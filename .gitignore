@@ -1,0 +1,42 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# next.js
+apps/web/.next/
+apps/web/out/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+apps/api/.venv/
+*.egg-info/
+dist/
+.uv/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# vercel
+.vercel/
+
+# db / indexes
+*.sqlite
+*.sqlite-journal
+*.index
+
+# datasets — too large for git, download separately per data/README.md
+data/
+
+# os
+.DS_Store
+Thumbs.db
+
+# editors
+.idea/
+.vscode/
+*.swp
+
