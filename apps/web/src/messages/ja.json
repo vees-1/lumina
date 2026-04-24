@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "ケース", "newCase": "新規ケース", "signIn": "サインイン", "getStarted": "始める", "dashboard": "ダッシュボード" },
+  "dashboard": { "title": "ケース", "subtitle": "診断履歴", "newCase": "新規ケース", "totalCases": "総ケース数", "avgConfidence": "平均信頼度", "hpoAvg": "HPO用語平均", "noCases": "ケースはまだありません", "startFirst": "最初のケースを開始する", "clearAll": "すべて削除" },
+  "intake": { "title": "新規ケース", "analyseButton": "ケースを分析する" },
+  "case": { "topDiagnosis": "トップ診断", "confidence": "一致", "whyThis": "なぜこの疾患？", "addModality": "{modality}を追加して信頼度を向上させる", "generateLetter": "紹介状を生成する", "exportFhir": "FHIRエクスポート" },
+  "common": { "loading": "読み込み中...", "error": "問題が発生しました" }
+}

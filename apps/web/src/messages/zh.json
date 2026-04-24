@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "病例", "newCase": "新建病例", "signIn": "登录", "getStarted": "开始使用", "dashboard": "控制台" },
+  "dashboard": { "title": "病例", "subtitle": "您的诊断历史", "newCase": "新建病例", "totalCases": "总病例数", "avgConfidence": "平均置信度", "hpoAvg": "HPO 术语均值", "noCases": "暂无病例", "startFirst": "创建您的第一个病例", "clearAll": "清除所有病例" },
+  "intake": { "title": "新建病例", "analyseButton": "分析病例" },
+  "case": { "topDiagnosis": "首选诊断", "confidence": "匹配度", "whyThis": "为何诊断为该疾病？", "addModality": "添加 {modality} 以提升置信度", "generateLetter": "生成转诊信", "exportFhir": "导出 FHIR" },
+  "common": { "loading": "加载中……", "error": "出现错误" }
+}

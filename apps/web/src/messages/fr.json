@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "Dossiers", "newCase": "Nouveau dossier", "signIn": "Se connecter", "getStarted": "Commencer", "dashboard": "Tableau de bord" },
+  "dashboard": { "title": "Dossiers", "subtitle": "Votre historique de diagnostics", "newCase": "Nouveau dossier", "totalCases": "Total des dossiers", "avgConfidence": "Confiance moyenne", "hpoAvg": "Moyenne des termes HPO", "noCases": "Aucun dossier pour l'instant", "startFirst": "Créez votre premier dossier", "clearAll": "Effacer tous les dossiers" },
+  "intake": { "title": "Nouveau dossier", "analyseButton": "Analyser le dossier" },
+  "case": { "topDiagnosis": "Diagnostic principal", "confidence": "correspondance", "whyThis": "Pourquoi cette maladie ?", "addModality": "Ajouter {modality} pour améliorer la confiance", "generateLetter": "Générer une lettre de référence", "exportFhir": "Exporter en FHIR" },
+  "common": { "loading": "Chargement...", "error": "Une erreur est survenue" }
+}

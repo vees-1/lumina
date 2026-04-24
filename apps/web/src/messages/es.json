@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "Casos", "newCase": "Nuevo caso", "signIn": "Iniciar sesión", "getStarted": "Comenzar", "dashboard": "Panel" },
+  "dashboard": { "title": "Casos", "subtitle": "Tu historial diagnóstico", "newCase": "Nuevo caso", "totalCases": "Total de casos", "avgConfidence": "Confianza promedio", "hpoAvg": "Promedio términos HPO", "noCases": "Aún no hay casos", "startFirst": "Comienza tu primer caso", "clearAll": "Borrar todos los casos" },
+  "intake": { "title": "Nuevo caso", "analyseButton": "Analizar caso" },
+  "case": { "topDiagnosis": "Diagnóstico principal", "confidence": "coincidencia", "whyThis": "¿Por qué esta enfermedad?", "addModality": "Añadir {modality} para mejorar la confianza", "generateLetter": "Generar carta de derivación", "exportFhir": "Exportar FHIR" },
+  "common": { "loading": "Cargando...", "error": "Algo salió mal" }
+}

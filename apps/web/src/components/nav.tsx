@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { Globe, Check } from "lucide-react";
 import { useAuth, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -137,40 +138,60 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
 }
 
 const LOCALES = [
-  { code: "en", label: "EN" },
-  { code: "hi", label: "हिं" },
-  { code: "ta", label: "த" },
+  { code: "en", label: "English" },
+  { code: "hi", label: "हिंदी" },
+  { code: "de", label: "Deutsch" },
+  { code: "fr", label: "Français" },
+  { code: "es", label: "Español" },
+  { code: "zh", label: "中文" },
+  { code: "ja", label: "日本語" },
 ] as const;
 
 function LanguageSwitcher() {
-  const [current, setCurrent] = useState<string>(() =>
+  const [current] = useState<string>(() =>
     typeof window !== "undefined" ? (localStorage.getItem("lumina_locale") ?? "en") : "en"
   );
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   function handleSwitch(code: string) {
-    if (code === current) return;
     localStorage.setItem("lumina_locale", code);
-    setCurrent(code);
     window.location.reload();
   }
 
+  const currentLabel = LOCALES.find((l) => l.code === current)?.label ?? "English";
+
   return (
-    <div className="flex items-center gap-0.5">
-      {LOCALES.map((locale, i) => (
-        <button
-          key={locale.code}
-          onClick={() => handleSwitch(locale.code)}
-          className={cn(
-            "px-2 py-0.5 text-[11px] rounded transition-colors",
-            current === locale.code
-              ? "text-foreground font-semibold"
-              : "text-muted-foreground hover:text-foreground",
-            i < LOCALES.length - 1 && "border-r border-border"
-          )}
-        >
-          {locale.label}
-        </button>
-      ))}
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 px-2 py-1 text-[13px] text-muted-foreground hover:text-foreground rounded-lg hover:bg-black/5 transition-colors"
+      >
+        <Globe className="w-3.5 h-3.5" />
+        <span>{currentLabel}</span>
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-background shadow-md z-50 py-1">
+          {LOCALES.map((locale) => (
+            <button
+              key={locale.code}
+              onClick={() => handleSwitch(locale.code)}
+              className="flex items-center justify-between w-full px-3 py-1.5 text-[13px] text-left hover:bg-black/5 transition-colors"
+            >
+              <span>{locale.label}</span>
+              {current === locale.code && <Check className="w-3.5 h-3.5 text-foreground" />}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "Fälle", "newCase": "Neuer Fall", "signIn": "Anmelden", "getStarted": "Loslegen", "dashboard": "Dashboard" },
+  "dashboard": { "title": "Fälle", "subtitle": "Ihre Diagnosehistorie", "newCase": "Neuer Fall", "totalCases": "Fälle gesamt", "avgConfidence": "Ø Konfidenz", "hpoAvg": "Ø HPO-Begriffe", "noCases": "Noch keine Fälle", "startFirst": "Starten Sie Ihren ersten Fall", "clearAll": "Alle Fälle löschen" },
+  "intake": { "title": "Neuer Fall", "analyseButton": "Fall analysieren" },
+  "case": { "topDiagnosis": "Hauptdiagnose", "confidence": "Übereinstimmung", "whyThis": "Warum diese Erkrankung?", "addModality": "{modality} hinzufügen, um die Konfidenz zu verbessern", "generateLetter": "Überweisungsschreiben erstellen", "exportFhir": "FHIR exportieren" },
+  "common": { "loading": "Lädt...", "error": "Etwas ist schiefgelaufen" }
+}
