@@ -1,3 +1,7 @@
+# markdown docs — local only
+*.md
+**/*.md
+
 # deps
 node_modules/
 .pnpm-store/
