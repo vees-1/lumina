@@ -368,7 +368,7 @@ function LetterView({ letter, streaming }: { letter: string; streaming: boolean 
 
 export default function CasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [caseData, setCaseData] = useState<CaseData | null>(null);
+  const [caseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [letterStarted, setLetterStarted] = useState(false);
@@ -376,20 +376,16 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   const [agentDismissed, setAgentDismissed] = useState(false);
 
   useEffect(() => {
-    const data = getCaseById(id);
-    if (!data) return;
-    setCaseData(data);
-
-    // Fetch agent suggestion if confidence is low and not all modalities used
-    const topConf = data.rankings[0]?.confidence ?? 100;
+    if (!caseData) return;
+    const topConf = caseData.rankings[0]?.confidence ?? 100;
     const allModalities = ["notes", "photo", "lab", "vcf"];
-    const unused = allModalities.filter((m) => !data.modalities.includes(m));
+    const unused = allModalities.filter((m) => !caseData.modalities.includes(m));
     if (topConf < 85 && unused.length > 0) {
-      getAgentSuggestion(data.rankings.slice(0, 5), data.modalities, 0)
+      getAgentSuggestion(caseData.rankings.slice(0, 5), caseData.modalities, 0)
         .then((s) => { if (s.modality) setAgentSuggestion(s); })
-        .catch(() => {/* API not running — silently skip */});
+        .catch(() => {});
     }
-  }, [id]);
+  }, [caseData]);
 
   const handleGenerateLetter = async () => {
     if (!caseData) return;

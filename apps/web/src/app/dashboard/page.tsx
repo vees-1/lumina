@@ -98,7 +98,7 @@ function EmptyState() {
 
 export default function DashboardPage() {
   const [cases, setCases] = useState<CaseSummary[]>(() => getCaseSummaries());
-  const [loaded, setLoaded] = useState(true);
+  const [loaded] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
 
   const handleClearAll = () => {

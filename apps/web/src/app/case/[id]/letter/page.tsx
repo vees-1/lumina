@@ -12,28 +12,25 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const [caseData, setCaseData] = useState<CaseData | null>(null);
+  const [caseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const hasStarted = useRef(false);
 
   useEffect(() => {
-    const data = getCaseById(id);
-    if (data) setCaseData(data);
-  }, [id]);
-
-  useEffect(() => {
-    if (!caseData || streaming || done) return;
-    setStreaming(true);
+    if (!caseData || hasStarted.current) return;
+    hasStarted.current = true;
     (async () => {
+      setStreaming(true);
       try {
         for await (const chunk of streamLetter(caseData)) {
           setLetter((prev) => prev + chunk);
         }
         setDone(true);
-      } catch (e) {
+      } catch (_e) {
         setError("Letter generation failed — is the API running?");
       } finally {
         setStreaming(false);
