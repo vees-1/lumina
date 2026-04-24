@@ -148,9 +148,9 @@ const LOCALES = [
 ] as const;
 
 function LanguageSwitcher() {
-  const [current] = useState<string>(() =>
-    typeof window !== "undefined" ? (localStorage.getItem("lumina_locale") ?? "en") : "en"
-  );
+  const pathname = usePathname();
+  const current = pathname.split("/")[1];
+  const activeLocale = LOCALES.find((l) => l.code === current)?.code ?? "en";
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -163,11 +163,15 @@ function LanguageSwitcher() {
   }, [open]);
 
   function handleSwitch(code: string) {
-    localStorage.setItem("lumina_locale", code);
-    window.location.reload();
+    const segments = pathname.split("/");
+    const hasLocale = LOCALES.some((l) => l.code === segments[1]);
+    const newPath = hasLocale
+      ? "/" + code + "/" + segments.slice(2).join("/")
+      : "/" + code + pathname;
+    window.location.href = newPath;
   }
 
-  const currentLabel = LOCALES.find((l) => l.code === current)?.label ?? "English";
+  const currentLabel = LOCALES.find((l) => l.code === activeLocale)?.label ?? "English";
 
   return (
     <div className="relative" ref={ref}>
@@ -187,7 +191,7 @@ function LanguageSwitcher() {
               className="flex items-center justify-between w-full px-3 py-1.5 text-[13px] text-left hover:bg-black/5 transition-colors"
             >
               <span>{locale.label}</span>
-              {current === locale.code && <Check className="w-3.5 h-3.5 text-foreground" />}
+              {activeLocale === locale.code && <Check className="w-3.5 h-3.5 text-foreground" />}
             </button>
           ))}
         </div>
