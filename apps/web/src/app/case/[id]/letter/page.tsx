@@ -30,7 +30,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
           setLetter((prev) => prev + chunk);
         }
         setDone(true);
-      } catch (_e) {
+      } catch {
         setError("Letter generation failed — is the API running?");
       } finally {
         setStreaming(false);

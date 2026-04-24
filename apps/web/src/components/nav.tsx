@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Check } from "lucide-react";
 import { useAuth, UserButton } from "@clerk/nextjs";
@@ -149,6 +149,7 @@ const LOCALES = [
 
 function LanguageSwitcher() {
   const pathname = usePathname();
+  const router = useRouter();
   const current = pathname.split("/")[1];
   const activeLocale = LOCALES.find((l) => l.code === current)?.code ?? "en";
   const [open, setOpen] = useState(false);
@@ -168,7 +169,7 @@ function LanguageSwitcher() {
     const newPath = hasLocale
       ? "/" + code + "/" + segments.slice(2).join("/")
       : "/" + code + pathname;
-    window.location.href = newPath;
+    router.push(newPath);
   }
 
   const currentLabel = LOCALES.find((l) => l.code === activeLocale)?.label ?? "English";
