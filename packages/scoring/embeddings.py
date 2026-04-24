@@ -25,7 +25,7 @@ class HPOEmbedder:
     def build_index(self, hpo_vocab: list[tuple[str, str]]) -> None:
         """Pre-compute embeddings for all HPO terms. Call once at startup."""
         try:
-            import numpy as np
+            import numpy as np  # noqa: F401
         except ImportError:
             return
         if self._model is None:

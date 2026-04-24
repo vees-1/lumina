@@ -143,12 +143,9 @@ const LOCALES = [
 ] as const;
 
 function LanguageSwitcher() {
-  const [current, setCurrent] = useState<string>("en");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("lumina_locale") ?? "en";
-    setCurrent(saved);
-  }, []);
+  const [current, setCurrent] = useState<string>(() =>
+    typeof window !== "undefined" ? (localStorage.getItem("lumina_locale") ?? "en") : "en"
+  );
 
   function handleSwitch(code: string) {
     if (code === current) return;

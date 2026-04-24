@@ -39,7 +39,7 @@ class ScoringIndex:
     # {orpha_code: [(hpo_id, freq_weight)]}
     disease_phenotypes: dict[int, list[tuple[str, float]]]
     disease_names: dict[int, str]
-    xgb: "XGBoostRanker | None" = field(default=None, repr=False)
+    xgb: XGBoostRanker | None = field(default=None, repr=False)
 
     @classmethod
     def load(cls, db_path=None) -> ScoringIndex:

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from sqlmodel import SQLModel, create_engine
 
+
 # Prefer explicit env var; fall back to repo root relative to cwd
 def _resolve_db_path() -> Path:
     url = os.environ.get("DATABASE_URL", "")

@@ -26,4 +26,6 @@ async def search_hpo(
     if embedder is None:
         return []
     matches = embedder.match(q, top_k=top_k)
-    return [HPOMatch(hpo_id=hpo_id, name=name, score=round(score, 4)) for hpo_id, name, score in matches]
+    return [
+        HPOMatch(hpo_id=hpo_id, name=name, score=round(score, 4)) for hpo_id, name, score in matches
+    ]

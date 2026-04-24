@@ -49,7 +49,7 @@ async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
     client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
     top5_text = "\n".join(
-        f"#{i+1} ORPHA:{r.orpha_code} {r.name} — confidence {r.confidence:.1f}"
+        f"#{i + 1} ORPHA:{r.orpha_code} {r.name} — confidence {r.confidence:.1f}"
         for i, r in enumerate(body.top5)
     )
     user_msg = (
@@ -79,7 +79,9 @@ async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
             cycles_remaining=max(0, min(3, int(data.get("cycles_remaining", 0)))),
         )
     except (json.JSONDecodeError, ValueError):
-        return AgentSuggestion(modality="", reasoning="Unable to suggest next step.", cycles_remaining=0)
+        return AgentSuggestion(
+            modality="", reasoning="Unable to suggest next step.", cycles_remaining=0
+        )
 
 
 @router.post("/letter")

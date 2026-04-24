@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { DashboardNav } from "@/components/nav";
@@ -97,14 +97,9 @@ function EmptyState() {
 }
 
 export default function DashboardPage() {
-  const [cases, setCases] = useState<CaseSummary[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [cases, setCases] = useState<CaseSummary[]>(() => getCaseSummaries());
+  const [loaded, setLoaded] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
-
-  useEffect(() => {
-    setCases(getCaseSummaries());
-    setLoaded(true);
-  }, []);
 
   const handleClearAll = () => {
     if (!confirmClear) { setConfirmClear(true); return; }

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
@@ -32,7 +32,7 @@ def _uuid() -> str:
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 @router.post("/export")
@@ -50,42 +50,56 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
 
         evidence = []
         for hpo_id in dx.contributing_terms:
-            evidence.append({
-                "code": [{
-                    "coding": [{
-                        "system": "http://purl.obolibrary.org/obo/hp.owl",
-                        "code": hpo_id,
-                    }]
-                }]
-            })
+            evidence.append(
+                {
+                    "code": [
+                        {
+                            "coding": [
+                                {
+                                    "system": "http://purl.obolibrary.org/obo/hp.owl",
+                                    "code": hpo_id,
+                                }
+                            ]
+                        }
+                    ]
+                }
+            )
 
-        condition_entries.append({
-            "fullUrl": f"urn:uuid:{cond_id}",
-            "resource": {
-                "resourceType": "Condition",
-                "id": cond_id,
-                "verificationStatus": {
-                    "coding": [{
-                        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
-                        "code": "unconfirmed",
-                        "display": "Unconfirmed",
-                    }]
+        condition_entries.append(
+            {
+                "fullUrl": f"urn:uuid:{cond_id}",
+                "resource": {
+                    "resourceType": "Condition",
+                    "id": cond_id,
+                    "verificationStatus": {
+                        "coding": [
+                            {
+                                "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                                "code": "unconfirmed",
+                                "display": "Unconfirmed",
+                            }
+                        ]
+                    },
+                    "code": {
+                        "coding": [
+                            {
+                                "system": "http://www.orpha.net",
+                                "code": f"ORPHA:{dx.orpha_code}",
+                                "display": dx.name,
+                            }
+                        ],
+                        "text": dx.name,
+                    },
+                    "evidence": evidence if evidence else [],
+                    "extension": [
+                        {
+                            "url": "http://lumina.ai/fhir/StructureDefinition/diagnosis-confidence",
+                            "valueDecimal": round(dx.confidence, 2),
+                        }
+                    ],
                 },
-                "code": {
-                    "coding": [{
-                        "system": "http://www.orpha.net",
-                        "code": f"ORPHA:{dx.orpha_code}",
-                        "display": dx.name,
-                    }],
-                    "text": dx.name,
-                },
-                "evidence": evidence if evidence else [],
-                "extension": [{
-                    "url": "http://lumina.ai/fhir/StructureDefinition/diagnosis-confidence",
-                    "valueDecimal": round(dx.confidence, 2),
-                }],
             }
-        })
+        )
 
     # Build Observation resources for HPO terms
     observation_entries = []
@@ -93,22 +107,26 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
     for term in body.hpo_terms:
         obs_id = _uuid()
         observation_refs.append({"reference": f"urn:uuid:{obs_id}"})
-        observation_entries.append({
-            "fullUrl": f"urn:uuid:{obs_id}",
-            "resource": {
-                "resourceType": "Observation",
-                "id": obs_id,
-                "status": "final",
-                "code": {
-                    "coding": [{
-                        "system": "http://purl.obolibrary.org/obo/hp.owl",
-                        "code": term.hpo_id,
-                        "display": term.label if term.label else term.hpo_id,
-                    }]
+        observation_entries.append(
+            {
+                "fullUrl": f"urn:uuid:{obs_id}",
+                "resource": {
+                    "resourceType": "Observation",
+                    "id": obs_id,
+                    "status": "final",
+                    "code": {
+                        "coding": [
+                            {
+                                "system": "http://purl.obolibrary.org/obo/hp.owl",
+                                "code": term.hpo_id,
+                                "display": term.label if term.label else term.hpo_id,
+                            }
+                        ]
+                    },
+                    "valueBoolean": True,
                 },
-                "valueBoolean": True,
             }
-        })
+        )
 
     # Composition resource
     composition = {
@@ -118,11 +136,13 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
             "id": composition_id,
             "status": "preliminary",
             "type": {
-                "coding": [{
-                    "system": "http://loinc.org",
-                    "code": "11502-2",
-                    "display": "Laboratory report",
-                }]
+                "coding": [
+                    {
+                        "system": "http://loinc.org",
+                        "code": "11502-2",
+                        "display": "Laboratory report",
+                    }
+                ]
             },
             "date": now,
             "title": "Lumina Rare Disease Differential Diagnosis Report",
@@ -130,34 +150,40 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
                 "system": "http://lumina.ai/cases",
                 "value": body.case_id,
             },
-            "author": [{
-                "display": "Lumina Clinical AI",
-            }],
+            "author": [
+                {
+                    "display": "Lumina Clinical AI",
+                }
+            ],
             "section": [
                 {
                     "title": "Differential Diagnoses",
                     "code": {
-                        "coding": [{
-                            "system": "http://loinc.org",
-                            "code": "29548-5",
-                            "display": "Diagnosis",
-                        }]
+                        "coding": [
+                            {
+                                "system": "http://loinc.org",
+                                "code": "29548-5",
+                                "display": "Diagnosis",
+                            }
+                        ]
                     },
                     "entry": condition_refs,
                 },
                 {
                     "title": "Observed Phenotypes (HPO)",
                     "code": {
-                        "coding": [{
-                            "system": "http://loinc.org",
-                            "code": "8716-3",
-                            "display": "Vital signs",
-                        }]
+                        "coding": [
+                            {
+                                "system": "http://loinc.org",
+                                "code": "8716-3",
+                                "display": "Vital signs",
+                            }
+                        ]
                     },
                     "entry": observation_refs,
                 },
             ],
-        }
+        },
     }
 
     bundle = {

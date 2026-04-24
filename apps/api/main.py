@@ -5,19 +5,19 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / ".env")
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from ingest.db import get_engine
-from ingest.models import HPOTerm as HPOTermModel
-from scoring.ranker import ScoringIndex
-from sqlmodel import Session, select
+from fastapi import FastAPI  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from ingest.db import get_engine  # noqa: E402
+from ingest.models import HPOTerm as HPOTermModel  # noqa: E402
+from scoring.ranker import ScoringIndex  # noqa: E402
+from sqlmodel import Session, select  # noqa: E402
 
-from api.routes.agent import router as agent_router
-from api.routes.disease import router as disease_router
-from api.routes.fhir import router as fhir_router
-from api.routes.intake import router as intake_router
-from api.routes.score import router as score_router
-from api.routes.search import router as search_router
+from api.routes.agent import router as agent_router  # noqa: E402
+from api.routes.disease import router as disease_router  # noqa: E402
+from api.routes.fhir import router as fhir_router  # noqa: E402
+from api.routes.intake import router as intake_router  # noqa: E402
+from api.routes.score import router as score_router  # noqa: E402
+from api.routes.search import router as search_router  # noqa: E402
 
 
 def _load_hpo_vocab(engine, n: int = 2000) -> list[tuple[str, str]]:
@@ -34,6 +34,7 @@ def _load_hpo_vocab(engine, n: int = 2000) -> list[tuple[str, str]]:
 def _load_facial_vocab(engine) -> list[str]:
     from ingest.models import FacialDiseasePhenotype
     from ingest.models import HPOTerm as HT
+
     with Session(engine) as s:
         rows = s.exec(select(FacialDiseasePhenotype.hpo_id).distinct()).all()
         hpo_ids = list(rows)
@@ -53,6 +54,7 @@ async def lifespan(app: FastAPI):
     app.state.hpo_vocab = _load_hpo_vocab(engine)
     app.state.facial_vocab = _load_facial_vocab(engine)
     from scoring.embeddings import _embedder
+
     if not _embedder.load_index():
         pass  # index not built yet; build with scripts/build_hpo_index.py
     app.state.hpo_embedder = _embedder
@@ -83,6 +85,7 @@ app.include_router(search_router)
 @app.get("/health")
 async def health():
     from sqlmodel import Session, text
+
     try:
         with Session(app.state.db_engine) as s:
             count = s.exec(text("SELECT COUNT(*) FROM disease")).one()
