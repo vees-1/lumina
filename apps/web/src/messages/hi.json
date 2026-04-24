@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "केस", "newCase": "नया केस", "signIn": "साइन इन", "getStarted": "शुरू करें", "dashboard": "डैशबोर्ड" },
+  "dashboard": { "title": "केस", "subtitle": "आपका निदान इतिहास", "newCase": "नया केस", "totalCases": "कुल केस", "avgConfidence": "औसत विश्वास", "hpoAvg": "HPO शब्द औसत", "noCases": "अभी कोई केस नहीं", "startFirst": "पहला केस शुरू करें", "clearAll": "सभी केस हटाएं" },
+  "intake": { "title": "नया केस", "analyseButton": "केस विश्लेषण करें" },
+  "case": { "topDiagnosis": "शीर्ष निदान", "confidence": "मिलान", "whyThis": "यह रोग क्यों?", "addModality": "{modality} जोड़कर सटीकता बढ़ाएं", "generateLetter": "रेफरल पत्र बनाएं", "exportFhir": "FHIR निर्यात" },
+  "common": { "loading": "लोड हो रहा है...", "error": "कुछ गलत हो गया" }
+}

@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "வழக்குகள்", "newCase": "புதிய வழக்கு", "signIn": "உள்நுழை", "getStarted": "தொடங்கு", "dashboard": "டாஷ்போர்டு" },
+  "dashboard": { "title": "வழக்குகள்", "subtitle": "உங்கள் நோயறிதல் வரலாறு", "newCase": "புதிய வழக்கு", "totalCases": "மொத்த வழக்குகள்", "avgConfidence": "சராசரி நம்பகத்தன்மை", "hpoAvg": "HPO சொற்கள் சராசரி", "noCases": "இன்னும் வழக்குகள் இல்லை", "startFirst": "முதல் வழக்கை தொடங்கு", "clearAll": "அனைத்து வழக்குகளையும் நீக்கு" },
+  "intake": { "title": "புதிய வழக்கு", "analyseButton": "வழக்கை பகுப்பாய்வு செய்" },
+  "case": { "topDiagnosis": "முதல் நோயறிதல்", "confidence": "பொருத்தம்", "whyThis": "இந்த நோய் ஏன்?", "addModality": "நம்பகத்தன்மையை மேம்படுத்த {modality} சேர்க்கவும்", "generateLetter": "பரிந்துரை கடிதம் உருவாக்கு", "exportFhir": "FHIR ஏற்றுமதி" },
+  "common": { "loading": "ஏற்றுகிறது...", "error": "ஏதோ தவறு நேர்ந்தது" }
+}

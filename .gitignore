@@ -40,3 +40,15 @@ Thumbs.db
 .vscode/
 *.swp
 
+# build artifacts
+packages/**/build/
+packages/**/*.egg-info/
+
+# package locks inside sub-packages (root pnpm-lock.yaml is authoritative)
+packages/**/uv.lock
+
+# ml model artifacts
+*.pkl
+*.pt
+*.bin
+hpo_embeddings.json

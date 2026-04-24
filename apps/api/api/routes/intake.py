@@ -1,4 +1,9 @@
-from fastapi import APIRouter, File, UploadFile
+from extractors.lab import extract_lab
+from extractors.models import HPOTerm
+from extractors.notes import extract_notes
+from extractors.photo import extract_photo
+from extractors.vcf import extract_vcf
+from fastapi import APIRouter, File, Request, UploadFile
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/intake", tags=["intake"])
@@ -8,34 +13,32 @@ class NotesRequest(BaseModel):
     notes: str
 
 
-class HPOTerm(BaseModel):
-    hpo_id: str
-    confidence: float
-    source: str
-
-
 @router.post("/text", response_model=list[HPOTerm])
-async def intake_text(body: NotesRequest) -> list[HPOTerm]:
-    # TODO: phase 3 — notes extractor
-    return []
+async def intake_text(body: NotesRequest, request: Request) -> list[HPOTerm]:
+    return await extract_notes(body.notes, request.app.state.hpo_vocab)
 
 
 @router.post("/photo", response_model=list[HPOTerm])
 async def intake_photo(
+    request: Request,
     file: UploadFile = File(...),
     facial: bool = False,
 ) -> list[HPOTerm]:
-    # TODO: phase 3 — claude vision extractor
-    return []
+    image_bytes = await file.read()
+    facial_vocab = request.app.state.facial_vocab if facial else None
+    return await extract_photo(
+        image_bytes,
+        media_type=file.content_type or "image/jpeg",
+        facial=facial,
+        facial_vocab=facial_vocab,
+    )
 
 
 @router.post("/lab", response_model=list[HPOTerm])
 async def intake_lab(file: UploadFile = File(...)) -> list[HPOTerm]:
-    # TODO: phase 3 — OCR + claude lab extractor
-    return []
+    return await extract_lab(await file.read())
 
 
 @router.post("/vcf", response_model=list[HPOTerm])
-async def intake_vcf(file: UploadFile = File(...)) -> list[HPOTerm]:
-    # TODO: phase 3 — cyvcf2 + clinvar extractor
-    return []
+async def intake_vcf(request: Request, file: UploadFile = File(...)) -> list[HPOTerm]:
+    return extract_vcf(await file.read(), request.app.state.db_engine)

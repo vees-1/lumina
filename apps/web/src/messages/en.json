@@ -1,0 +1,7 @@
+{
+  "nav": { "cases": "Cases", "newCase": "New case", "signIn": "Sign in", "getStarted": "Get started", "dashboard": "Dashboard" },
+  "dashboard": { "title": "Cases", "subtitle": "Your diagnostic history", "newCase": "New case", "totalCases": "Total cases", "avgConfidence": "Avg confidence", "hpoAvg": "HPO terms avg", "noCases": "No cases yet", "startFirst": "Start your first case", "clearAll": "Clear all cases" },
+  "intake": { "title": "New case", "analyseButton": "Analyse case" },
+  "case": { "topDiagnosis": "Top diagnosis", "confidence": "match", "whyThis": "Why this disease?", "addModality": "Add {modality} to improve confidence", "generateLetter": "Generate referral letter", "exportFhir": "Export FHIR" },
+  "common": { "loading": "Loading...", "error": "Something went wrong" }
+}
