@@ -1,4 +1,4 @@
-"""Clinical notes → HPO terms via scispaCy (primary) + Groq/Llama (fallback)."""
+"""Clinical notes -> HPO terms via Groq/Llama 3.3 70B."""
 
 from __future__ import annotations
 
@@ -7,9 +7,6 @@ import os
 import re
 
 from extractors.models import HPOTerm
-
-_SCISPACY_THRESHOLD = 0.85
-_SCISPACY_MIN_TERMS = 3
 
 _GROQ_MODEL = "llama-3.3-70b-versatile"
 
@@ -24,47 +21,6 @@ Rules:
 - confidence 0.6–0.8 for inferred or ambiguous findings
 - skip normal/absent findings
 - return [] if no findings map to HPO terms"""
-
-
-class ScispacyExtractor:
-    def __init__(self) -> None:
-        self._nlp = None
-        self._available: bool | None = None
-
-    def _load(self) -> bool:
-        try:
-            import spacy
-            from scispacy.linking import EntityLinker  # noqa: F401
-
-            nlp = spacy.load("en_core_sci_lg")
-            nlp.add_pipe(
-                "scispacy_linker",
-                config={"resolve_abbreviations": True, "linker_name": "hpo"},
-            )
-            self._nlp = nlp
-            self._available = True
-            return True
-        except Exception:
-            self._available = False
-            return False
-
-    def extract(self, text: str) -> list[HPOTerm]:
-        if self._available is False:
-            return []
-        if self._nlp is None:
-            if not self._load():
-                return []
-        doc = self._nlp(text)
-        results: list[HPOTerm] = []
-        for ent in doc.ents:
-            if ent._.kb_ents:
-                hpo_id, score = ent._.kb_ents[0]
-                if score >= _SCISPACY_THRESHOLD:
-                    results.append(HPOTerm(hpo_id=hpo_id, confidence=float(score), source=ent.text))
-        return results
-
-
-_scispacy_extractor = ScispacyExtractor()
 
 
 def _keyword_match(text: str, hpo_vocab: list[tuple[str, str]]) -> list[HPOTerm]:
@@ -125,25 +81,11 @@ async def extract_notes(
     text: str,
     hpo_vocab: list[tuple[str, str]],
 ) -> list[HPOTerm]:
-    # Primary: scispaCy + HPO entity linker
-    scispacy_results = _scispacy_extractor.extract(text)
-    high_confidence = [t for t in scispacy_results if t.confidence >= _SCISPACY_THRESHOLD]
-
-    if len(high_confidence) >= _SCISPACY_MIN_TERMS:
-        return high_confidence
-
-    # Fallback: Groq + Llama 3.3 70B
+    # Primary: Groq + Llama 3.3 70B
     groq_results = await _extract_via_groq(text, hpo_vocab)
 
-    if not groq_results:
-        # Last resort: keyword matching
-        groq_results = _keyword_match(text, hpo_vocab)
+    if groq_results:
+        return groq_results
 
-    # Merge scispaCy + fallback, keep highest confidence per HPO ID
-    merged: dict[str, HPOTerm] = {}
-    for term in (*scispacy_results, *groq_results):
-        existing = merged.get(term.hpo_id)
-        if existing is None or term.confidence > existing.confidence:
-            merged[term.hpo_id] = term
-
-    return list(merged.values())
+    # Fallback: keyword matching against HPO vocab
+    return _keyword_match(text, hpo_vocab)

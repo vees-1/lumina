@@ -1,9 +1,11 @@
+import traceback
+
 from extractors.lab import extract_lab
 from extractors.models import HPOTerm
 from extractors.notes import extract_notes
 from extractors.photo import extract_photo
 from extractors.vcf import extract_vcf
-from fastapi import APIRouter, File, Request, UploadFile
+from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/intake", tags=["intake"])
@@ -15,7 +17,10 @@ class NotesRequest(BaseModel):
 
 @router.post("/text", response_model=list[HPOTerm])
 async def intake_text(body: NotesRequest, request: Request) -> list[HPOTerm]:
-    return await extract_notes(body.notes, request.app.state.hpo_vocab)
+    try:
+        return await extract_notes(body.notes, request.app.state.hpo_vocab)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}")
 
 
 @router.post("/photo", response_model=list[HPOTerm])
