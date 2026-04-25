@@ -133,13 +133,13 @@ async def _extract_via_claude(
     """Extract HPO terms using the Claude API (original implementation)."""
     client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-    vocab_block = "\n".join(f"{hid}: {name}" for hid, name in hpo_vocab[:2000])
-    system_text = f"{_SYSTEM}\n\nHPO vocabulary (top terms by clinical relevance):\n{vocab_block}"
+    vocab_block = "\n".join(f"{hid}: {name}" for hid, name in hpo_vocab[:300])
+    system = f"{_SYSTEM}\n\nHPO vocabulary (top terms by clinical relevance):\n{vocab_block}"
 
     response = await client.messages.create(
         model=_MODEL,
         max_tokens=2048,
-        system=[{"type": "text", "text": system_text, "cache_control": {"type": "ephemeral"}}],
+        system=system,
         messages=[{"role": "user", "content": text}],
     )
 
