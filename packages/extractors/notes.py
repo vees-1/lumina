@@ -25,7 +25,7 @@ class ScispacyExtractor:
             import spacy
             from scispacy.linking import EntityLinker  # noqa: F401
 
-            nlp = spacy.load("en_core_sci_md")
+            nlp = spacy.load("en_core_sci_lg")
             nlp.add_pipe(
                 "scispacy_linker",
                 config={"resolve_abbreviations": True, "linker_name": "hpo"},
