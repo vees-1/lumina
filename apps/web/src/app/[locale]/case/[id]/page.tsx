@@ -4,6 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { getCaseById, getAgentSuggestion, streamLetter } from "@/lib/api";
@@ -367,6 +368,7 @@ function LetterView({ letter, streaming }: { letter: string; streaming: boolean 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function CasePage({ params }: { params: Promise<{ id: string }> }) {
+  const t = useTranslations("case");
   const { id } = use(params);
   const [caseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
@@ -558,7 +560,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                     disabled={streaming}
                     className="rounded-full bg-foreground text-background h-8 px-4 text-[13px]"
                   >
-                    Generate letter
+                    {t("generateLetter")}
                   </Button>
                 )}
               </div>
@@ -678,7 +680,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 className="w-full rounded-xl h-9 text-[13px] border-black/10"
                 onClick={() => handleExportFHIR(caseData, id)}
               >
-                Export FHIR
+                {t("exportFhir")}
               </Button>
               <Link href="/intake" className="block">
                 <Button variant="outline" className="w-full rounded-xl h-9 text-[13px] border-black/10">

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Globe, Check } from "lucide-react";
 import { useAuth, UserButton } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -202,6 +203,7 @@ function LanguageSwitcher() {
 }
 
 export function DashboardNav() {
+  const t = useTranslations("nav");
   const pathname = usePathname();
   return (
     <motion.header
@@ -232,11 +234,11 @@ export function DashboardNav() {
               pathname === "/dashboard" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            Cases
+            {t("cases")}
           </Link>
           <Link href="/intake">
             <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
-              New case
+              {t("newCase")}
             </Button>
           </Link>
           <LanguageSwitcher />

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
+import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { saveCaseToStorage, scoreCase, submitLab, submitNotes, submitPhoto, submitVcf } from "@/lib/api";
@@ -111,6 +112,7 @@ function ProgressStep({ label, active, done }: { label: string; active: boolean;
 }
 
 export default function IntakePage() {
+  const t = useTranslations("intake");
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("notes");
   const [notes, setNotes] = useState("");
@@ -234,7 +236,7 @@ export default function IntakePage() {
           transition={{ duration: 0.5, ease }}
           className="pt-6 mb-8"
         >
-          <h1 className="serif text-[28px] tracking-tight">New case</h1>
+          <h1 className="serif text-[28px] tracking-tight">{t("title")}</h1>
           <p className="text-[14px] text-muted-foreground mt-1">
             Submit any combination of clinical inputs — Lumina handles the rest.
           </p>
@@ -423,7 +425,7 @@ export default function IntakePage() {
                     Analyzing…
                   </span>
                 ) : (
-                  "Analyze case"
+                  t("analyseButton")
                 )}
               </Button>
             </motion.div>

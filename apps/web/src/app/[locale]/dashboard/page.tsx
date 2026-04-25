@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { getCaseSummaries } from "@/lib/api";
@@ -68,6 +69,7 @@ function CaseCard({ c, index }: { c: CaseSummary; index: number }) {
 }
 
 function EmptyState() {
+  const t = useTranslations("dashboard");
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -83,13 +85,13 @@ function EmptyState() {
           </svg>
         </div>
       </div>
-      <h3 className="text-[17px] font-semibold mb-2">No cases yet</h3>
+      <h3 className="text-[17px] font-semibold mb-2">{t("noCases")}</h3>
       <p className="text-[14px] text-muted-foreground max-w-xs mb-8">
         Start your first case by uploading patient data across one or more clinical modalities.
       </p>
       <Link href="/intake">
         <Button className="rounded-full bg-foreground text-background px-6 h-10">
-          Start first case
+          {t("startFirst")}
         </Button>
       </Link>
     </motion.div>
@@ -97,6 +99,7 @@ function EmptyState() {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard");
   const [cases, setCases] = useState<CaseSummary[]>(() => getCaseSummaries());
   const [loaded] = useState(true);
   const [confirmClear, setConfirmClear] = useState(false);
@@ -123,14 +126,14 @@ export default function DashboardPage() {
           className="flex items-center justify-between mb-8 pt-4"
         >
           <div>
-            <h1 className="serif text-[28px] tracking-tight">Cases</h1>
+            <h1 className="serif text-[28px] tracking-tight">{t("title")}</h1>
             <p className="text-[14px] text-muted-foreground mt-0.5">
-              {cases.length > 0 ? `${cases.length} case${cases.length !== 1 ? "s" : ""} total` : "Your diagnostic history"}
+              {cases.length > 0 ? `${cases.length} case${cases.length !== 1 ? "s" : ""} total` : t("subtitle")}
             </p>
           </div>
           <Link href="/intake">
             <Button className="rounded-full bg-foreground text-background h-9 px-5 text-[13px]">
-              New case
+              {t("newCase")}
             </Button>
           </Link>
         </motion.div>
@@ -144,9 +147,9 @@ export default function DashboardPage() {
             className="grid grid-cols-3 gap-3 mb-8"
           >
             {[
-              { label: "Total cases", value: cases.length.toString() },
-              { label: "Avg confidence", value: `${Math.round(cases.reduce((s, c) => s + c.confidence, 0) / cases.length)}%` },
-              { label: "HPO terms avg", value: Math.round(cases.reduce((s, c) => s + c.hpoCount, 0) / cases.length).toString() },
+              { label: t("totalCases"), value: cases.length.toString() },
+              { label: t("avgConfidence"), value: `${Math.round(cases.reduce((s, c) => s + c.confidence, 0) / cases.length)}%` },
+              { label: t("hpoAvg"), value: Math.round(cases.reduce((s, c) => s + c.hpoCount, 0) / cases.length).toString() },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -223,7 +226,7 @@ export default function DashboardPage() {
                   onClick={handleClearAll}
                   className="text-[12px] text-muted-foreground hover:text-red-500 transition-colors"
                 >
-                  Clear all cases
+                  {t("clearAll")}
                 </motion.button>
               )}
             </AnimatePresence>
