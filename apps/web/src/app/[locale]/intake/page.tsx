@@ -14,12 +14,6 @@ import type { HPOTerm } from "@/types/lumina";
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 type Tab = "notes" | "photo" | "lab" | "vcf";
-const TABS: { id: Tab; label: string; hint: string }[] = [
-  { id: "notes", label: "Clinical Notes", hint: "Patient history, symptoms, clinical observations" },
-  { id: "photo", label: "Clinical Photo", hint: "Facial dysmorphology, clinical manifestations" },
-  { id: "lab", label: "Lab Report", hint: "Blood panels, metabolic screens, imaging" },
-  { id: "vcf", label: "Genomic Data", hint: "VCF file from WES/WGS sequencing" },
-];
 
 function DropZone({
   accept, label, hint, file, onFile, onClear,
@@ -126,6 +120,13 @@ export default function IntakePage() {
   const [progress, setProgress] = useState<string[]>([]);
   const [activeStep, setActiveStep] = useState("");
 
+  const TABS: { id: Tab; label: string; hint: string }[] = [
+    { id: "notes", label: t("tabNotesLabel"), hint: t("tabNotesHint") },
+    { id: "photo", label: t("tabPhotoLabel"), hint: t("tabPhotoHint") },
+    { id: "lab",   label: t("tabLabLabel"),   hint: t("tabLabHint")   },
+    { id: "vcf",   label: t("tabVcfLabel"),   hint: t("tabVcfHint")   },
+  ];
+
   const hasAnyInput = notes.trim() || photo || lab || vcf;
 
   const addProgress = (msg: string) => {
@@ -135,7 +136,7 @@ export default function IntakePage() {
 
   const handleAnalyze = async () => {
     if (!hasAnyInput) {
-      toast.error("Add at least one input to analyze");
+      toast.error(t("errorNoInput"));
       return;
     }
 
@@ -152,7 +153,7 @@ export default function IntakePage() {
           submitNotes(notes.trim()).then((terms) => {
             allTerms.push(...terms);
             modalities.push("notes");
-            addProgress("Clinical notes analyzed");
+            addProgress(t("progressNotes"));
           })
         );
       }
@@ -161,7 +162,7 @@ export default function IntakePage() {
           submitPhoto(photo, isFacial).then((terms) => {
             allTerms.push(...terms);
             modalities.push("photo");
-            addProgress("Clinical photo analyzed");
+            addProgress(t("progressPhoto"));
           })
         );
       }
@@ -170,7 +171,7 @@ export default function IntakePage() {
           submitLab(lab).then((terms) => {
             allTerms.push(...terms);
             modalities.push("lab");
-            addProgress("Lab report analyzed");
+            addProgress(t("progressLab"));
           })
         );
       }
@@ -179,7 +180,7 @@ export default function IntakePage() {
           submitVcf(vcf).then((terms) => {
             allTerms.push(...terms);
             modalities.push("vcf");
-            addProgress("Genomic data analyzed");
+            addProgress(t("progressVcf"));
           })
         );
       }
@@ -187,23 +188,23 @@ export default function IntakePage() {
       await Promise.all(calls);
 
       if (allTerms.length === 0) {
-        toast.error("No HPO phenotypes extracted — try adding more detail");
+        toast.error(t("errorNoHpo"));
         setAnalyzing(false);
         return;
       }
 
-      addProgress("Scoring against disease database…");
+      addProgress(t("progressScoring"));
 
       // Deduplicate by hpo_id, keep highest confidence
       const termMap = new Map<string, HPOTerm>();
-      for (const t of allTerms) {
-        const existing = termMap.get(t.hpo_id);
-        if (!existing || t.confidence > existing.confidence) termMap.set(t.hpo_id, t);
+      for (const term of allTerms) {
+        const existing = termMap.get(term.hpo_id);
+        if (!existing || term.confidence > existing.confidence) termMap.set(term.hpo_id, term);
       }
       const dedupedTerms = Array.from(termMap.values());
 
       const rankings = await scoreCase(dedupedTerms, 10);
-      addProgress("Ranking complete");
+      addProgress(t("progressRanking"));
 
       const caseId = uuid();
       saveCaseToStorage({
@@ -219,7 +220,7 @@ export default function IntakePage() {
       router.push(`/case/${caseId}`);
     } catch (err) {
       console.error(err);
-      toast.error("Analysis failed — is the API running?");
+      toast.error(t("errorApiFailed"));
       setAnalyzing(false);
     }
   };
@@ -238,7 +239,7 @@ export default function IntakePage() {
         >
           <h1 className="serif text-[28px] tracking-tight">{t("title")}</h1>
           <p className="text-[14px] text-muted-foreground mt-1">
-            Submit any combination of clinical inputs — Lumina handles the rest.
+            {t("subtitle")}
           </p>
         </motion.div>
 
@@ -251,27 +252,27 @@ export default function IntakePage() {
               transition={{ duration: 0.4, ease, delay: 0.05 }}
               className="bg-white rounded-2xl border border-black/[0.06] p-5"
             >
-              <h2 className="text-[14px] font-semibold mb-3">Patient context <span className="text-muted-foreground font-normal">(optional)</span></h2>
+              <h2 className="text-[14px] font-semibold mb-3">{t("patientContext")} <span className="text-muted-foreground font-normal">{t("optional")}</span></h2>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">Age</label>
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">{t("age")}</label>
                   <input
                     value={age}
                     onChange={(e) => setAge(e.target.value)}
-                    placeholder="e.g. 8 years"
+                    placeholder={t("agePlaceholder")}
                     className="w-full h-9 px-3 rounded-lg border border-black/10 text-[13px] outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all bg-white"
                   />
                 </div>
                 <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">Sex</label>
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">{t("sex")}</label>
                   <select
                     value={sex}
                     onChange={(e) => setSex(e.target.value)}
                     className="w-full h-9 px-3 rounded-lg border border-black/10 text-[13px] outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all bg-white appearance-none"
                   >
-                    <option value="">Unknown</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+                    <option value="">{t("sexUnknown")}</option>
+                    <option value="male">{t("sexMale")}</option>
+                    <option value="female">{t("sexFemale")}</option>
                   </select>
                 </div>
               </div>
@@ -286,23 +287,23 @@ export default function IntakePage() {
             >
               {/* Tab bar */}
               <div className="flex border-b border-black/[0.06] overflow-x-auto scrollbar-none">
-                {TABS.map((t) => {
+                {TABS.map((tabItem) => {
                   const hasData =
-                    t.id === "notes" ? !!notes.trim() :
-                    t.id === "photo" ? !!photo :
-                    t.id === "lab" ? !!lab :
+                    tabItem.id === "notes" ? !!notes.trim() :
+                    tabItem.id === "photo" ? !!photo :
+                    tabItem.id === "lab" ? !!lab :
                     !!vcf;
                   return (
                     <button
-                      key={t.id}
-                      onClick={() => setTab(t.id)}
+                      key={tabItem.id}
+                      onClick={() => setTab(tabItem.id)}
                       className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-3 text-[13px] font-medium transition-all border-b-2 ${
-                        tab === t.id
+                        tab === tabItem.id
                           ? "text-foreground border-foreground"
                           : "text-muted-foreground border-transparent hover:text-foreground"
                       }`}
                     >
-                      {t.label}
+                      {tabItem.label}
                       {hasData && (
                         <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.52_0.21_255)]" />
                       )}
@@ -324,17 +325,17 @@ export default function IntakePage() {
                     {tab === "notes" && (
                       <div>
                         <p className="text-[12px] text-muted-foreground mb-3">
-                          Enter clinical notes, patient history, symptom descriptions, or consultation summaries.
+                          {t("notesDesc")}
                         </p>
                         <textarea
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
-                          placeholder="Patient is a 6-year-old male presenting with febrile seizures onset at 5 months. EEG shows irregular spike-wave complexes. Developmental regression noted after first seizure cluster. Family history of epilepsy on maternal side..."
+                          placeholder={t("notesPlaceholder")}
                           rows={8}
                           className="w-full px-4 py-3 rounded-xl border border-black/10 text-[14px] leading-relaxed outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all resize-none font-mono text-muted-foreground placeholder:text-black/25"
                         />
                         <p className="text-[11px] text-muted-foreground mt-2">
-                          {notes.length} characters · Claude NER extracts HPO terms
+                          {`${notes.length} ${t("charCount")}`}
                         </p>
                       </div>
                     )}
@@ -342,12 +343,12 @@ export default function IntakePage() {
                     {tab === "photo" && (
                       <div>
                         <p className="text-[12px] text-muted-foreground mb-3">
-                          Upload a clinical photograph for AI vision analysis.
+                          {t("photoDesc")}
                         </p>
                         <DropZone
                           accept="image/*"
-                          label="Drop clinical photo"
-                          hint="JPEG, PNG, HEIC up to 20MB"
+                          label={t("photoDropLabel")}
+                          hint={t("photoDropHint")}
                           file={photo}
                           onFile={setPhoto}
                           onClear={() => setPhoto(null)}
@@ -360,7 +361,7 @@ export default function IntakePage() {
                             className="w-4 h-4 rounded accent-[oklch(0.52_0.21_255)]"
                           />
                           <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors">
-                            Enable facial dysmorphology analysis (FGDD vocabulary)
+                            {t("photoFacialToggle")}
                           </span>
                         </label>
                       </div>
@@ -369,12 +370,12 @@ export default function IntakePage() {
                     {tab === "lab" && (
                       <div>
                         <p className="text-[12px] text-muted-foreground mb-3">
-                          Upload a lab report image or PDF screenshot for OCR + AI interpretation.
+                          {t("labDesc")}
                         </p>
                         <DropZone
                           accept="image/*,.pdf"
-                          label="Drop lab report"
-                          hint="JPEG, PNG, PDF up to 20MB"
+                          label={t("labDropLabel")}
+                          hint={t("labDropHint")}
                           file={lab}
                           onFile={setLab}
                           onClear={() => setLab(null)}
@@ -385,18 +386,18 @@ export default function IntakePage() {
                     {tab === "vcf" && (
                       <div>
                         <p className="text-[12px] text-muted-foreground mb-3">
-                          Upload a VCF file from whole-exome or whole-genome sequencing.
+                          {t("vcfDesc")}
                         </p>
                         <DropZone
                           accept=".vcf,.vcf.gz"
-                          label="Drop VCF file"
-                          hint=".vcf or .vcf.gz — ClinVar-annotated preferred"
+                          label={t("vcfDropLabel")}
+                          hint={t("vcfDropHint")}
                           file={vcf}
                           onFile={setVcf}
                           onClear={() => setVcf(null)}
                         />
                         <p className="text-[12px] text-muted-foreground mt-3">
-                          Pathogenic/likely-pathogenic variants are resolved through gene → disease → HPO chains.
+                          {t("vcfNote")}
                         </p>
                       </div>
                     )}
@@ -422,7 +423,7 @@ export default function IntakePage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
                     </svg>
-                    Analyzing…
+                    {t("analyzing")}
                   </span>
                 ) : (
                   t("analyseButton")
@@ -440,13 +441,13 @@ export default function IntakePage() {
               transition={{ duration: 0.4, ease, delay: 0.2 }}
               className="bg-white rounded-2xl border border-black/[0.06] p-4"
             >
-              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Inputs</h3>
+              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("sidebarInputs")}</h3>
               <div className="space-y-2.5">
                 {[
-                  { id: "notes", label: "Clinical notes", active: !!notes.trim() },
-                  { id: "photo", label: "Clinical photo", active: !!photo },
-                  { id: "lab", label: "Lab report", active: !!lab },
-                  { id: "vcf", label: "Genomic data", active: !!vcf },
+                  { id: "notes", label: t("sidebarNotes"), active: !!notes.trim() },
+                  { id: "photo", label: t("sidebarPhoto"), active: !!photo },
+                  { id: "lab",   label: t("sidebarLab"),   active: !!lab },
+                  { id: "vcf",   label: t("sidebarVcf"),   active: !!vcf },
                 ].map((item) => (
                   <div key={item.id} className="flex items-center gap-2">
                     <div className={`w-4 h-4 rounded flex items-center justify-center transition-all duration-300 ${item.active ? "bg-[oklch(0.52_0.19_160)]" : "border border-black/15"}`}>
@@ -473,7 +474,7 @@ export default function IntakePage() {
                   exit={{ opacity: 0, y: -8 }}
                   className="bg-white rounded-2xl border border-black/[0.06] p-4"
                 >
-                  <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Progress</h3>
+                  <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("sidebarProgress")}</h3>
                   <div className="space-y-2">
                     {progress.map((step) => (
                       <ProgressStep key={step} label={step} active={step === activeStep} done={step !== activeStep} />
@@ -493,9 +494,9 @@ export default function IntakePage() {
               transition={{ duration: 0.4, ease, delay: 0.3 }}
               className="rounded-xl bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.15)] p-4"
             >
-              <p className="text-[12px] text-[oklch(0.52_0.21_255)] font-medium mb-1">Tip</p>
+              <p className="text-[12px] text-[oklch(0.52_0.21_255)] font-medium mb-1">{t("tipTitle")}</p>
               <p className="text-[12px] text-muted-foreground leading-relaxed">
-                More modalities = higher confidence. Adding genomic data alongside notes typically doubles accuracy.
+                {t("tipBody")}
               </p>
             </motion.div>
           </div>
