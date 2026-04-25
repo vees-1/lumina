@@ -120,7 +120,6 @@ class ScoringIndex:
         self,
         query: list[tuple[str, float]],  # [(hpo_id, confidence)]
         top_k: int = 5,
-        modalities: int = 1,
     ) -> list[RankResult]:
         """Score all diseases against the query terms and return top_k results."""
         if not query:
@@ -161,12 +160,12 @@ class ScoringIndex:
         scores.sort(key=lambda x: x[1], reverse=True)
         top = scores[:top_k]
 
-        # Calibrate: scale relative to top score, capped by modality count
+        # Calibrate: scale relative to top score (cap applied externally per modality count)
         max_score = top[0][1] if top else 1.0
 
         results = []
         for orpha_code, raw_score, contributing in top:
-            confidence = _calibrate(raw_score, max_score, modalities)
+            confidence = _calibrate(raw_score, max_score)
             results.append(
                 RankResult(
                     orpha_code=orpha_code,
@@ -179,12 +178,8 @@ class ScoringIndex:
         return results
 
 
-_MODALITY_CAP = {1: 40.0, 2: 55.0, 3: 65.0, 4: 80.0}
-
-
-def _calibrate(raw: float, max_raw: float, modalities: int = 1) -> float:
-    """Scale relative to top score, capped by number of modalities used."""
+def _calibrate(raw: float, max_raw: float) -> float:
+    """Scale relative to top score to 0–100 (cap applied per modality count in score route)."""
     if max_raw == 0:
         return 0.0
-    cap = _MODALITY_CAP.get(max(1, min(4, modalities)), 40.0)
-    return min(cap, (raw / max_raw) * cap)
+    return min(100.0, (raw / max_raw) * 100.0)
