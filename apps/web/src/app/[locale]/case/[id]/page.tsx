@@ -414,7 +414,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   };
 
   const handleExportFHIR = async (data: CaseData, caseId: string) => {
-    const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    const API = "/api";
     try {
       const res = await fetch(`${API}/fhir/export`, {
         method: "POST",

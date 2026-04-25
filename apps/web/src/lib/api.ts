@@ -1,6 +1,6 @@
 import type { CaseData, HPOTerm, RankResult } from "@/types/lumina";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API = "/api";
 
 export async function submitNotes(notes: string): Promise<HPOTerm[]> {
   const res = await fetch(`${API}/intake/text`, {
