@@ -5,6 +5,7 @@ description = "Add your description here"
 requires-python = ">=3.13"
 dependencies = [
     "anthropic>=0.96.0",
+    "groq>=0.13.0",
     "cyvcf2>=0.32.1",
     "extractors",
     "fastapi>=0.136.0",
