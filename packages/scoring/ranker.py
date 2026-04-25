@@ -179,7 +179,7 @@ class ScoringIndex:
 
 
 def _calibrate(raw: float, max_raw: float) -> float:
-    """Map raw similarity score to 0–100. Simple ratio-based calibration for prototype."""
+    """Map raw similarity score to 0–80. Top score anchors at 75%, others scale relatively."""
     if max_raw == 0:
         return 0.0
-    return min(100.0, (raw / max_raw) * 100.0)
+    return min(75.0, (raw / max_raw) * 75.0)

@@ -21,9 +21,10 @@ Return JSON only:
 Modalities: notes (clinical text), photo (clinical photo), lab (lab reports), vcf (genetics VCF)
 If confidence is high enough (top-1 > 85 AND gap to top-2 > 15), return cycles_remaining: 0."""
 
-_LETTER_SYSTEM = """You are a clinical specialist writing a referral letter for a rare disease patient.
-Write in professional medical style. Structure: patient summary, clinical findings, suspected diagnosis,
-reasoning, recommended next steps, closing. Use markdown headers."""
+_LETTER_SYSTEM = """You are a clinical specialist writing a concise referral letter for a rare disease patient.
+Write in professional medical style. Keep it under 300 words. Structure: patient summary (1-2 sentences),
+key clinical findings (bullet list), suspected diagnosis with brief reasoning (2-3 sentences),
+recommended next steps (bullet list), closing. Use markdown headers."""
 
 
 class AgentNextRequest(BaseModel):
