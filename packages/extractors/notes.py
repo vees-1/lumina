@@ -134,12 +134,12 @@ async def _extract_via_claude(
     client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
     vocab_block = "\n".join(f"{hid}: {name}" for hid, name in hpo_vocab[:2000])
-    system = f"{_SYSTEM}\n\nHPO vocabulary (top terms by clinical relevance):\n{vocab_block}"
+    system_text = f"{_SYSTEM}\n\nHPO vocabulary (top terms by clinical relevance):\n{vocab_block}"
 
     response = await client.messages.create(
         model=_MODEL,
         max_tokens=2048,
-        system=system,
+        system=[{"type": "text", "text": system_text, "cache_control": {"type": "ephemeral"}}],
         messages=[{"role": "user", "content": text}],
     )
 
