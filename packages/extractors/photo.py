@@ -1,4 +1,4 @@
-"""Clinical photo → HPO terms via Claude Vision."""
+"""Clinical photo → HPO terms via Groq Vision."""
 
 from __future__ import annotations
 
@@ -6,11 +6,11 @@ import base64
 import json
 import os
 
-import anthropic
+from groq import AsyncGroq
 
 from extractors.models import HPOTerm
 
-_MODEL = "claude-sonnet-4-6"
+_MODEL = "llama-3.2-11b-vision-preview"
 
 _SYSTEM_BASE = """You are a clinical image analyst specialising in rare disease phenotyping.
 
@@ -41,35 +41,40 @@ async def extract_photo(
     facial: bool = False,
     facial_vocab: list[str] | None = None,
 ) -> list[HPOTerm]:
-    """Extract HPO terms from a clinical photograph using Claude Vision."""
-    client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    """Extract HPO terms from a clinical photograph using Groq Vision."""
+    client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
 
     system = _SYSTEM_BASE
     if facial and facial_vocab:
         vocab_str = "\n".join(f"- {v}" for v in facial_vocab[:200])
         system = _SYSTEM_BASE + _FACIAL_ADDENDUM.format(vocab=vocab_str)
 
-    b64 = base64.standard_b64encode(image_bytes).decode()
+    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
-    response = await client.messages.create(
+    response = await client.chat.completions.create(
         model=_MODEL,
-        max_tokens=2048,
-        system=system,
+        max_tokens=1024,
+        temperature=0.0,
         messages=[
             {
                 "role": "user",
                 "content": [
                     {
-                        "type": "image",
-                        "source": {"type": "base64", "media_type": media_type, "data": b64},
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:{media_type};base64,{image_b64}"
+                        },
                     },
-                    {"type": "text", "text": "Identify all observable clinical findings and return the JSON array."},
+                    {
+                        "type": "text",
+                        "text": system + "\n\nIdentify all observable clinical findings and return the JSON array.",
+                    },
                 ],
             }
         ],
     )
 
-    raw = response.content[0].text.strip()
+    raw = response.choices[0].message.content.strip()
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
