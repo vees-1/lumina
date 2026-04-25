@@ -6,11 +6,9 @@ import base64
 import json
 import os
 
-from groq import AsyncGroq
-
 from extractors.models import HPOTerm
 
-_MODEL = "llama-3.2-11b-vision-preview"
+_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
 _SYSTEM_BASE = """You are a clinical image analyst specialising in rare disease phenotyping.
 
@@ -42,62 +40,77 @@ async def extract_photo(
     facial_vocab: list[str] | None = None,
 ) -> list[HPOTerm]:
     """Extract HPO terms from a clinical photograph using Groq Vision."""
-    client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
-
-    system = _SYSTEM_BASE
-    if facial and facial_vocab:
-        vocab_str = "\n".join(f"- {v}" for v in facial_vocab[:200])
-        system = _SYSTEM_BASE + _FACIAL_ADDENDUM.format(vocab=vocab_str)
-
-    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
-
-    response = await client.chat.completions.create(
-        model=_MODEL,
-        max_tokens=1024,
-        temperature=0.0,
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:{media_type};base64,{image_b64}"
-                        },
-                    },
-                    {
-                        "type": "text",
-                        "text": system + "\n\nIdentify all observable clinical findings and return the JSON array.",
-                    },
-                ],
-            }
-        ],
-    )
-
-    raw = response.choices[0].message.content.strip()
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-    raw = raw.strip()
-
-    try:
-        items = json.loads(raw)
-    except json.JSONDecodeError:
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
         return []
 
-    results = []
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        hpo_id = item.get("hpo_id", "")
-        if not hpo_id.startswith("HP:"):
-            continue
-        results.append(
-            HPOTerm(
-                hpo_id=hpo_id,
-                confidence=max(0.0, min(1.0, float(item.get("confidence", 0.7)))),
-                source=str(item.get("source", "")),
-            )
+    try:
+        from groq import AsyncGroq
+
+        client = AsyncGroq(api_key=api_key)
+
+        system = _SYSTEM_BASE
+        if facial and facial_vocab:
+            vocab_str = "\n".join(f"- {v}" for v in facial_vocab[:200])
+            system = _SYSTEM_BASE + _FACIAL_ADDENDUM.format(vocab=vocab_str)
+
+        image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+
+        response = await client.chat.completions.create(
+            model=_MODEL,
+            max_tokens=1024,
+            temperature=0.0,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{media_type};base64,{image_b64}"
+                            },
+                        },
+                        {
+                            "type": "text",
+                            "text": system + "\n\nIdentify all observable clinical findings and return the JSON array.",
+                        },
+                    ],
+                }
+            ],
         )
-    return results
+
+        raw = response.choices[0].message.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        raw = raw.strip()
+
+        # Find JSON array in response
+        start = raw.find("[")
+        end = raw.rfind("]") + 1
+        if start >= 0 and end > start:
+            raw = raw[start:end]
+
+        try:
+            items = json.loads(raw)
+        except json.JSONDecodeError:
+            return []
+
+        results = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            hpo_id = item.get("hpo_id", "")
+            if not hpo_id.startswith("HP:"):
+                continue
+            results.append(
+                HPOTerm(
+                    hpo_id=hpo_id,
+                    confidence=max(0.0, min(1.0, float(item.get("confidence", 0.7)))),
+                    source=str(item.get("source", "")),
+                )
+            )
+        return results
+    except Exception:
+        return []
