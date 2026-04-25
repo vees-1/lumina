@@ -21,5 +21,6 @@ async def score_case(body: ScoreRequest, request: Request) -> list[RankResult]:
     results = index.rank(query, top_k=body.top_k)
     cap = _MODALITY_CAP.get(max(1, min(4, body.modalities)), 40.0)
     for r in results:
-        r.confidence = round(min(cap, r.confidence * cap / 100.0), 1)
+        # Use raw score (0–1 Lin similarity) directly — only hits cap when match is near-perfect
+        r.confidence = round(min(cap, r.score * cap), 1)
     return results
