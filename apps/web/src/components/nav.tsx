@@ -10,18 +10,19 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const NAV_LINKS = [
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#modalities", label: "Technology" },
-  { href: "#stats", label: "Science" },
-];
-
 export function Nav({ transparent = false }: { transparent?: boolean }) {
+  const t = useTranslations("nav");
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
   const isLanding = pathname === "/";
   const { isSignedIn } = useAuth();
+
+  const NAV_LINKS = [
+    { href: "#how-it-works", label: t("howItWorks") },
+    { href: "#modalities", label: t("technology") },
+    { href: "#stats", label: t("science") },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -83,12 +84,12 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
               <>
                 <Link href="/sign-in">
                   <Button variant="ghost" size="sm" className="text-[13px] h-7">
-                    Sign in
+                    {t("signIn")}
                   </Button>
                 </Link>
                 <Link href="/sign-up">
                   <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
-                    Get started
+                    {t("getStarted")}
                   </Button>
                 </Link>
               </>
@@ -97,13 +98,13 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
                 {!pathname.startsWith("/dashboard") ? (
                   <Link href="/dashboard">
                     <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
-                      Dashboard
+                      {t("dashboard")}
                     </Button>
                   </Link>
                 ) : (
                   <Link href="/intake">
                     <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
-                      New case
+                      {t("newCase")}
                     </Button>
                   </Link>
                 )}

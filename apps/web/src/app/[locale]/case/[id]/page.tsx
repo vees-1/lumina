@@ -21,6 +21,9 @@ const MODALITY_NEXT_LABEL: Record<string, string> = {
   notes: "clinical notes", photo: "a clinical photo", lab: "a lab report", vcf: "a genomic VCF",
 };
 
+// Note: MODALITY_LABEL and MODALITY_NEXT_LABEL are intentionally not translated
+// as they appear in API-facing contexts and as technical identifiers in badges.
+
 // ── Confidence bar ────────────────────────────────────────────────────────────
 
 function ConfidenceBar({ value, color, delay }: { value: number; color: string; delay: number }) {
@@ -42,6 +45,7 @@ function ConfidenceBar({ value, color, delay }: { value: number; color: string; 
 // ── Rank card ─────────────────────────────────────────────────────────────────
 
 function RankCard({ result, rank, delay }: { result: RankResult; rank: number; delay: number }) {
+  const t = useTranslations("case");
   const colors = [
     "oklch(0.52 0.21 255)",
     "oklch(0.65 0.18 200)",
@@ -62,7 +66,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
       {isTop && (
         <div className="absolute -top-2.5 left-4">
           <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: color }}>
-            Top match
+            {t("topMatch")}
           </span>
         </div>
       )}
@@ -109,6 +113,7 @@ function AgentBanner({
   suggestion: AgentSuggestion;
   onDismiss: () => void;
 }) {
+  const t = useTranslations("case");
   const nextLabel = MODALITY_NEXT_LABEL[suggestion.modality] ?? suggestion.modality;
   return (
     <motion.div
@@ -132,14 +137,14 @@ function AgentBanner({
         <div className="flex items-center gap-2 mt-3">
           <Link href="/intake">
             <button className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[oklch(0.52_0.21_255)] text-white hover:bg-[oklch(0.46_0.21_255)] transition-colors">
-              Add now
+              {t("addNow")}
             </button>
           </Link>
           <button
             onClick={onDismiss}
             className="text-[12px] text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-black/[0.05] transition-colors"
           >
-            Dismiss
+            {t("dismiss")}
           </button>
         </div>
       </div>
@@ -150,6 +155,7 @@ function AgentBanner({
 // ── Explainability panel ──────────────────────────────────────────────────────
 
 function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseData: CaseData }) {
+  const t = useTranslations("case");
   const hpoMap = new Map(caseData.hpoTerms.map((t) => [t.hpo_id, t]));
   const terms = result.contributing_terms.slice(0, 5);
 
@@ -178,7 +184,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
           Why {result.name}?
         </h2>
         <p className="text-[12px] text-muted-foreground mt-0.5">
-          Top discriminating phenotypes for this diagnosis
+          {t("topDiscriminating")}
         </p>
       </div>
       <div className="divide-y divide-black/[0.04]">
@@ -220,7 +226,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
         })}
       </div>
       {terms.length === 0 && (
-        <p className="px-5 py-4 text-[13px] text-muted-foreground">No contributing terms available.</p>
+        <p className="px-5 py-4 text-[13px] text-muted-foreground">{t("noContributing")}</p>
       )}
     </motion.div>
   );
@@ -236,6 +242,7 @@ interface PubMedArticle {
 }
 
 function PubMedCitations({ diseaseName }: { diseaseName: string }) {
+  const t = useTranslations("case");
   const [articles, setArticles] = useState<PubMedArticle[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -288,7 +295,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
       className="bg-white rounded-2xl border border-black/[0.06] p-4"
     >
       <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-        PubMed References
+        {t("pubmedReferences")}
       </h3>
       {loading ? (
         <div className="space-y-2">
@@ -326,6 +333,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
 // ── Letter view ───────────────────────────────────────────────────────────────
 
 function LetterView({ letter, streaming }: { letter: string; streaming: boolean }) {
+  const t = useTranslations("case");
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -334,23 +342,23 @@ function LetterView({ letter, streaming }: { letter: string; streaming: boolean 
   return (
     <div className="relative bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.06]">
-        <h3 className="text-[14px] font-semibold">Clinical Referral Letter</h3>
+        <h3 className="text-[14px] font-semibold">{t("clinicalReferralLetter")}</h3>
         {streaming && (
           <span className="flex items-center gap-1.5 text-[12px] text-[oklch(0.52_0.21_255)]">
             <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.52_0.21_255)] animate-pulse" />
-            Generating…
+            {t("generating")}
           </span>
         )}
         {!streaming && letter && (
           <button
-            onClick={() => { navigator.clipboard.writeText(letter); toast.success("Copied to clipboard"); }}
+            onClick={() => { navigator.clipboard.writeText(letter); toast.success(t("copiedToClipboard")); }}
             className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
               <rect x="2" y="5" width="9" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
               <path d="M5 5V3.5A1.5 1.5 0 016.5 2h6A1.5 1.5 0 0114 3.5v9A1.5 1.5 0 0112.5 14H11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
             </svg>
-            Copy
+            {t("copy")}
           </button>
         )}
       </div>
@@ -399,7 +407,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
         setLetter((prev) => prev + chunk);
       }
     } catch {
-      toast.error("Letter generation failed");
+      toast.error(t("letterGenerationFailed"));
     } finally {
       setStreaming(false);
     }
@@ -434,9 +442,9 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       anchor.download = `case_${caseId}_fhir.json`;
       anchor.click();
       URL.revokeObjectURL(url);
-      toast.success("FHIR bundle downloaded");
+      toast.success(t("fhirDownloaded"));
     } catch {
-      toast.error("FHIR export failed");
+      toast.error(t("fhirExportFailed"));
     }
   };
 
@@ -451,10 +459,10 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             transition={{ duration: 0.4 }}
             className="py-16"
           >
-            <h2 className="text-[20px] font-semibold mb-2">Case not found</h2>
-            <p className="text-muted-foreground text-[14px] mb-6">This case may have expired from storage.</p>
+            <h2 className="text-[20px] font-semibold mb-2">{t("notFound")}</h2>
+            <p className="text-muted-foreground text-[14px] mb-6">{t("notFoundSub")}</p>
             <Link href="/dashboard">
-              <Button variant="outline" className="rounded-full">Back to dashboard</Button>
+              <Button variant="outline" className="rounded-full">{t("backToDashboard")}</Button>
             </Link>
           </motion.div>
         </main>
@@ -482,7 +490,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                 <path d="M10 4l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Cases
+              {t("cases")}
             </Link>
             <span className="text-muted-foreground/40">/</span>
             <span className="text-[13px] text-muted-foreground font-mono">{id.slice(0, 8)}…</span>
@@ -532,7 +540,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 transition={{ delay: 0.1 }}
                 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3"
               >
-                Differential Diagnosis
+                {t("differentialDiagnosis")}
               </motion.h2>
               <div className="space-y-3">
                 {caseData.rankings.slice(0, 5).map((r, i) => (
@@ -552,7 +560,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             <section>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Clinical Letter
+                  {t("clinicalLetter")}
                 </h2>
                 {!letterStarted && (
                   <Button
@@ -579,7 +587,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                     </svg>
                   </div>
                   <p className="text-[14px] text-muted-foreground">
-                    Generate a specialist referral letter with Claude
+                    {t("generateWithClaude")}
                   </p>
                 </motion.div>
               )}
@@ -596,7 +604,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               className="bg-white rounded-2xl border border-black/[0.06] p-4"
             >
               <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                HPO Phenotypes ({caseData.hpoTerms.length})
+                {t("hpoPhenotypes")} ({caseData.hpoTerms.length})
               </h3>
               <div className="flex flex-wrap gap-1.5 max-h-[260px] overflow-y-auto">
                 {caseData.hpoTerms
@@ -623,13 +631,13 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               transition={{ duration: 0.5, ease, delay: 0.2 }}
               className="bg-white rounded-2xl border border-black/[0.06] p-4"
             >
-              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Evidence</h3>
+              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("evidence")}</h3>
               <div className="space-y-2">
                 {[
-                  { label: "HPO terms extracted", value: caseData.hpoTerms.length.toString() },
-                  { label: "Modalities used", value: caseData.modalities.length.toString() },
-                  { label: "Diseases ranked", value: caseData.rankings.length.toString() },
-                  { label: "Top confidence", value: topRank ? `${topRank.confidence.toFixed(1)}%` : "—" },
+                  { label: t("hpoExtracted"), value: caseData.hpoTerms.length.toString() },
+                  { label: t("modalitiesUsed"), value: caseData.modalities.length.toString() },
+                  { label: t("diseasesRanked"), value: caseData.rankings.length.toString() },
+                  { label: t("topConfidence"), value: topRank ? `${topRank.confidence.toFixed(1)}%` : "—" },
                 ].map((row) => (
                   <div key={row.label} className="flex justify-between items-center">
                     <span className="text-[12px] text-muted-foreground">{row.label}</span>
@@ -650,17 +658,17 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 transition={{ duration: 0.5, ease, delay: 0.25 }}
                 className="bg-white rounded-2xl border border-black/[0.06] p-4"
               >
-                <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">Patient</h3>
+                <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("patient")}</h3>
                 <div className="space-y-2">
                   {caseData.patientContext?.age && (
                     <div className="flex justify-between">
-                      <span className="text-[12px] text-muted-foreground">Age</span>
+                      <span className="text-[12px] text-muted-foreground">{t("age")}</span>
                       <span className="text-[13px] font-medium">{caseData.patientContext.age}</span>
                     </div>
                   )}
                   {caseData.patientContext?.sex && (
                     <div className="flex justify-between">
-                      <span className="text-[12px] text-muted-foreground">Sex</span>
+                      <span className="text-[12px] text-muted-foreground">{t("sex")}</span>
                       <span className="text-[13px] font-medium capitalize">{caseData.patientContext.sex}</span>
                     </div>
                   )}
@@ -684,12 +692,12 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               </Button>
               <Link href="/intake" className="block">
                 <Button variant="outline" className="w-full rounded-xl h-9 text-[13px] border-black/10">
-                  New case
+                  {t("newCase")}
                 </Button>
               </Link>
               <Link href="/dashboard" className="block">
                 <Button variant="ghost" className="w-full rounded-xl h-9 text-[13px]">
-                  All cases
+                  {t("allCases")}
                 </Button>
               </Link>
             </motion.div>

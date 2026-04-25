@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -85,6 +86,7 @@ function LoadingSkeleton() {
 }
 
 function ErrorState({ orpha }: { orpha: string }) {
+  const t = useTranslations("disease");
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -97,18 +99,19 @@ function ErrorState({ orpha }: { orpha: string }) {
           <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h2 className="text-[18px] font-semibold mb-1">Disease not found</h2>
+      <h2 className="text-[18px] font-semibold mb-1">{t("notFound")}</h2>
       <p className="text-[13px] text-muted-foreground mb-6">
-        ORPHA:{orpha} could not be found in the database.
+        {t("notFoundSub", { orpha: `ORPHA:${orpha}` })}
       </p>
       <Link href="/diseases">
-        <Button variant="outline" className="rounded-full">Back to catalog</Button>
+        <Button variant="outline" className="rounded-full">{t("backToCatalog")}</Button>
       </Link>
     </motion.div>
   );
 }
 
 export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha: string }> }) {
+  const t = useTranslations("disease");
   const { orpha } = use(params);
   const [disease, setDisease] = useState<DiseaseDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -155,7 +158,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                 <path d="M10 4l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Disease Catalog
+              {t("back")}
             </Link>
           </div>
 
@@ -189,7 +192,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 <div className="flex items-center gap-3 mb-8">
                   <Link href="/intake">
                     <Button className="rounded-full bg-foreground text-background h-9 px-5 text-[13px]">
-                      Analyze this disease
+                      {t("analyzeThis")}
                     </Button>
                   </Link>
                 </div>
@@ -197,9 +200,9 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 {/* Tabs */}
                 <Tabs defaultValue="overview">
                   <TabsList className="mb-6">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="overview">{t("tabOverview")}</TabsTrigger>
                     <TabsTrigger value="phenotypes">
-                      Phenotypes
+                      {t("tabPhenotypes")}
                       {disease.phenotypes.length > 0 && (
                         <span className="ml-1.5 text-[11px] opacity-60">
                           {disease.phenotypes.length}
@@ -207,14 +210,14 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                       )}
                     </TabsTrigger>
                     <TabsTrigger value="genes">
-                      Genes
+                      {t("tabGenes")}
                       {disease.genes.length > 0 && (
                         <span className="ml-1.5 text-[11px] opacity-60">
                           {disease.genes.length}
                         </span>
                       )}
                     </TabsTrigger>
-                    <TabsTrigger value="prevalence">Prevalence</TabsTrigger>
+                    <TabsTrigger value="prevalence">{t("tabPrevalence")}</TabsTrigger>
                   </TabsList>
 
                   {/* Overview */}
@@ -222,8 +225,8 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                     <div className="space-y-4">
                       <div className="bg-white rounded-2xl border border-black/[0.06] divide-y divide-black/[0.04]">
                         {[
-                          { label: "Disorder type", value: disease.disorder_type || "—" },
-                          { label: "Disorder group", value: disease.disorder_group || "—" },
+                          { label: t("disorderType"), value: disease.disorder_type || "—" },
+                          { label: t("disorderGroup"), value: disease.disorder_group || "—" },
                         ].map((row) => (
                           <div key={row.label} className="flex items-center justify-between px-5 py-4">
                             <span className="text-[13px] text-muted-foreground">{row.label}</span>
@@ -233,7 +236,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
 
                         {/* ICD-10 */}
                         <div className="flex items-start justify-between px-5 py-4 gap-4">
-                          <span className="text-[13px] text-muted-foreground flex-shrink-0">ICD-10 codes</span>
+                          <span className="text-[13px] text-muted-foreground flex-shrink-0">{t("icd10")}</span>
                           <div className="flex flex-wrap gap-1.5 justify-end">
                             {disease.icd10.length > 0 ? (
                               disease.icd10.map((code) => (
@@ -252,7 +255,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
 
                         {/* OMIM */}
                         <div className="flex items-start justify-between px-5 py-4 gap-4">
-                          <span className="text-[13px] text-muted-foreground flex-shrink-0">OMIM</span>
+                          <span className="text-[13px] text-muted-foreground flex-shrink-0">{t("omim")}</span>
                           <div className="flex flex-wrap gap-1.5 justify-end">
                             {disease.omim.length > 0 ? (
                               disease.omim.map((id) => (
@@ -279,13 +282,13 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                   <TabsContent value="phenotypes">
                     {disease.phenotypes.length === 0 ? (
                       <div className="bg-white rounded-2xl border border-black/[0.06] p-10 text-center">
-                        <p className="text-[14px] text-muted-foreground">No phenotype data available</p>
+                        <p className="text-[14px] text-muted-foreground">{t("noPhenotypeData")}</p>
                       </div>
                     ) : (
                       <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
                         <div className="px-5 py-3 border-b border-black/[0.06] flex items-center gap-3">
-                          <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">HPO Term</span>
-                          <span className="ml-auto text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">Frequency</span>
+                          <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("hpoTerm")}</span>
+                          <span className="ml-auto text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("frequency")}</span>
                         </div>
                         <div className="divide-y divide-black/[0.04] max-h-[500px] overflow-y-auto">
                           {[...disease.phenotypes]
@@ -314,13 +317,13 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                   <TabsContent value="genes">
                     {disease.genes.length === 0 ? (
                       <div className="bg-white rounded-2xl border border-black/[0.06] p-10 text-center">
-                        <p className="text-[14px] text-muted-foreground">No gene data available</p>
+                        <p className="text-[14px] text-muted-foreground">{t("noGeneData")}</p>
                       </div>
                     ) : (
                       <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
                         <div className="px-5 py-3 border-b border-black/[0.06]">
                           <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
-                            Associated Genes
+                            {t("associatedGenes")}
                           </span>
                         </div>
                         <div className="divide-y divide-black/[0.04]">
@@ -345,7 +348,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                                   rel="noopener noreferrer"
                                   className="text-[12px] font-mono px-2.5 py-1 rounded-lg bg-[oklch(0.52_0.19_160/0.07)] border border-[oklch(0.52_0.19_160/0.2)] text-[oklch(0.38_0.19_160)] hover:bg-[oklch(0.52_0.19_160/0.12)] transition-colors whitespace-nowrap"
                                 >
-                                  Ensembl ↗
+                                  {t("ensembl")}
                                 </a>
                               )}
                             </motion.div>
@@ -359,7 +362,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                   <TabsContent value="prevalence">
                     {disease.prevalence.length === 0 ? (
                       <div className="bg-white rounded-2xl border border-black/[0.06] p-10 text-center">
-                        <p className="text-[14px] text-muted-foreground">No prevalence data available</p>
+                        <p className="text-[14px] text-muted-foreground">{t("noPrevalenceData")}</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
@@ -386,7 +389,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                             </div>
                             {p.val_moy !== null && p.val_moy !== undefined && (
                               <p className="text-[13px] text-muted-foreground">
-                                Mean value: <span className="font-medium text-foreground">{p.val_moy}</span>
+                                {t("meanValue")} <span className="font-medium text-foreground">{p.val_moy}</span>
                               </p>
                             )}
                           </motion.div>

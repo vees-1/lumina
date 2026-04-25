@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { getCaseById, streamLetter } from "@/lib/api";
@@ -11,6 +12,7 @@ import type { CaseData } from "@/types/lumina";
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = useTranslations("letter");
   const { id } = use(params);
   const [caseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
@@ -53,6 +55,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   };
 
   const topDx = caseData?.rankings?.[0]?.name ?? "Unknown";
+  const wordCount = letter.split(/\s+/).filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
@@ -67,9 +70,9 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         >
           <div>
             <Link href={`/case/${id}`} className="text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-1 block">
-              ← Back to case
+              {t("backToCase")}
             </Link>
-            <h1 className="serif text-[26px] tracking-tight">Referral Letter</h1>
+            <h1 className="serif text-[26px] tracking-tight">{t("title")}</h1>
             <p className="text-[13px] text-muted-foreground mt-0.5">
               {topDx}
             </p>
@@ -82,14 +85,14 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
                 onClick={handleCopy}
                 className="text-[13px] h-8 rounded-full"
               >
-                Copy
+                {t("copy")}
               </Button>
               <Button
                 size="sm"
                 onClick={handleDownload}
                 className="text-[13px] h-8 rounded-full bg-foreground text-background"
               >
-                Download
+                {t("download")}
               </Button>
             </div>
           )}
@@ -106,7 +109,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
           <div className="flex items-center gap-2 px-5 py-3 border-b border-black/[0.06]">
             <div className={`w-2 h-2 rounded-full ${streaming ? "bg-[oklch(0.52_0.21_255)] animate-pulse" : done ? "bg-[oklch(0.52_0.19_160)]" : "bg-[oklch(0.75_0_0)]"}`} />
             <span className="text-[12px] text-muted-foreground">
-              {streaming ? "Generating letter…" : done ? "Complete" : "Waiting for case data…"}
+              {streaming ? t("generating") : done ? t("complete") : t("waiting")}
             </span>
           </div>
 
@@ -118,7 +121,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
               value={letter}
               onChange={(e) => setLetter(e.target.value)}
               className="w-full min-h-[600px] p-6 text-[14px] leading-relaxed font-mono resize-none outline-none bg-white"
-              placeholder={streaming ? "" : "Letter will appear here…"}
+              placeholder={streaming ? "" : t("placeholder")}
               spellCheck
             />
           )}
@@ -138,7 +141,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
             animate={{ opacity: 1 }}
             className="text-[12px] text-muted-foreground mt-3 text-right"
           >
-            {letter.split(/\s+/).filter(Boolean).length} words
+            {t("words", { count: wordCount })}
           </motion.p>
         )}
       </main>

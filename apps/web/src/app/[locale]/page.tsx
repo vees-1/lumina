@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 
@@ -117,6 +118,7 @@ function StepCard({ num, title, description }: { num: string; title: string; des
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 export default function HomePage() {
+  const t = useTranslations("landing");
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
@@ -157,7 +159,7 @@ export default function HomePage() {
               <span className="pulse-ring absolute inline-flex h-full w-full rounded-full bg-[oklch(0.52_0.21_255)]" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[oklch(0.52_0.21_255)]" />
             </span>
-            Now in clinical beta
+            {t("betaPill")}
           </motion.div>
 
           {/* Giant headline */}
@@ -165,9 +167,9 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease, delay: 0.15 }}
-            className="font-[family-name:var(--font-serif)] text-[clamp(4.5rem,10vw,8.5rem)] font-normal tracking-[-0.02em] leading-[0.92] text-foreground mb-8"
+            className="font-[family-name:var(--font-serif)] text-[clamp(4.5rem,10vw,8.5rem)] font-normal tracking-[-0.02em] leading-[0.92] text-foreground mb-8 whitespace-pre-line"
           >
-            Rare diseases,<br />decoded.
+            {t("heroHeadline")}
           </motion.h1>
 
           {/* Subtitle — one clean line */}
@@ -177,7 +179,7 @@ export default function HomePage() {
             transition={{ duration: 0.6, ease, delay: 0.32 }}
             className="text-[1.15rem] text-muted-foreground mb-12 max-w-sm leading-relaxed"
           >
-            Five modalities. One AI. Answers for the undiagnosed.
+            {t("heroSub")}
           </motion.p>
 
           {/* CTAs */}
@@ -189,12 +191,12 @@ export default function HomePage() {
           >
             <Link href="/sign-up">
               <Button className="h-12 px-8 rounded-full bg-foreground text-background text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
-                Get started free
+                {t("getStartedFree")}
               </Button>
             </Link>
             <a href="#how-it-works">
               <Button variant="ghost" className="h-12 px-6 rounded-full text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
-                How it works
+                {t("howItWorks")}
                 <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 16 16">
                   <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -232,38 +234,22 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <motion.p variants={fadeUp} className="text-[13px] font-medium text-[oklch(0.52_0.21_255)] mb-3 tracking-wider uppercase">
-              Workflow
+              {t("workflowLabel")}
             </motion.p>
             <motion.h2 variants={fadeUp} className="serif text-[clamp(2rem,5vw,3.25rem)] tracking-tight mb-4">
-              From input to insight in seconds.
+              {t("workflowHeadline")}
             </motion.h2>
             <motion.p variants={fadeUp} className="text-[17px] text-muted-foreground max-w-xl mx-auto">
-              Lumina&apos;s pipeline extracts phenotypic signals from every modality and matches them against the world&apos;s largest rare disease ontology.
+              {t("workflowSub")}
             </motion.p>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <StepCard
-                num="01"
-                title="Upload patient data"
-                description="Submit clinical notes, photos, lab reports, or genetic data — any combination works."
-              />
-              <StepCard
-                num="02"
-                title="AI extracts HPO phenotypes"
-                description="Our models identify Human Phenotype Ontology terms from every modality with confidence scores."
-              />
-              <StepCard
-                num="03"
-                title="Score against 7,000+ diseases"
-                description="Resnik/Lin semantic similarity ranks diseases by phenotypic overlap in under 100ms."
-              />
-              <StepCard
-                num="04"
-                title="Generate clinical letter"
-                description="Claude drafts a specialist referral letter summarizing the diagnosis and evidence."
-              />
+              <StepCard num="01" title={t("step1Title")} description={t("step1Desc")} />
+              <StepCard num="02" title={t("step2Title")} description={t("step2Desc")} />
+              <StepCard num="03" title={t("step3Title")} description={t("step3Desc")} />
+              <StepCard num="04" title={t("step4Title")} description={t("step4Desc")} />
             </div>
 
             {/* Animated pipeline visual */}
@@ -276,10 +262,10 @@ export default function HomePage() {
             >
               <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-6 space-y-3">
                 {[
-                  { label: "Clinical notes", tag: "NER", color: "oklch(0.52 0.21 255)", terms: 12 },
-                  { label: "Facial photo", tag: "Vision", color: "oklch(0.65 0.18 200)", terms: 7 },
-                  { label: "Lab report", tag: "OCR+AI", color: "oklch(0.60 0.20 285)", terms: 9 },
-                  { label: "VCF file", tag: "Genomic", color: "oklch(0.52 0.19 160)", terms: 5 },
+                  { label: t("clinicalNotes"), tag: "NER", color: "oklch(0.52 0.21 255)", terms: 12 },
+                  { label: t("facialPhoto"), tag: "Vision", color: "oklch(0.65 0.18 200)", terms: 7 },
+                  { label: t("labReport"), tag: "OCR+AI", color: "oklch(0.60 0.20 285)", terms: 9 },
+                  { label: t("vcfFile"), tag: "Genomic", color: "oklch(0.52 0.19 160)", terms: 5 },
                 ].map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -298,7 +284,7 @@ export default function HomePage() {
                       {item.tag}
                     </span>
                     <span className="text-[12px] font-semibold" style={{ color: item.color }}>
-                      {item.terms} terms
+                      {item.terms} {t("pipelineTerms")}
                     </span>
                   </motion.div>
                 ))}
@@ -331,22 +317,22 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <motion.p variants={fadeUp} className="text-[13px] font-medium text-[oklch(0.52_0.21_255)] mb-3 tracking-wider uppercase">
-              Technology
+              {t("technologyLabel")}
             </motion.p>
             <motion.h2 variants={fadeUp} className="serif text-[clamp(2rem,5vw,3.25rem)] tracking-tight mb-4">
-              Five ways to see what others miss.
+              {t("technologyHeadline")}
             </motion.h2>
             <motion.p variants={fadeUp} className="text-[17px] text-muted-foreground max-w-lg mx-auto">
-              Every clinical signal captured. Every phenotype extracted. One unified diagnosis.
+              {t("technologySub")}
             </motion.p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ModalityCard delay={0} icon={<NoteIcon />} title="Clinical Notes" description="Advanced NER extracts HPO phenotypes from free-text clinical documentation using Claude." />
-            <ModalityCard delay={0.07} icon={<PhotoIcon />} title="Clinical Photography" description="Vision AI identifies facial dysmorphology and clinical phenotypes from patient photos." />
-            <ModalityCard delay={0.14} icon={<LabIcon />} title="Lab Reports" description="OCR combined with AI interprets abnormal lab values and maps them to HPO terms." />
-            <ModalityCard delay={0.21} icon={<DnaIcon />} title="Genomic Data" description="VCF files parsed for pathogenic variants; gene-disease-phenotype chains resolved." />
-            <ModalityCard delay={0.28} icon={<ChatIcon />} title="Specialist Notes" description="Unstructured specialist observations converted to structured phenotype profiles." />
+            <ModalityCard delay={0} icon={<NoteIcon />} title={t("modalityNoteTitle")} description={t("modalityNoteDesc")} />
+            <ModalityCard delay={0.07} icon={<PhotoIcon />} title={t("modalityPhotoTitle")} description={t("modalityPhotoDesc")} />
+            <ModalityCard delay={0.14} icon={<LabIcon />} title={t("modalityLabTitle")} description={t("modalityLabDesc")} />
+            <ModalityCard delay={0.21} icon={<DnaIcon />} title={t("modalityDnaTitle")} description={t("modalityDnaDesc")} />
+            <ModalityCard delay={0.28} icon={<ChatIcon />} title={t("modalityChatTitle")} description={t("modalityChatDesc")} />
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -356,8 +342,8 @@ export default function HomePage() {
             >
               <div className="orb absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20"
                 style={{ background: "radial-gradient(circle, oklch(0.52 0.21 255) 0%, transparent 70%)", filter: "blur(20px)" }} />
-              <div className="text-[15px] font-semibold text-white">Powered by Claude</div>
-              <p className="text-[13px] text-white/60 mt-2">Anthropic&apos;s most capable models extract phenotypes with clinical precision.</p>
+              <div className="text-[15px] font-semibold text-white">{t("poweredBy")}</div>
+              <p className="text-[13px] text-white/60 mt-2">{t("poweredByDesc")}</p>
               <div className="mt-4 text-[12px] font-medium text-white/40 uppercase tracking-wider">claude-opus-4-7</div>
             </motion.div>
           </div>
@@ -375,10 +361,10 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <motion.p variants={fadeUp} className="text-[13px] font-medium text-[oklch(0.52_0.21_255)] mb-3 tracking-wider uppercase">
-              Science
+              {t("scienceLabel")}
             </motion.p>
             <motion.h2 variants={fadeUp} className="serif text-[clamp(2rem,5vw,3.25rem)] tracking-tight">
-              Built on the world&apos;s largest rare disease graph.
+              {t("scienceHeadline")}
             </motion.h2>
           </motion.div>
 
@@ -389,10 +375,10 @@ export default function HomePage() {
             variants={staggerFast}
             className="grid grid-cols-2 md:grid-cols-4 gap-8"
           >
-            <StatCard value={7000} label="Rare diseases" suffix="+" />
-            <StatCard value={30000} label="HPO terms" suffix="+" />
-            <StatCard value={5} label="Input modalities" />
-            <StatCard value={100} label="ms scoring time" />
+            <StatCard value={7000} label={t("statRareDiseases")} suffix="+" />
+            <StatCard value={30000} label={t("statHpoTerms")} suffix="+" />
+            <StatCard value={5} label={t("statModalities")} />
+            <StatCard value={100} label={t("statScoring")} />
           </motion.div>
 
           <motion.div
@@ -403,9 +389,9 @@ export default function HomePage() {
             className="mt-12 grid md:grid-cols-3 gap-4"
           >
             {[
-              { title: "Orphanet", desc: "7,000+ diseases with curated phenotype-gene associations" },
-              { title: "HPO Ontology", desc: "Human Phenotype Ontology with information content scoring" },
-              { title: "ClinVar", desc: "Pathogenic variant → gene → disease resolution chain" },
+              { title: "Orphanet", desc: t("orphanetDesc") },
+              { title: "HPO Ontology", desc: t("hpoOntologyDesc") },
+              { title: "ClinVar", desc: t("clinvarDesc") },
             ].map((item) => (
               <div key={item.title} className="bg-white rounded-xl border border-black/[0.06] p-5">
                 <div className="text-[13px] font-semibold mb-1.5">{item.title}</div>
@@ -430,20 +416,20 @@ export default function HomePage() {
           className="relative z-10 text-center max-w-2xl mx-auto"
         >
           <motion.h2 variants={fadeUp} className="serif text-[clamp(2.5rem,6vw,4rem)] tracking-tight text-white mb-4">
-            Start diagnosing today.
+            {t("ctaHeadline")}
           </motion.h2>
           <motion.p variants={fadeUp} className="text-[17px] text-white/60 mb-10">
-            Join clinical teams using Lumina to reach diagnoses faster and more accurately.
+            {t("ctaSub")}
           </motion.p>
           <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-3">
             <Link href="/sign-up">
               <Button className="h-11 px-8 rounded-full bg-white text-foreground text-[15px] font-medium hover:bg-white/90 shadow-lg transition-all duration-300">
-                Get early access
+                {t("getEarlyAccess")}
               </Button>
             </Link>
             <Link href="/sign-in">
               <Button variant="ghost" className="h-11 px-8 rounded-full text-[15px] text-white/70 hover:text-white hover:bg-white/10 border border-white/20">
-                Sign in
+                {t("signIn")}
               </Button>
             </Link>
           </motion.div>
@@ -466,7 +452,7 @@ export default function HomePage() {
             <span className="text-[13px] font-medium">Lumina</span>
           </div>
           <p className="text-[12px] text-white/40">
-            © {new Date().getFullYear()} Lumina. Rare disease diagnosis, reimagined.
+            &copy; {new Date().getFullYear()} Lumina. {t("footerTagline")}
           </p>
         </div>
       </footer>
