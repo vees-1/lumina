@@ -203,7 +203,7 @@ export default function IntakePage() {
       }
       const dedupedTerms = Array.from(termMap.values());
 
-      const rankings = await scoreCase(dedupedTerms, 10);
+      const rankings = await scoreCase(dedupedTerms, 10, modalities.length);
       addProgress(t("progressRanking"));
 
       const caseId = uuid();

@@ -36,11 +36,11 @@ export async function submitVcf(file: File): Promise<HPOTerm[]> {
   return res.json();
 }
 
-export async function scoreCase(terms: HPOTerm[], topK = 10): Promise<RankResult[]> {
+export async function scoreCase(terms: HPOTerm[], topK = 10, modalities = 1): Promise<RankResult[]> {
   const res = await fetch(`${API}/score`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ terms, top_k: topK }),
+    body: JSON.stringify({ terms, top_k: topK, modalities }),
   });
   if (!res.ok) throw new Error("Scoring failed");
   return res.json();

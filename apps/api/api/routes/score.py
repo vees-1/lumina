@@ -9,10 +9,11 @@ router = APIRouter(prefix="/score", tags=["score"])
 class ScoreRequest(BaseModel):
     terms: list[HPOTerm]
     top_k: int = 5
+    modalities: int = 1  # number of input modalities used (1–4)
 
 
 @router.post("", response_model=list[RankResult])
 async def score_case(body: ScoreRequest, request: Request) -> list[RankResult]:
     index = request.app.state.scoring_index
     query = [(t.hpo_id, t.confidence) for t in body.terms]
-    return index.rank(query, top_k=body.top_k)
+    return index.rank(query, top_k=body.top_k, modalities=body.modalities)
