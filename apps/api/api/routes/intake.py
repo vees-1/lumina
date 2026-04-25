@@ -20,7 +20,9 @@ async def intake_text(body: NotesRequest, request: Request) -> list[HPOTerm]:
     try:
         return await extract_notes(body.notes, request.app.state.hpo_vocab)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}")
+        raise HTTPException(
+            status_code=500, detail=f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
+        )
 
 
 @router.post("/photo", response_model=list[HPOTerm])
