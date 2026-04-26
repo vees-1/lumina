@@ -47,6 +47,7 @@ class LetterRequest(BaseModel):
 @router.post("/next", response_model=AgentSuggestion)
 async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
     from groq import AsyncGroq
+
     client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
 
     top5_text = "\n".join(
@@ -81,12 +82,15 @@ async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
             cycles_remaining=max(0, min(3, int(data.get("cycles_remaining", 0)))),
         )
     except Exception:
-        return AgentSuggestion(modality="", reasoning="Unable to suggest next step.", cycles_remaining=0)
+        return AgentSuggestion(
+            modality="", reasoning="Unable to suggest next step.", cycles_remaining=0
+        )
 
 
 @router.post("/letter")
 async def generate_letter(body: LetterRequest) -> StreamingResponse:
     from groq import AsyncGroq
+
     client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
 
     top5_text = "\n".join(
