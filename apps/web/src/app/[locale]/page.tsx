@@ -344,7 +344,7 @@ export default function HomePage() {
                 style={{ background: "radial-gradient(circle, oklch(0.52 0.21 255) 0%, transparent 70%)", filter: "blur(20px)" }} />
               <div className="text-[15px] font-semibold text-white">{t("poweredBy")}</div>
               <p className="text-[13px] text-white/60 mt-2">{t("poweredByDesc")}</p>
-              <div className="mt-4 text-[12px] font-medium text-white/40 uppercase tracking-wider">claude-opus-4-7</div>
+              <div className="mt-4 text-[12px] font-medium text-white/40 uppercase tracking-wider">llama-3.3-70b-versatile</div>
             </motion.div>
           </div>
         </div>
