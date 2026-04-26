@@ -44,8 +44,7 @@ It does not replace clinical judgement. It gives clinicians a structured, eviden
 │            ──── list[(hpo_id, confidence)] ────                  │
 │                            │                                     │
 │                         /score                                   │
-│               Lin semantic similarity  (primary)                 │
-│               XGBoost reranker         (60 Lin + 40 XGB)         │
+│               Lin semantic similarity                            │
 │               Modality-aware confidence cap                      │
 │               (40 / 55 / 65 / 80% for 1 – 4 modalities)         │
 │                            │                                     │
@@ -79,10 +78,6 @@ lin(a, b) = 2 × IC(lowest common ancestor) / ( IC(a) + IC(b) )
 
 For each patient, the ranker computes Lin similarity between every patient HPO term and every annotated phenotype for every disease in the database, takes the best match per query term (weighted by phenotype frequency in the disease), and averages across all query terms. The result is a scored ranking of all 11,456 diseases by phenotypic overlap — **no language model involved**.
 
-### XGBoost reranker
-
-An XGBoost classifier trained on Orphanet's disease–phenotype annotation matrix (IC-weighted feature vectors) contributes a 40% weight alongside the 60% Lin score. Because both signals derive from the same annotation data, the gain is incremental. Lin is the dominant signal.
-
 ### Modality-aware confidence caps
 
 Confidence is capped based on how many modalities were submitted. A single data source is a lead, not a diagnosis — the cap reflects this honestly and encourages clinicians to gather corroborating evidence.
@@ -108,7 +103,7 @@ AI handles only the **extraction** step — converting raw clinical inputs into 
 | Genomic VCF → HPO | cyvcf2 + ClinVar pathogenicity filter + gene → disease → HPO chain |
 | Next modality suggestion | Groq Llama 3.3 70B |
 | Referral letter | Groq Llama 3.3 70B (streaming SSE) |
-| **Scoring & ranking** | **Lin similarity + XGBoost — no AI** |
+| **Scoring & ranking** | **Lin semantic similarity — no AI** |
 | **Disease database** | **Orphanet + HPO + ClinVar + FGDD — static, curated** |
 
 If Groq is unavailable, notes extraction falls back to keyword matching against the HPO vocabulary. All other modalities continue to function.
@@ -136,7 +131,7 @@ If Groq is unavailable, notes extraction falls back to keyword matching against 
 |:---|:---|
 | Frontend | Next.js 16, Tailwind 4, shadcn/ui, Clerk |
 | Backend | FastAPI, Python 3.13, uv |
-| Scoring | Resnik/Lin similarity, XGBoost |
+| Scoring | Resnik/Lin semantic similarity |
 | Extraction | Groq (Llama 3.3 70B, Llama 4 Scout Vision) |
 | Database | SQLite (orpha.sqlite) — Orphanet + HPO + ClinVar + FGDD |
 | Deployment | Vercel (frontend) · HuggingFace Spaces cpu-basic (API) |

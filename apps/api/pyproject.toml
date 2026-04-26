@@ -19,7 +19,6 @@ dependencies = [
     "scoring",
     "sqlmodel>=0.0.38",
     "uvicorn[standard]>=0.44.0",
-    "xgboost>=2.0.0",
     # scispacy: local HPO NER — NOT in core deps (spacy/blis incompatible with Python 3.14)
     # Install manually on Python 3.12 env:
     #   pip install scispacy
