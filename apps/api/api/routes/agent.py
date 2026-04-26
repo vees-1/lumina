@@ -1,7 +1,6 @@
 import json
 import os
 
-import anthropic
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -9,8 +8,8 @@ from scoring.ranker import RankResult
 
 router = APIRouter(prefix="/agent", tags=["agent"])
 
-_MODEL_FAST = "claude-haiku-4-5-20251001"
-_MODEL_FULL = "claude-sonnet-4-6"
+_MODEL_NEXT = "llama-3.3-70b-versatile"
+_MODEL_LETTER = "llama-3.3-70b-versatile"
 
 _NEXT_SYSTEM = """You are a clinical reasoning assistant for rare disease diagnosis.
 Given a ranked disease list and the modalities already used, suggest which modality to try next.
@@ -47,7 +46,8 @@ class LetterRequest(BaseModel):
 
 @router.post("/next", response_model=AgentSuggestion)
 async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
-    client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    from groq import AsyncGroq
+    client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
 
     top5_text = "\n".join(
         f"#{i + 1} ORPHA:{r.orpha_code} {r.name} — confidence {r.confidence:.1f}"
@@ -59,35 +59,35 @@ async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
         f"Cycle: {body.cycle}/3"
     )
 
-    response = await client.messages.create(
-        model=_MODEL_FAST,
-        max_tokens=256,
-        system=_NEXT_SYSTEM,
-        messages=[{"role": "user", "content": user_msg}],
-    )
-
-    raw = response.content[0].text.strip()
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-
     try:
+        response = await client.chat.completions.create(
+            model=_MODEL_NEXT,
+            max_tokens=256,
+            temperature=0.0,
+            messages=[
+                {"role": "system", "content": _NEXT_SYSTEM},
+                {"role": "user", "content": user_msg},
+            ],
+        )
+        raw = response.choices[0].message.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
         data = json.loads(raw.strip())
         return AgentSuggestion(
             modality=data.get("modality", ""),
             reasoning=data.get("reasoning", ""),
             cycles_remaining=max(0, min(3, int(data.get("cycles_remaining", 0)))),
         )
-    except (json.JSONDecodeError, ValueError):
-        return AgentSuggestion(
-            modality="", reasoning="Unable to suggest next step.", cycles_remaining=0
-        )
+    except Exception:
+        return AgentSuggestion(modality="", reasoning="Unable to suggest next step.", cycles_remaining=0)
 
 
 @router.post("/letter")
 async def generate_letter(body: LetterRequest) -> StreamingResponse:
-    client = anthropic.AsyncAnthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+    from groq import AsyncGroq
+    client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
 
     top5_text = "\n".join(
         f"- ORPHA:{r.orpha_code} {r.name} (confidence {r.confidence:.1f}%, contributing: {', '.join(r.contributing_terms[:3])})"
@@ -100,14 +100,23 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
     )
 
     async def stream_letter():
-        async with client.messages.stream(
-            model=_MODEL_FULL,
-            max_tokens=2048,
-            system=_LETTER_SYSTEM,
-            messages=[{"role": "user", "content": user_msg}],
-        ) as stream:
-            async for text in stream.text_stream:
-                yield f"data: {json.dumps({'text': text})}\n\n"
+        try:
+            stream = await client.chat.completions.create(
+                model=_MODEL_LETTER,
+                max_tokens=1024,
+                temperature=0.3,
+                stream=True,
+                messages=[
+                    {"role": "system", "content": _LETTER_SYSTEM},
+                    {"role": "user", "content": user_msg},
+                ],
+            )
+            async for chunk in stream:
+                text = chunk.choices[0].delta.content or ""
+                if text:
+                    yield f"data: {json.dumps({'text': text})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'text': f'Error: {e}'})}\n\n"
         yield "data: [DONE]\n\n"
 
     return StreamingResponse(stream_letter(), media_type="text/event-stream")
