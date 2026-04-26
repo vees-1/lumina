@@ -31,19 +31,29 @@ async def intake_photo(
     file: UploadFile = File(...),
     facial: bool = False,
 ) -> list[HPOTerm]:
-    image_bytes = await file.read()
-    facial_vocab = request.app.state.facial_vocab if facial else None
-    return await extract_photo(
-        image_bytes,
-        media_type=file.content_type or "image/jpeg",
-        facial=facial,
-        facial_vocab=facial_vocab,
-    )
+    try:
+        image_bytes = await file.read()
+        facial_vocab = request.app.state.facial_vocab if facial else None
+        return await extract_photo(
+            image_bytes,
+            media_type=file.content_type or "image/jpeg",
+            facial=facial,
+            facial_vocab=facial_vocab,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
+        )
 
 
 @router.post("/lab", response_model=list[HPOTerm])
 async def intake_lab(file: UploadFile = File(...)) -> list[HPOTerm]:
-    return await extract_lab(await file.read())
+    try:
+        return await extract_lab(await file.read())
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
+        )
 
 
 @router.post("/vcf", response_model=list[HPOTerm])
