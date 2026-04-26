@@ -20,7 +20,16 @@ import numpy as np
 from ingest.models import DiseasePhenotype, HPOTerm
 from sqlmodel import Session, select
 
-MODEL_PATH = Path(__file__).parent / "xgb_model.pkl"
+def _resolve_model_path() -> Path:
+    # Prefer data/ directory (same as orpha.sqlite) — works on HF Space
+    from ingest.db import DATA_DIR
+    candidate = DATA_DIR / "xgb_model.pkl"
+    if candidate.exists():
+        return candidate
+    # Fallback: alongside the package (local dev)
+    return Path(__file__).parent / "xgb_model.pkl"
+
+MODEL_PATH = _resolve_model_path()
 
 
 class XGBoostRanker:
