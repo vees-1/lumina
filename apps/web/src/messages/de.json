@@ -1,6 +1,6 @@
 {
   "nav": { "cases": "Fälle", "newCase": "Neuer Fall", "signIn": "Anmelden", "getStarted": "Loslegen", "dashboard": "Dashboard", "howItWorks": "So funktioniert es", "technology": "Technologie", "science": "Wissenschaft" },
-  "dashboard": { "title": "Fälle", "subtitle": "Ihre Diagnosehistorie", "newCase": "Neuer Fall", "totalCases": "Fälle gesamt", "avgConfidence": "Ø Konfidenz", "hpoAvg": "Ø HPO-Begriffe", "noCases": "Noch keine Fälle", "startFirst": "Starten Sie Ihren ersten Fall", "clearAll": "Alle Fälle löschen" },
+  "dashboard": { "title": "Fälle", "subtitle": "Ihre Diagnosehistorie", "newCase": "Neuer Fall", "totalCases": "Fälle gesamt", "avgConfidence": "Ø Konfidenz", "hpoAvg": "Ø HPO-Begriffe", "noCases": "Noch keine Fälle", "startFirst": "Starten Sie Ihren ersten Fall", "clearAll": "Alle Fälle löschen", "casesTotal": "{count} Fälle insgesamt", "hpoTerms": "{count} HPO-Begriffe", "matchLabel": "Übereinstimmung", "deleteAllConfirm": "Alle {count} Fälle löschen?", "yesDeleteAll": "Ja, alle löschen", "cancel": "Abbrechen", "emptyStateDesc": "Starten Sie Ihren ersten Fall, indem Sie Patientendaten über eine oder mehrere klinische Modalitäten hochladen.", "modalityNotes": "Notizen", "modalityPhoto": "Foto", "modalityLab": "Labor", "modalityVcf": "Genomisch" },
   "intake": {
     "title": "Neuer Fall",
     "analyseButton": "Fall analysieren",
@@ -92,7 +92,17 @@
     "aiSuggests": "KI schlägt vor: {modality} hinzufügen",
     "addNow": "Jetzt hinzufügen",
     "dismiss": "Verwerfen",
-    "cases": "Fälle"
+    "cases": "Fälle",
+    "confidenceLabel": "Konfidenz",
+    "modalityNotes": "Klinische Notizen",
+    "modalityPhoto": "Klinisches Foto",
+    "modalityLab": "Laborbericht",
+    "modalityVcf": "Genomisch",
+    "modalityNextNotes": "klinische Notizen",
+    "modalityNextPhoto": "ein klinisches Foto",
+    "modalityNextLab": "einen Laborbericht",
+    "modalityNextVcf": "eine genomische VCF",
+    "caseTitle": "Fall {id}"
   },
   "letter": {
     "title": "Überweisungsschreiben",
@@ -159,8 +169,8 @@
     "modalityDnaDesc": "VCF-Dateien werden auf pathogene Varianten analysiert; Gen-Erkrankungs-Phänotyp-Ketten aufgelöst.",
     "modalityChatTitle": "Facharztnotizen",
     "modalityChatDesc": "Unstrukturierte Fachbeobachtungen in strukturierte Phänotypprofile umgewandelt.",
-    "poweredBy": "Betrieben von Groq",
-    "poweredByDesc": "Llama 3.3 70B extrahiert Phänotypen mit klinischer Präzision.",
+    "poweredBy": "Unterstützt von Claude Sonnet",
+    "poweredByDesc": "Claude Sonnet extrahiert Phänotypen mit klinischer Präzision.",
     "scienceLabel": "Wissenschaft",
     "scienceHeadline": "Aufgebaut auf dem weltweit größten Graphen seltener Erkrankungen.",
     "statRareDiseases": "Seltene Erkrankungen",

@@ -13,16 +13,6 @@ import type { CaseData, RankResult } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
-const MODALITY_LABEL: Record<string, string> = {
-  notes: "Clinical Notes", photo: "Clinical Photo", lab: "Lab Report", vcf: "Genomic",
-};
-
-const MODALITY_NEXT_LABEL: Record<string, string> = {
-  notes: "clinical notes", photo: "a clinical photo", lab: "a lab report", vcf: "a genomic VCF",
-};
-
-// Note: MODALITY_LABEL and MODALITY_NEXT_LABEL are intentionally not translated
-// as they appear in API-facing contexts and as technical identifiers in badges.
 
 // ── Confidence bar ────────────────────────────────────────────────────────────
 
@@ -114,7 +104,13 @@ function AgentBanner({
   onDismiss: () => void;
 }) {
   const t = useTranslations("case");
-  const nextLabel = MODALITY_NEXT_LABEL[suggestion.modality] ?? suggestion.modality;
+  const modalityNextLabel: Record<string, string> = {
+    notes: t("modalityNextNotes"),
+    photo: t("modalityNextPhoto"),
+    lab: t("modalityNextLab"),
+    vcf: t("modalityNextVcf"),
+  };
+  const nextLabel = modalityNextLabel[suggestion.modality] ?? suggestion.modality;
   return (
     <motion.div
       initial={{ opacity: 0, y: -8 }}
@@ -131,7 +127,7 @@ function AgentBanner({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[13px] font-semibold text-[oklch(0.38_0.21_255)] mb-0.5">
-          AI suggests: add {nextLabel}
+          {t("aiSuggests", { modality: nextLabel })}
         </p>
         <p className="text-[12px] text-muted-foreground leading-relaxed">{suggestion.reasoning}</p>
         <div className="flex items-center gap-2 mt-3">
@@ -157,6 +153,12 @@ function AgentBanner({
 function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseData: CaseData }) {
   const t = useTranslations("case");
   const hpoMap = new Map(caseData.hpoTerms.map((t) => [t.hpo_id, t]));
+  const modalityLabel: Record<string, string> = {
+    notes: t("modalityNotes"),
+    photo: t("modalityPhoto"),
+    lab: t("modalityLab"),
+    vcf: t("modalityVcf"),
+  };
   const terms = result.contributing_terms.slice(0, 5);
 
   const modalityColor: Record<string, string> = {
@@ -218,7 +220,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
                   className="text-[11px] font-medium px-2 py-0.5 rounded-full flex-shrink-0"
                   style={{ background: bg, color }}
                 >
-                  {MODALITY_LABEL[src] ?? src}
+                  {modalityLabel[src] ?? src}
                 </span>
               )}
             </motion.div>
@@ -472,6 +474,12 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
 
   const topRank = caseData.rankings[0];
   const topColor = "oklch(0.52 0.21 255)";
+  const modalityLabel: Record<string, string> = {
+    notes: t("modalityNotes"),
+    photo: t("modalityPhoto"),
+    lab: t("modalityLab"),
+    vcf: t("modalityVcf"),
+  };
 
   return (
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
@@ -504,18 +512,18 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   className="text-[13px] font-semibold px-3 py-1 rounded-full"
                   style={{ background: `${topColor}15`, color: topColor }}
                 >
-                  {topRank.confidence.toFixed(0)}% confidence
+                  {topRank.confidence.toFixed(0)}% {t("confidenceLabel")}
                 </span>
                 <span className="text-[13px] text-muted-foreground">ORPHA:{topRank.orpha_code}</span>
                 {caseData.modalities.map((m) => (
                   <span key={m} className="text-[12px] px-2.5 py-0.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
-                    {MODALITY_LABEL[m] ?? m}
+                    {modalityLabel[m] ?? m}
                   </span>
                 ))}
               </div>
             </>
           ) : (
-            <h1 className="serif text-[28px] tracking-tight">Case {id.slice(0, 8)}</h1>
+            <h1 className="serif text-[28px] tracking-tight">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
           )}
         </motion.div>
 

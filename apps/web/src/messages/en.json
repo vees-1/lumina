@@ -1,6 +1,6 @@
 {
   "nav": { "cases": "Cases", "newCase": "New case", "signIn": "Sign in", "getStarted": "Get started", "dashboard": "Dashboard", "howItWorks": "How it works", "technology": "Technology", "science": "Science" },
-  "dashboard": { "title": "Cases", "subtitle": "Your diagnostic history", "newCase": "New case", "totalCases": "Total cases", "avgConfidence": "Avg confidence", "hpoAvg": "HPO terms avg", "noCases": "No cases yet", "startFirst": "Start your first case", "clearAll": "Clear all cases" },
+  "dashboard": { "title": "Cases", "subtitle": "Your diagnostic history", "newCase": "New case", "totalCases": "Total cases", "avgConfidence": "Avg confidence", "hpoAvg": "HPO terms avg", "noCases": "No cases yet", "startFirst": "Start your first case", "clearAll": "Clear all cases", "casesTotal": "{count} cases total", "hpoTerms": "{count} HPO terms", "matchLabel": "match", "deleteAllConfirm": "Delete all {count} cases?", "yesDeleteAll": "Yes, delete all", "cancel": "Cancel", "emptyStateDesc": "Start your first case by uploading patient data across one or more clinical modalities.", "modalityNotes": "Notes", "modalityPhoto": "Photo", "modalityLab": "Lab", "modalityVcf": "Genomic" },
   "intake": {
     "title": "New case",
     "analyseButton": "Analyse case",
@@ -92,7 +92,17 @@
     "aiSuggests": "AI suggests: add {modality}",
     "addNow": "Add now",
     "dismiss": "Dismiss",
-    "cases": "Cases"
+    "cases": "Cases",
+    "confidenceLabel": "confidence",
+    "modalityNotes": "Clinical Notes",
+    "modalityPhoto": "Clinical Photo",
+    "modalityLab": "Lab Report",
+    "modalityVcf": "Genomic",
+    "modalityNextNotes": "clinical notes",
+    "modalityNextPhoto": "a clinical photo",
+    "modalityNextLab": "a lab report",
+    "modalityNextVcf": "a genomic VCF",
+    "caseTitle": "Case {id}"
   },
   "letter": {
     "title": "Referral Letter",
@@ -159,8 +169,8 @@
     "modalityDnaDesc": "VCF files parsed for pathogenic variants; gene-disease-phenotype chains resolved.",
     "modalityChatTitle": "Specialist Notes",
     "modalityChatDesc": "Unstructured specialist observations converted to structured phenotype profiles.",
-    "poweredBy": "Powered by Groq",
-    "poweredByDesc": "Llama 3.3 70B extracts phenotypes with clinical precision.",
+    "poweredBy": "Powered by Claude Sonnet",
+    "poweredByDesc": "Claude Sonnet extracts phenotypes with clinical precision.",
     "scienceLabel": "Science",
     "scienceHeadline": "Built on the world's largest rare disease graph.",
     "statRareDiseases": "Rare diseases",

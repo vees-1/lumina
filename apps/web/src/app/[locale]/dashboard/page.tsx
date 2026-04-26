@@ -11,11 +11,8 @@ import type { CaseSummary } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
-const MODALITY_LABEL: Record<string, string> = {
-  notes: "Notes", photo: "Photo", lab: "Lab", vcf: "Genomic",
-};
-
 function ConfidenceBadge({ value }: { value: number }) {
+  const t = useTranslations("dashboard");
   const color =
     value >= 80 ? "oklch(0.52 0.19 160)" :
     value >= 60 ? "oklch(0.52 0.21 255)" :
@@ -25,12 +22,19 @@ function ConfidenceBadge({ value }: { value: number }) {
       className="text-[12px] font-semibold px-2.5 py-1 rounded-full"
       style={{ background: `${color}15`, color }}
     >
-      {value.toFixed(0)}% match
+      {value.toFixed(0)}% {t("matchLabel")}
     </span>
   );
 }
 
 function CaseCard({ c, index }: { c: CaseSummary; index: number }) {
+  const t = useTranslations("dashboard");
+  const modalityLabel: Record<string, string> = {
+    notes: t("modalityNotes"),
+    photo: t("modalityPhoto"),
+    lab: t("modalityLab"),
+    vcf: t("modalityVcf"),
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -56,11 +60,11 @@ function CaseCard({ c, index }: { c: CaseSummary; index: number }) {
         <div className="flex items-center gap-2 flex-wrap">
           {c.modalities.map((m) => (
             <span key={m} className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[oklch(0.97_0_0)] border border-black/[0.06] text-muted-foreground">
-              {MODALITY_LABEL[m] ?? m}
+              {modalityLabel[m] ?? m}
             </span>
           ))}
           <span className="text-[11px] text-muted-foreground ml-auto">
-            {c.hpoCount} HPO terms
+            {t("hpoTerms", { count: c.hpoCount })}
           </span>
         </div>
       </Link>
@@ -87,7 +91,7 @@ function EmptyState() {
       </div>
       <h3 className="text-[17px] font-semibold mb-2">{t("noCases")}</h3>
       <p className="text-[14px] text-muted-foreground max-w-xs mb-8">
-        Start your first case by uploading patient data across one or more clinical modalities.
+        {t("emptyStateDesc")}
       </p>
       <Link href="/intake">
         <Button className="rounded-full bg-foreground text-background px-6 h-10">
@@ -128,7 +132,7 @@ export default function DashboardPage() {
           <div>
             <h1 className="serif text-[28px] tracking-tight">{t("title")}</h1>
             <p className="text-[14px] text-muted-foreground mt-0.5">
-              {cases.length > 0 ? `${cases.length} case${cases.length !== 1 ? "s" : ""} total` : t("subtitle")}
+              {cases.length > 0 ? t("casesTotal", { count: cases.length }) : t("subtitle")}
             </p>
           </div>
           <Link href="/intake">
@@ -203,18 +207,18 @@ export default function DashboardPage() {
                   exit={{ opacity: 0, x: -8 }}
                   className="flex items-center gap-3"
                 >
-                  <span className="text-[13px] text-muted-foreground">Delete all {cases.length} cases?</span>
+                  <span className="text-[13px] text-muted-foreground">{t("deleteAllConfirm", { count: cases.length })}</span>
                   <button
                     onClick={handleClearAll}
                     className="text-[13px] font-medium text-red-500 hover:text-red-600 transition-colors"
                   >
-                    Yes, delete all
+                    {t("yesDeleteAll")}
                   </button>
                   <button
                     onClick={() => setConfirmClear(false)}
                     className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    Cancel
+                    {t("cancel")}
                   </button>
                 </motion.div>
               ) : (

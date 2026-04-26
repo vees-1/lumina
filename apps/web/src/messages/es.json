@@ -1,6 +1,6 @@
 {
   "nav": { "cases": "Casos", "newCase": "Nuevo caso", "signIn": "Iniciar sesión", "getStarted": "Comenzar", "dashboard": "Panel", "howItWorks": "Cómo funciona", "technology": "Tecnología", "science": "Ciencia" },
-  "dashboard": { "title": "Casos", "subtitle": "Tu historial diagnóstico", "newCase": "Nuevo caso", "totalCases": "Total de casos", "avgConfidence": "Confianza promedio", "hpoAvg": "Promedio términos HPO", "noCases": "Aún no hay casos", "startFirst": "Comienza tu primer caso", "clearAll": "Borrar todos los casos" },
+  "dashboard": { "title": "Casos", "subtitle": "Tu historial diagnóstico", "newCase": "Nuevo caso", "totalCases": "Total de casos", "avgConfidence": "Confianza promedio", "hpoAvg": "Promedio términos HPO", "noCases": "Aún no hay casos", "startFirst": "Comienza tu primer caso", "clearAll": "Borrar todos los casos", "casesTotal": "{count} casos en total", "hpoTerms": "{count} términos HPO", "matchLabel": "coincidencia", "deleteAllConfirm": "¿Eliminar todos los {count} casos?", "yesDeleteAll": "Sí, eliminar todos", "cancel": "Cancelar", "emptyStateDesc": "Comienza tu primer caso subiendo datos del paciente a través de una o más modalidades clínicas.", "modalityNotes": "Notas", "modalityPhoto": "Foto", "modalityLab": "Laboratorio", "modalityVcf": "Genómico" },
   "intake": {
     "title": "Nuevo caso",
     "analyseButton": "Analizar caso",
@@ -92,7 +92,17 @@
     "aiSuggests": "IA sugiere: añadir {modality}",
     "addNow": "Añadir ahora",
     "dismiss": "Descartar",
-    "cases": "Casos"
+    "cases": "Casos",
+    "confidenceLabel": "confianza",
+    "modalityNotes": "Notas clínicas",
+    "modalityPhoto": "Foto clínica",
+    "modalityLab": "Informe de laboratorio",
+    "modalityVcf": "Genómico",
+    "modalityNextNotes": "notas clínicas",
+    "modalityNextPhoto": "una foto clínica",
+    "modalityNextLab": "un informe de laboratorio",
+    "modalityNextVcf": "un VCF genómico",
+    "caseTitle": "Caso {id}"
   },
   "letter": {
     "title": "Carta de derivación",
@@ -159,8 +169,8 @@
     "modalityDnaDesc": "Los archivos VCF se analizan para variantes patogénicas; se resuelven las cadenas gen-enfermedad-fenotipo.",
     "modalityChatTitle": "Notas de especialista",
     "modalityChatDesc": "Las observaciones no estructuradas de especialistas se convierten en perfiles fenotípicos estructurados.",
-    "poweredBy": "Impulsado por Groq",
-    "poweredByDesc": "Llama 3.3 70B extrae fenotipos con precisión clínica.",
+    "poweredBy": "Impulsado por Claude Sonnet",
+    "poweredByDesc": "Claude Sonnet extrae fenotipos con precisión clínica.",
     "scienceLabel": "Ciencia",
     "scienceHeadline": "Construido sobre el grafo de enfermedades raras más grande del mundo.",
     "statRareDiseases": "Enfermedades raras",

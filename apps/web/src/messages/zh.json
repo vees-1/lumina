@@ -1,6 +1,6 @@
 {
   "nav": { "cases": "病例", "newCase": "新建病例", "signIn": "登录", "getStarted": "开始使用", "dashboard": "控制台", "howItWorks": "使用方法", "technology": "技术", "science": "科学" },
-  "dashboard": { "title": "病例", "subtitle": "您的诊断历史", "newCase": "新建病例", "totalCases": "总病例数", "avgConfidence": "平均置信度", "hpoAvg": "HPO 术语均值", "noCases": "暂无病例", "startFirst": "创建您的第一个病例", "clearAll": "清除所有病例" },
+  "dashboard": { "title": "病例", "subtitle": "您的诊断历史", "newCase": "新建病例", "totalCases": "总病例数", "avgConfidence": "平均置信度", "hpoAvg": "HPO 术语均值", "noCases": "暂无病例", "startFirst": "创建您的第一个病例", "clearAll": "清除所有病例", "casesTotal": "共 {count} 个病例", "hpoTerms": "{count} 个 HPO 术语", "matchLabel": "匹配度", "deleteAllConfirm": "删除全部 {count} 个病例？", "yesDeleteAll": "是，全部删除", "cancel": "取消", "emptyStateDesc": "通过上传一种或多种临床模态的患者数据来创建您的第一个病例。", "modalityNotes": "笔记", "modalityPhoto": "照片", "modalityLab": "检验", "modalityVcf": "基因组" },
   "intake": {
     "title": "新建病例",
     "analyseButton": "分析病例",
@@ -92,7 +92,17 @@
     "aiSuggests": "AI 建议：添加 {modality}",
     "addNow": "立即添加",
     "dismiss": "关闭",
-    "cases": "病例"
+    "cases": "病例",
+    "confidenceLabel": "置信度",
+    "modalityNotes": "临床笔记",
+    "modalityPhoto": "临床照片",
+    "modalityLab": "实验室报告",
+    "modalityVcf": "基因组",
+    "modalityNextNotes": "临床笔记",
+    "modalityNextPhoto": "一张临床照片",
+    "modalityNextLab": "一份实验室报告",
+    "modalityNextVcf": "一个基因组 VCF",
+    "caseTitle": "病例 {id}"
   },
   "letter": {
     "title": "转诊信",
@@ -159,8 +169,8 @@
     "modalityDnaDesc": "VCF 文件解析致病变异；解析基因-疾病-表型链。",
     "modalityChatTitle": "专家笔记",
     "modalityChatDesc": "将非结构化专家观察转换为结构化表型档案。",
-    "poweredBy": "由 Groq 驱动",
-    "poweredByDesc": "Llama 3.3 70B 以临床精度提取表型。",
+    "poweredBy": "由 Claude Sonnet 驱动",
+    "poweredByDesc": "Claude Sonnet 以临床精度提取表型。",
     "scienceLabel": "科学",
     "scienceHeadline": "构建于世界最大罕见病图谱之上。",
     "statRareDiseases": "种罕见病",

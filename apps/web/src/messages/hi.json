@@ -1,6 +1,6 @@
 {
   "nav": { "cases": "केस", "newCase": "नया केस", "signIn": "साइन इन", "getStarted": "शुरू करें", "dashboard": "डैशबोर्ड", "howItWorks": "यह कैसे काम करता है", "technology": "तकनीक", "science": "विज्ञान" },
-  "dashboard": { "title": "केस", "subtitle": "आपका निदान इतिहास", "newCase": "नया केस", "totalCases": "कुल केस", "avgConfidence": "औसत विश्वास", "hpoAvg": "HPO शब्द औसत", "noCases": "अभी कोई केस नहीं", "startFirst": "पहला केस शुरू करें", "clearAll": "सभी केस हटाएं" },
+  "dashboard": { "title": "केस", "subtitle": "आपका निदान इतिहास", "newCase": "नया केस", "totalCases": "कुल केस", "avgConfidence": "औसत विश्वास", "hpoAvg": "HPO शब्द औसत", "noCases": "अभी कोई केस नहीं", "startFirst": "पहला केस शुरू करें", "clearAll": "सभी केस हटाएं", "casesTotal": "कुल {count} केस", "hpoTerms": "{count} HPO शब्द", "matchLabel": "मिलान", "deleteAllConfirm": "सभी {count} केस हटाएं?", "yesDeleteAll": "हाँ, सभी हटाएं", "cancel": "रद्द करें", "emptyStateDesc": "एक या अधिक क्लिनिकल मोडैलिटी के माध्यम से रोगी डेटा अपलोड करके अपना पहला केस शुरू करें।", "modalityNotes": "नोट्स", "modalityPhoto": "फ़ोटो", "modalityLab": "लैब", "modalityVcf": "जीनोमिक" },
   "intake": {
     "title": "नया केस",
     "analyseButton": "केस विश्लेषण करें",
@@ -92,7 +92,17 @@
     "aiSuggests": "AI सुझाव: {modality} जोड़ें",
     "addNow": "अभी जोड़ें",
     "dismiss": "खारिज करें",
-    "cases": "केस"
+    "cases": "केस",
+    "confidenceLabel": "विश्वास",
+    "modalityNotes": "नैदानिक नोट्स",
+    "modalityPhoto": "नैदानिक फ़ोटो",
+    "modalityLab": "लैब रिपोर्ट",
+    "modalityVcf": "जीनोमिक",
+    "modalityNextNotes": "नैदानिक नोट्स",
+    "modalityNextPhoto": "एक नैदानिक फ़ोटो",
+    "modalityNextLab": "एक लैब रिपोर्ट",
+    "modalityNextVcf": "एक जीनोमिक VCF",
+    "caseTitle": "केस {id}"
   },
   "letter": {
     "title": "रेफरल पत्र",
@@ -159,8 +169,8 @@
     "modalityDnaDesc": "VCF फाइलें रोगजनक वेरिएंट के लिए पार्स की गई; जीन-रोग-फेनोटाइप श्रृंखला हल की गई।",
     "modalityChatTitle": "विशेषज्ञ नोट्स",
     "modalityChatDesc": "असंरचित विशेषज्ञ अवलोकन संरचित फेनोटाइप प्रोफाइल में परिवर्तित।",
-    "poweredBy": "Groq द्वारा संचालित",
-    "poweredByDesc": "Llama 3.3 70B क्लिनिकल परिशुद्धता के साथ फेनोटाइप निकालता है।",
+    "poweredBy": "Claude Sonnet द्वारा संचालित",
+    "poweredByDesc": "Claude Sonnet क्लिनिकल परिशुद्धता के साथ फेनोटाइप निकालता है।",
     "scienceLabel": "विज्ञान",
     "scienceHeadline": "दुनिया के सबसे बड़े दुर्लभ रोग ग्राफ पर निर्मित।",
     "statRareDiseases": "दुर्लभ रोग",

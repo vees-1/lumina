@@ -1,6 +1,6 @@
 {
   "nav": { "cases": "ケース", "newCase": "新規ケース", "signIn": "サインイン", "getStarted": "始める", "dashboard": "ダッシュボード", "howItWorks": "使い方", "technology": "テクノロジー", "science": "サイエンス" },
-  "dashboard": { "title": "ケース", "subtitle": "診断履歴", "newCase": "新規ケース", "totalCases": "総ケース数", "avgConfidence": "平均信頼度", "hpoAvg": "HPO用語平均", "noCases": "ケースはまだありません", "startFirst": "最初のケースを開始する", "clearAll": "すべて削除" },
+  "dashboard": { "title": "ケース", "subtitle": "診断履歴", "newCase": "新規ケース", "totalCases": "総ケース数", "avgConfidence": "平均信頼度", "hpoAvg": "HPO用語平均", "noCases": "ケースはまだありません", "startFirst": "最初のケースを開始する", "clearAll": "すべて削除", "casesTotal": "合計{count}件", "hpoTerms": "{count}個のHPO用語", "matchLabel": "一致", "deleteAllConfirm": "{count}件すべてを削除しますか？", "yesDeleteAll": "はい、すべて削除", "cancel": "キャンセル", "emptyStateDesc": "1つ以上の臨床モダリティを通じて患者データをアップロードして最初のケースを開始してください。", "modalityNotes": "ノート", "modalityPhoto": "写真", "modalityLab": "検査", "modalityVcf": "ゲノム" },
   "intake": {
     "title": "新規ケース",
     "analyseButton": "ケースを分析する",
@@ -92,7 +92,17 @@
     "aiSuggests": "AI提案：{modality}を追加",
     "addNow": "今すぐ追加",
     "dismiss": "閉じる",
-    "cases": "ケース"
+    "cases": "ケース",
+    "confidenceLabel": "信頼度",
+    "modalityNotes": "臨床ノート",
+    "modalityPhoto": "臨床写真",
+    "modalityLab": "検査レポート",
+    "modalityVcf": "ゲノム",
+    "modalityNextNotes": "臨床ノート",
+    "modalityNextPhoto": "臨床写真",
+    "modalityNextLab": "検査レポート",
+    "modalityNextVcf": "ゲノムVCF",
+    "caseTitle": "ケース {id}"
   },
   "letter": {
     "title": "紹介状",
@@ -159,8 +169,8 @@
     "modalityDnaDesc": "VCFファイルを病原性バリアントで解析；遺伝子-疾患-表現型チェーンを解決します。",
     "modalityChatTitle": "専門医メモ",
     "modalityChatDesc": "非構造化の専門家観察を構造化表現型プロファイルに変換します。",
-    "poweredBy": "Groqを搭載",
-    "poweredByDesc": "Llama 3.3 70Bが臨床精度で表現型を抽出します。",
+    "poweredBy": "Claude Sonnet搭載",
+    "poweredByDesc": "Claude Sonnetが臨床精度で表現型を抽出します。",
     "scienceLabel": "サイエンス",
     "scienceHeadline": "世界最大の希少疾患グラフ上に構築。",
     "statRareDiseases": "希少疾患",

@@ -1,6 +1,6 @@
 {
   "nav": { "cases": "Dossiers", "newCase": "Nouveau dossier", "signIn": "Se connecter", "getStarted": "Commencer", "dashboard": "Tableau de bord", "howItWorks": "Comment ça marche", "technology": "Technologie", "science": "Science" },
-  "dashboard": { "title": "Dossiers", "subtitle": "Votre historique de diagnostics", "newCase": "Nouveau dossier", "totalCases": "Total des dossiers", "avgConfidence": "Confiance moyenne", "hpoAvg": "Moyenne des termes HPO", "noCases": "Aucun dossier pour l'instant", "startFirst": "Créez votre premier dossier", "clearAll": "Effacer tous les dossiers" },
+  "dashboard": { "title": "Dossiers", "subtitle": "Votre historique de diagnostics", "newCase": "Nouveau dossier", "totalCases": "Total des dossiers", "avgConfidence": "Confiance moyenne", "hpoAvg": "Moyenne des termes HPO", "noCases": "Aucun dossier pour l'instant", "startFirst": "Créez votre premier dossier", "clearAll": "Effacer tous les dossiers", "casesTotal": "{count} dossiers au total", "hpoTerms": "{count} termes HPO", "matchLabel": "correspondance", "deleteAllConfirm": "Supprimer les {count} dossiers ?", "yesDeleteAll": "Oui, tout supprimer", "cancel": "Annuler", "emptyStateDesc": "Créez votre premier dossier en téléchargeant des données patient via une ou plusieurs modalités cliniques.", "modalityNotes": "Notes", "modalityPhoto": "Photo", "modalityLab": "Laboratoire", "modalityVcf": "Génomique" },
   "intake": {
     "title": "Nouveau dossier",
     "analyseButton": "Analyser le dossier",
@@ -92,7 +92,17 @@
     "aiSuggests": "L'IA suggère : ajouter {modality}",
     "addNow": "Ajouter maintenant",
     "dismiss": "Ignorer",
-    "cases": "Dossiers"
+    "cases": "Dossiers",
+    "confidenceLabel": "confiance",
+    "modalityNotes": "Notes cliniques",
+    "modalityPhoto": "Photo clinique",
+    "modalityLab": "Rapport de laboratoire",
+    "modalityVcf": "Génomique",
+    "modalityNextNotes": "des notes cliniques",
+    "modalityNextPhoto": "une photo clinique",
+    "modalityNextLab": "un rapport de laboratoire",
+    "modalityNextVcf": "un VCF génomique",
+    "caseTitle": "Dossier {id}"
   },
   "letter": {
     "title": "Lettre de référence",
@@ -159,8 +169,8 @@
     "modalityDnaDesc": "Les fichiers VCF sont analysés pour les variants pathogènes ; les chaînes gène-maladie-phénotype sont résolues.",
     "modalityChatTitle": "Notes de spécialiste",
     "modalityChatDesc": "Les observations non structurées des spécialistes sont converties en profils phénotypiques structurés.",
-    "poweredBy": "Propulsé par Groq",
-    "poweredByDesc": "Llama 3.3 70B extrait les phénotypes avec une précision clinique.",
+    "poweredBy": "Propulsé par Claude Sonnet",
+    "poweredByDesc": "Claude Sonnet extrait les phénotypes avec une précision clinique.",
     "scienceLabel": "Science",
     "scienceHeadline": "Construit sur le plus grand graphe de maladies rares au monde.",
     "statRareDiseases": "Maladies rares",
