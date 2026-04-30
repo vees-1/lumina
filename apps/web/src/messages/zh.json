@@ -86,7 +86,8 @@
     "errorNoInput": "请至少添加一项输入进行分析",
     "errorNoHpo": "未提取到 HPO 表型 — 请尝试添加更多详细信息",
     "errorApiFailed": "分析失败 — API 是否正在运行？",
-    "confidenceCeiling": "置信度上限"
+    "confidenceCeiling": "置信度上限",
+    "warmingUp": "API 启动中 — 首次请求可能需要 15–30 秒…"
   },
   "case": {
     "topDiagnosis": "首选诊断",
@@ -147,7 +148,8 @@
     "placeholder": "信件将显示在此处…",
     "copy": "复制",
     "download": "下载",
-    "words": "{count} 个词"
+    "words": "{count} 个词",
+    "print": "打印"
   },
   "disease": {
     "back": "疾病目录",

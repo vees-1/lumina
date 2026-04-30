@@ -47,12 +47,18 @@ function CaseCard({ c, index }: { c: CaseSummary; index: number }) {
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-[15px] tracking-tight truncate">{c.topDiagnosis}</h3>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              {new Date(c.timestamp).toLocaleDateString("en-US", {
-                month: "short", day: "numeric", year: "numeric",
-                hour: "2-digit", minute: "2-digit",
-              })}
-            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              {c.patientName && (
+                <span className="text-[12px] text-foreground/70 font-medium truncate max-w-[140px]">{c.patientName}</span>
+              )}
+              {c.patientName && <span className="text-muted-foreground/30 text-[11px]">·</span>}
+              <p className="text-[12px] text-muted-foreground">
+                {new Date(c.timestamp).toLocaleDateString("en-US", {
+                  month: "short", day: "numeric", year: "numeric",
+                  hour: "2-digit", minute: "2-digit",
+                })}
+              </p>
+            </div>
           </div>
           <ConfidenceBadge value={c.confidence} />
         </div>

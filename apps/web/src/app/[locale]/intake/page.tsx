@@ -182,6 +182,10 @@ export default function IntakePage() {
     const allTerms: HPOTerm[] = [];
     const modalities: string[] = [];
 
+    const warmupToast = setTimeout(() => {
+      toast.info(t("warmingUp"), { duration: 8000 });
+    }, 6000);
+
     try {
       const calls: Promise<void>[] = [];
 
@@ -223,6 +227,7 @@ export default function IntakePage() {
       }
 
       await Promise.all(calls);
+      clearTimeout(warmupToast);
 
       if (allTerms.length === 0) {
         toast.error(t("errorNoHpo"));
@@ -255,6 +260,7 @@ export default function IntakePage() {
 
       router.push(`/case/${caseId}`);
     } catch (err) {
+      clearTimeout(warmupToast);
       console.error(err);
       toast.error(t("errorApiFailed"));
       setAnalyzing(false);
@@ -346,22 +352,6 @@ export default function IntakePage() {
                   : "border-black/[0.06]"
               }`}
             >
-              {/* Modality progress bar */}
-              <div className="flex items-center gap-3 px-5 pt-4 pb-3">
-                <div className="flex gap-1.5 flex-1">
-                  {[!!notes.trim(), !!photo, !!lab, !!vcf].map((active, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{ opacity: active ? 1 : 1 }}
-                      className={`h-1 flex-1 rounded-full transition-all duration-300 ${active ? "bg-[oklch(0.52_0.21_255)]" : "bg-black/[0.06]"}`}
-                    />
-                  ))}
-                </div>
-                <span className="text-[11px] text-muted-foreground flex-shrink-0 tabular-nums">
-                  {activeModalities} / 4 {t("modalitiesActive")}
-                </span>
-              </div>
-
               {/* Tab bar */}
               <div className="flex border-b border-black/[0.06] overflow-x-auto scrollbar-none">
                 {TABS.map((tabItem) => {
@@ -535,34 +525,6 @@ export default function IntakePage() {
                 ))}
               </div>
 
-              {/* Confidence ceiling — always visible */}
-              <div className="mt-4 pt-4 border-t border-black/[0.06]">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[12px] text-muted-foreground">{t("confidenceCeiling")}</span>
-                  <motion.span
-                    key={confidenceCap}
-                    initial={{ scale: 0.85, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className={`text-[14px] font-bold tabular-nums ${activeModalities > 0 ? "text-[oklch(0.52_0.21_255)]" : "text-muted-foreground"}`}
-                  >
-                    {activeModalities > 0 ? `${confidenceCap}%` : "—"}
-                  </motion.span>
-                </div>
-                <div className="h-2 rounded-full bg-black/[0.05] overflow-hidden">
-                  <motion.div
-                    animate={{ width: activeModalities > 0 ? `${confidenceCap}%` : "0%" }}
-                    transition={{ duration: 0.5, ease }}
-                    className="h-full rounded-full bg-[oklch(0.52_0.21_255)]"
-                  />
-                </div>
-                <div className="flex justify-between mt-1.5">
-                  {[40, 55, 65, 80].map((cap, i) => (
-                    <span key={cap} className={`text-[10px] tabular-nums transition-colors ${activeModalities > i ? "text-[oklch(0.52_0.21_255)] font-medium" : "text-muted-foreground/50"}`}>
-                      {cap}%
-                    </span>
-                  ))}
-                </div>
-              </div>
             </motion.div>
 
             {/* Analysis progress */}

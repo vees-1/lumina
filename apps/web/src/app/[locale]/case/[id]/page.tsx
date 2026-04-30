@@ -13,6 +13,23 @@ import type { CaseData, RankResult } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
+const CONFIDENCE_CAPS: Record<number, number> = { 1: 40, 2: 55, 3: 65, 4: 80 };
+
+function ConfidenceTooltip({ confidence, modalities, children }: { confidence: number; modalities: number; children: React.ReactNode }) {
+  const [visible, setVisible] = useState(false);
+  const cap = CONFIDENCE_CAPS[modalities] ?? 80;
+  return (
+    <span className="relative inline-block" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
+      {children}
+      {visible && (
+        <span className="absolute bottom-full left-0 mb-2 w-64 bg-foreground text-background text-[12px] leading-relaxed rounded-xl px-3 py-2.5 shadow-lg z-50 pointer-events-none">
+          <span className="font-semibold">{confidence.toFixed(0)}%</span> is a relative phenotypic overlap score, not a probability. The ceiling for {modalities} modality{modalities !== 1 ? " inputs" : ""} is {cap}%. Adding more modalities raises the ceiling.
+          <span className="absolute top-full left-4 border-4 border-transparent border-t-foreground" />
+        </span>
+      )}
+    </span>
+  );
+}
 
 // ── Confidence bar ────────────────────────────────────────────────────────────
 
@@ -507,14 +524,25 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
 
           {topRank ? (
             <>
+              {caseData.patientContext?.patientName && (
+                <p className="text-[13px] text-muted-foreground font-medium mb-1 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+                    <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                  {caseData.patientContext.patientName}
+                </p>
+              )}
               <h1 className="serif text-[28px] tracking-tight mb-1">{topRank.name}</h1>
               <div className="flex items-center gap-3 flex-wrap">
-                <span
-                  className="text-[13px] font-semibold px-3 py-1 rounded-full"
-                  style={{ background: `${topColor}15`, color: topColor }}
-                >
-                  {topRank.confidence.toFixed(0)}% {t("confidenceLabel")}
-                </span>
+                <ConfidenceTooltip confidence={topRank.confidence} modalities={caseData.modalities.length}>
+                  <span
+                    className="text-[13px] font-semibold px-3 py-1 rounded-full cursor-help"
+                    style={{ background: `${topColor}15`, color: topColor }}
+                  >
+                    {topRank.confidence.toFixed(0)}% {t("confidenceLabel")}
+                  </span>
+                </ConfidenceTooltip>
                 <span className="text-[13px] text-muted-foreground">ORPHA:{topRank.orpha_code}</span>
                 {caseData.modalities.map((m) => (
                   <span key={m} className="text-[12px] px-2.5 py-0.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">

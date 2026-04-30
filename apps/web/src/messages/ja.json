@@ -86,7 +86,8 @@
     "errorNoInput": "分析するには少なくとも1つの入力を追加してください",
     "errorNoHpo": "HPO 表現型が抽出されませんでした — 詳細を追加してみてください",
     "errorApiFailed": "分析に失敗しました — API は実行中ですか？",
-    "confidenceCeiling": "信頼度上限"
+    "confidenceCeiling": "信頼度上限",
+    "warmingUp": "API起動中 — 初回リクエストは15〜30秒かかる場合があります…"
   },
   "case": {
     "topDiagnosis": "トップ診断",
@@ -147,7 +148,8 @@
     "placeholder": "紹介状はここに表示されます…",
     "copy": "コピー",
     "download": "ダウンロード",
-    "words": "{count}語"
+    "words": "{count}語",
+    "print": "印刷"
   },
   "disease": {
     "back": "疾患カタログ",

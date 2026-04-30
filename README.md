@@ -146,6 +146,20 @@ AI is used **only for extraction**, not decision-making.
 
 ---
 
+### Can the AI extraction step hallucinate HPO terms?
+
+Yes. The notes and photo extractors use Groq/Llama to map clinical findings to HPO IDs. Several mitigations are in place:
+
+- **Constrained vocabulary** — notes extraction passes the top 2,000 HPO terms to the model; it can only assign IDs from that list  
+- **Temperature 0** — deterministic sampling, no creative generation  
+- **Ranker validation** — any HP: ID not present in the ontology is silently dropped before scoring  
+- **Keyword fallback** — if Groq returns nothing for notes, regex matching against the HPO vocabulary is used instead  
+- **VCF is deterministic** — genomic extraction uses no AI at all  
+
+The remaining risk is a *plausible-but-wrong* mapping: a real HP: ID that exists in the ontology but does not match the actual finding. This is why confidence ceilings are deliberately conservative and why multi-modality corroboration is recommended.
+
+---
+
 ### What does the confidence score mean?
 
 - Relative score, not probability  

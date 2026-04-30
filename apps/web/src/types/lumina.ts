@@ -29,4 +29,5 @@ export interface CaseSummary {
   confidence: number;
   modalities: string[];
   hpoCount: number;
+  patientName?: string;
 }

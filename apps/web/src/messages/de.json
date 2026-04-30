@@ -86,7 +86,8 @@
     "errorNoInput": "Mindestens eine Eingabe zur Analyse hinzufügen",
     "errorNoHpo": "Keine HPO-Phänotypen extrahiert — versuchen Sie, mehr Details hinzuzufügen",
     "errorApiFailed": "Analyse fehlgeschlagen — läuft die API?",
-    "confidenceCeiling": "Max. Konfidenz"
+    "confidenceCeiling": "Max. Konfidenz",
+    "warmingUp": "API wird gestartet — erste Anfrage kann 15–30s dauern…"
   },
   "case": {
     "topDiagnosis": "Hauptdiagnose",
@@ -147,7 +148,8 @@
     "placeholder": "Das Schreiben erscheint hier…",
     "copy": "Kopieren",
     "download": "Herunterladen",
-    "words": "{count} Wörter"
+    "words": "{count} Wörter",
+    "print": "Drucken"
   },
   "disease": {
     "back": "Erkrankungskatalog",

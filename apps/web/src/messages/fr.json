@@ -86,7 +86,8 @@
     "errorNoInput": "Ajoutez au moins une entrée à analyser",
     "errorNoHpo": "Aucun phénotype HPO extrait — essayez d'ajouter plus de détails",
     "errorApiFailed": "Analyse échouée — l'API est-elle en cours d'exécution ?",
-    "confidenceCeiling": "Plafond de confiance"
+    "confidenceCeiling": "Plafond de confiance",
+    "warmingUp": "API en démarrage — la première requête peut prendre 15–30s…"
   },
   "case": {
     "topDiagnosis": "Diagnostic principal",
@@ -147,7 +148,8 @@
     "placeholder": "La lettre apparaîtra ici…",
     "copy": "Copier",
     "download": "Télécharger",
-    "words": "{count} mots"
+    "words": "{count} mots",
+    "print": "Imprimer"
   },
   "disease": {
     "back": "Catalogue des maladies",

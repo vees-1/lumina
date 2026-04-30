@@ -54,6 +54,14 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     URL.revokeObjectURL(url);
   };
 
+  const handlePrint = () => {
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(`<html><head><title>Referral Letter</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.7;font-size:14px}h1,h2,h3{margin-top:1.5em}ul{padding-left:1.5em}@media print{body{margin:20px}}</style></head><body><pre style="white-space:pre-wrap;font-family:inherit">${letter.replace(/</g, "&lt;")}</pre></body></html>`);
+    win.document.close();
+    win.print();
+  };
+
   const topDx = caseData?.rankings?.[0]?.name ?? "Unknown";
   const wordCount = letter.split(/\s+/).filter(Boolean).length;
 
@@ -86,6 +94,14 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
                 className="text-[13px] h-8 rounded-full"
               >
                 {t("copy")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                className="text-[13px] h-8 rounded-full"
+              >
+                {t("print")}
               </Button>
               <Button
                 size="sm"

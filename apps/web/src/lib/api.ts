@@ -109,6 +109,7 @@ export function saveCaseToStorage(caseData: CaseData): void {
     confidence: caseData.rankings[0]?.confidence ?? 0,
     modalities: caseData.modalities,
     hpoCount: caseData.hpoTerms.length,
+    patientName: caseData.patientContext?.patientName,
   };
   summaries.unshift(summary);
   localStorage.setItem("lumina_cases", JSON.stringify(summaries.slice(0, 50)));

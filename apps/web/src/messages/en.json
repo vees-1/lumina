@@ -86,7 +86,8 @@
     "errorNoInput": "Add at least one input to analyze",
     "errorNoHpo": "No HPO phenotypes extracted — try adding more detail",
     "errorApiFailed": "Analysis failed — is the API running?",
-    "confidenceCeiling": "Confidence ceiling"
+    "confidenceCeiling": "Confidence ceiling",
+    "warmingUp": "API warming up — first request may take 15–30s…"
   },
   "case": {
     "topDiagnosis": "Top diagnosis",
@@ -147,7 +148,8 @@
     "placeholder": "Letter will appear here…",
     "copy": "Copy",
     "download": "Download",
-    "words": "{count} words"
+    "words": "{count} words",
+    "print": "Print"
   },
   "disease": {
     "back": "Disease Catalog",

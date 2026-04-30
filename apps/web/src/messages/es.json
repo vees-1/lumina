@@ -86,7 +86,8 @@
     "errorNoInput": "Añade al menos una entrada para analizar",
     "errorNoHpo": "No se extrajeron fenotipos HPO — intenta añadir más detalles",
     "errorApiFailed": "Análisis fallido — ¿está la API en funcionamiento?",
-    "confidenceCeiling": "Límite de confianza"
+    "confidenceCeiling": "Límite de confianza",
+    "warmingUp": "API iniciando — la primera solicitud puede tardar 15–30s…"
   },
   "case": {
     "topDiagnosis": "Diagnóstico principal",
@@ -147,7 +148,8 @@
     "placeholder": "La carta aparecerá aquí…",
     "copy": "Copiar",
     "download": "Descargar",
-    "words": "{count} palabras"
+    "words": "{count} palabras",
+    "print": "Imprimir"
   },
   "disease": {
     "back": "Catálogo de enfermedades",
