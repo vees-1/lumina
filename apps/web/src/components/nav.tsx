@@ -206,6 +206,8 @@ function LanguageSwitcher() {
 export function DashboardNav() {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const segments = pathname.split('/');
+  const locale = ['en','hi','de','fr','es','zh','ja'].includes(segments[1]) ? segments[1] : 'en';
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -214,7 +216,7 @@ export function DashboardNav() {
       className="fixed top-0 left-0 right-0 z-50 glass-strong shadow-[0_1px_0_oklch(0_0_0/0.06)]"
     >
       <nav className="mx-auto max-w-6xl flex items-center justify-between h-12 px-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href={`/${locale}`} className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-[8px] bg-foreground flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="4" r="2" fill="white" />
