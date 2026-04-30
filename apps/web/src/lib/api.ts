@@ -1,4 +1,4 @@
-import type { CaseData, HPOTerm, RankResult } from "@/types/lumina";
+import type { CaseData, CaseSummary, HPOTerm, RankResult } from "@/types/lumina";
 
 const API = "/api";
 
@@ -129,4 +129,22 @@ export function getCaseById(id: string): CaseData | null {
   } catch {
     return null;
   }
+}
+
+export function updateCaseInStorage(caseId: string, updated: CaseData): void {
+  localStorage.setItem(`lumina_case_${caseId}`, JSON.stringify(updated));
+  const summaries = getCaseSummaries();
+  const idx = summaries.findIndex((s: CaseSummary) => s.id === caseId);
+  const summary: CaseSummary = {
+    id: updated.id,
+    timestamp: updated.timestamp,
+    topDiagnosis: updated.rankings[0]?.name ?? "Unknown",
+    confidence: updated.rankings[0]?.confidence ?? 0,
+    modalities: updated.modalities,
+    hpoCount: updated.hpoTerms.length,
+    patientName: updated.patientContext?.patientName,
+  };
+  if (idx >= 0) summaries[idx] = summary;
+  else summaries.unshift(summary);
+  localStorage.setItem("lumina_cases", JSON.stringify(summaries.slice(0, 50)));
 }

@@ -1,14 +1,14 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
-import { saveCaseToStorage, scoreCase, submitLab, submitNotes, submitPhoto, submitVcf } from "@/lib/api";
+import { getCaseById, saveCaseToStorage, scoreCase, submitLab, submitNotes, submitPhoto, submitVcf, updateCaseInStorage } from "@/lib/api";
 import type { HPOTerm } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
@@ -142,7 +142,14 @@ function ProgressStep({ label, active, done }: { label: string; active: boolean;
 export default function IntakePage() {
   const t = useTranslations("intake");
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("notes");
+  const searchParams = useSearchParams();
+  const addToId = searchParams.get("addTo");
+  const existingCase = addToId ? getCaseById(addToId) : null;
+
+  const usedModalities = addToId && existingCase ? existingCase.modalities : [];
+  const firstUnused = (["notes", "photo", "lab", "vcf"] as Tab[]).find((m) => !usedModalities.includes(m)) ?? "notes";
+
+  const [tab, setTab] = useState<Tab>(firstUnused);
   const [notes, setNotes] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [isFacial, setIsFacial] = useState(false);
@@ -154,6 +161,15 @@ export default function IntakePage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState<string[]>([]);
   const [activeStep, setActiveStep] = useState("");
+
+  useEffect(() => {
+    if (addToId && existingCase) {
+      setPatientName(existingCase.patientContext?.patientName ?? "");
+      setAge(existingCase.patientContext?.age ?? "");
+      setSex(existingCase.patientContext?.sex ?? "");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const TABS: { id: Tab; label: string; hint: string }[] = [
     { id: "notes", label: t("tabNotesLabel"), hint: t("tabNotesHint") },
@@ -238,27 +254,51 @@ export default function IntakePage() {
       addProgress(t("progressScoring"));
 
       const termMap = new Map<string, HPOTerm>();
+
+      // If merging into existing case, seed the map with existing HPO terms
+      if (addToId && existingCase) {
+        for (const term of existingCase.hpoTerms) {
+          termMap.set(term.hpo_id, term);
+        }
+      }
+
       for (const term of allTerms) {
         const existing = termMap.get(term.hpo_id);
         if (!existing || term.confidence > existing.confidence) termMap.set(term.hpo_id, term);
       }
       const dedupedTerms = Array.from(termMap.values());
 
-      const rankings = await scoreCase(dedupedTerms, 10, modalities.length);
+      // Merge modalities if in add mode
+      const mergedModalities = addToId && existingCase
+        ? [...new Set([...existingCase.modalities, ...modalities])]
+        : modalities;
+
+      const rankings = await scoreCase(dedupedTerms, 10, mergedModalities.length);
       addProgress(t("progressRanking"));
 
-      const caseId = uuid();
-      saveCaseToStorage({
-        id: caseId,
-        timestamp: Date.now(),
-        notes: notes.trim() || undefined,
-        modalities,
-        hpoTerms: dedupedTerms,
-        rankings,
-        patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
-      });
-
-      router.push(`/case/${caseId}`);
+      if (addToId && existingCase) {
+        updateCaseInStorage(addToId, {
+          ...existingCase,
+          timestamp: Date.now(),
+          modalities: mergedModalities,
+          hpoTerms: dedupedTerms,
+          rankings,
+          patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
+        });
+        router.push(`/case/${addToId}`);
+      } else {
+        const caseId = uuid();
+        saveCaseToStorage({
+          id: caseId,
+          timestamp: Date.now(),
+          notes: notes.trim() || undefined,
+          modalities,
+          hpoTerms: dedupedTerms,
+          rankings,
+          patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
+        });
+        router.push(`/case/${caseId}`);
+      }
     } catch (err) {
       clearTimeout(warmupToast);
       console.error(err);
@@ -279,9 +319,24 @@ export default function IntakePage() {
           transition={{ duration: 0.5, ease }}
           className="pt-6 mb-8"
         >
-          <h1 className="serif text-[30px] tracking-tight">{t("title")}</h1>
+          <h1 className="serif text-[30px] tracking-tight">{addToId && existingCase ? t("titleAdd") : t("title")}</h1>
           <p className="text-[14px] text-muted-foreground mt-1">{t("subtitle")}</p>
         </motion.div>
+
+        {/* Add-mode banner */}
+        {addToId && existingCase && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease }}
+            className="bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.2)] rounded-xl px-4 py-3 mb-6 flex items-center gap-3"
+          >
+            <svg className="w-4 h-4 text-[oklch(0.52_0.21_255)] flex-shrink-0" fill="none" viewBox="0 0 16 16">
+              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span className="text-[13px] text-[oklch(0.52_0.21_255)]">{t("addingToCase")}</span>
+          </motion.div>
+        )}
 
         <div className="grid lg:grid-cols-[1fr_300px] gap-8">
           <div className="space-y-4">

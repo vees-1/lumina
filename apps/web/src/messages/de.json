@@ -87,7 +87,9 @@
     "errorNoHpo": "Keine HPO-Phänotypen extrahiert — versuchen Sie, mehr Details hinzuzufügen",
     "errorApiFailed": "Analyse fehlgeschlagen — läuft die API?",
     "confidenceCeiling": "Max. Konfidenz",
-    "warmingUp": "API wird gestartet — erste Anfrage kann 15–30s dauern…"
+    "warmingUp": "API wird gestartet — erste Anfrage kann 15–30s dauern…",
+    "addingToCase": "Daten zu bestehendem Fall hinzufügen — neue Befunde werden zusammengeführt",
+    "titleAdd": "Fall ergänzen"
   },
   "case": {
     "topDiagnosis": "Hauptdiagnose",
@@ -137,7 +139,8 @@
     "modalityNextPhoto": "ein klinisches Foto",
     "modalityNextLab": "einen Laborbericht",
     "modalityNextVcf": "eine genomische VCF",
-    "caseTitle": "Fall {id}"
+    "caseTitle": "Fall {id}",
+    "addData": "Daten hinzufügen"
   },
   "letter": {
     "title": "Überweisungsschreiben",

@@ -720,6 +720,16 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               transition={{ duration: 0.5, ease, delay: 0.3 }}
               className="space-y-2"
             >
+              {caseData.modalities.length < 4 && (
+                <Link href={`/intake?addTo=${id}`} className="block">
+                  <Button variant="outline" size="sm" className="w-full rounded-xl h-9 text-[13px] border-black/10 gap-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+                      <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                    {t("addData")}
+                  </Button>
+                </Link>
+              )}
               <Button
                 variant="outline"
                 className="w-full rounded-xl h-9 text-[13px] border-black/10"

@@ -87,7 +87,9 @@
     "errorNoHpo": "कोई HPO फेनोटाइप नहीं निकाला — अधिक विवरण जोड़ने का प्रयास करें",
     "errorApiFailed": "विश्लेषण विफल — क्या API चल रहा है?",
     "confidenceCeiling": "अधिकतम विश्वास",
-    "warmingUp": "API शुरू हो रही है — पहले अनुरोध में 15–30 सेकंड लग सकते हैं…"
+    "warmingUp": "API शुरू हो रही है — पहले अनुरोध में 15–30 सेकंड लग सकते हैं…",
+    "addingToCase": "मौजूदा केस में डेटा जोड़ना — नए निष्कर्ष मर्ज किए जाएंगे",
+    "titleAdd": "केस में जोड़ें"
   },
   "case": {
     "topDiagnosis": "शीर्ष निदान",
@@ -137,7 +139,8 @@
     "modalityNextPhoto": "एक नैदानिक फ़ोटो",
     "modalityNextLab": "एक लैब रिपोर्ट",
     "modalityNextVcf": "एक जीनोमिक VCF",
-    "caseTitle": "केस {id}"
+    "caseTitle": "केस {id}",
+    "addData": "डेटा जोड़ें"
   },
   "letter": {
     "title": "रेफरल पत्र",

@@ -87,7 +87,9 @@
     "errorNoHpo": "Aucun phénotype HPO extrait — essayez d'ajouter plus de détails",
     "errorApiFailed": "Analyse échouée — l'API est-elle en cours d'exécution ?",
     "confidenceCeiling": "Plafond de confiance",
-    "warmingUp": "API en démarrage — la première requête peut prendre 15–30s…"
+    "warmingUp": "API en démarrage — la première requête peut prendre 15–30s…",
+    "addingToCase": "Ajout de données au cas existant — les nouveaux résultats seront fusionnés",
+    "titleAdd": "Compléter le cas"
   },
   "case": {
     "topDiagnosis": "Diagnostic principal",
@@ -137,7 +139,8 @@
     "modalityNextPhoto": "une photo clinique",
     "modalityNextLab": "un rapport de laboratoire",
     "modalityNextVcf": "un VCF génomique",
-    "caseTitle": "Dossier {id}"
+    "caseTitle": "Dossier {id}",
+    "addData": "Ajouter des données"
   },
   "letter": {
     "title": "Lettre de référence",

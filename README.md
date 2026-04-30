@@ -12,21 +12,7 @@
 
 ---
 
-## What it does
-
-Lumina converts clinical data (notes, images, labs, genomics) into **HPO terms** and ranks **11,456 rare diseases** by phenotypic overlap.
-
-It acts as a **decision support system** — helping clinicians explore the full rare disease space, not just what they remember.
-
----
-
-## The problem
-
-- **7,000+ rare diseases**
-- **4–5 years** average time to diagnosis
-- **7–8 specialists** per patient
-
-The bottleneck is not access to information — it is **differential diagnosis**.
+Lumina converts clinical data (notes, images, labs, genomics) into **HPO terms** and ranks **11,456 rare diseases** by phenotypic overlap. It acts as a decision support system — helping clinicians explore the full rare disease space in seconds, not years.
 
 ---
 
@@ -66,42 +52,17 @@ The bottleneck is not access to information — it is **differential diagnosis**
 
 ---
 
-## Core idea
+## How it works
 
-All inputs are mapped to **HPO (Human Phenotype Ontology)**.
+All inputs map to **HPO (Human Phenotype Ontology)**, enabling unified representation and deterministic scoring.
 
-This enables:
-- Unified representation across modalities  
-- Deterministic scoring  
-- No AI dependency in ranking  
+**Scoring**: Lin semantic similarity (no LLM involved in ranking)
+```
+lin(a, b) = 2 × IC(LCA) / (IC(a) + IC(b))
+```
 
----
-
-## Scoring
-
-### Lin semantic similarity
-
-    lin(a, b) = 2 × IC(LCA) / (IC(a) + IC(b))
-
-- Measures semantic similarity between phenotypes  
-- Uses information content from Orphanet  
-- Ranks diseases by phenotypic overlap  
-
-No LLM is involved in scoring.
-
----
-
-### Confidence caps
-
-| Modalities | Max confidence |
-|:--|:--|
-| 1 | 40% |
-| 2 | 55% |
-| 3 | 65% |
-| 4 | 80% |
-
-- Prevents overconfidence  
-- Encourages adding more evidence  
+**Confidence caps** (by modalities): 40% (1) → 55% (2) → 65% (3) → 80% (4)  
+Prevents overconfidence and encourages multi-modality evidence.
 
 ---
 
@@ -122,64 +83,31 @@ AI is used **only for extraction**, not decision-making.
 
 ## Features
 
-- 4 modalities: notes, image, lab, VCF  
-- 11,456 diseases (Orphanet + HPO + ClinVar + FGDD)  
-- Ranked differential with phenotype evidence  
-- Agent suggests next best modality  
-- Referral letter generation  
-- FHIR export (R4)  
-- 7 languages  
-- No server-side PHI (localStorage only)  
+| | |
+|:--|:--|
+| Modalities | Notes, image, lab, VCF |
+| Diseases | 11,456 (Orphanet + HPO + ClinVar) |
+| Ranking | Phenotype overlap with evidence |
+| Agent | Suggests next best modality |
+| Export | FHIR (R4), referral letter |
+| Languages | 7 supported |
+| Privacy | Local-only (no server PHI) |
 
 ---
 
 ## FAQ
 
-### Why not just use ChatGPT or Claude?
+**Can the AI extraction step hallucinate HPO terms?**
 
-- LLMs suggest a few diseases → Lumina ranks all  
-- LLMs hallucinate → Lumina uses curated data  
-- No real confidence → Lumina uses ontology-based scoring  
-- Not reproducible → Lumina is deterministic  
+Yes, but mitigations are in place: constrained vocabulary (top 2k HPO terms only), temperature 0 (deterministic), ranker validation (invalid IDs dropped), keyword fallback (regex if Groq fails), and VCF extraction is fully deterministic (no AI). The remaining risk is plausible-but-wrong mappings — which is why confidence ceilings are conservative.
 
-> AI is used only for extraction
+**What does the confidence score mean?**
 
----
+Relative ranking, not absolute probability. Top result scaled to modality ceiling; others ranked relative to it.
 
-### Can the AI extraction step hallucinate HPO terms?
+**Is this a diagnostic tool?**
 
-Yes. The notes and photo extractors use Groq/Llama to map clinical findings to HPO IDs. Several mitigations are in place:
-
-- **Constrained vocabulary** — notes extraction passes the top 2,000 HPO terms to the model; it can only assign IDs from that list  
-- **Temperature 0** — deterministic sampling, no creative generation  
-- **Ranker validation** — any HP: ID not present in the ontology is silently dropped before scoring  
-- **Keyword fallback** — if Groq returns nothing for notes, regex matching against the HPO vocabulary is used instead  
-- **VCF is deterministic** — genomic extraction uses no AI at all  
-
-The remaining risk is a *plausible-but-wrong* mapping: a real HP: ID that exists in the ontology but does not match the actual finding. This is why confidence ceilings are deliberately conservative and why multi-modality corroboration is recommended.
-
----
-
-### What does the confidence score mean?
-
-- Relative score, not probability  
-- Top result scaled to modality ceiling  
-- Others ranked relative to it  
-
----
-
-### Is this a diagnostic tool?
-
-No.  
-Decision support only — not a replacement for clinicians.
-
----
-
-### How current is the data?
-
-- Static snapshot  
-- Orphanet + HPO + ClinVar + FGDD  
-- 11,456 diseases, 200k+ phenotype links  
+No. Decision support only — not a replacement for clinicians.
 
 ---
 

@@ -25,6 +25,12 @@ Rules:
 - Do not infer systemic findings from a single photo
 - return [] if no clinically significant HPO-mappable findings are visible"""
 
+_VOCAB_ADDENDUM = """
+You MUST only use HPO IDs from the provided vocabulary list. Do not invent HP: IDs.
+
+HPO vocabulary:
+{vocab}"""
+
 _FACIAL_ADDENDUM = """
 This is a facial photograph. In addition to general findings, pay close attention to:
 dysmorphic facial features including but not limited to the following vocabulary:
@@ -38,6 +44,7 @@ async def extract_photo(
     media_type: str = "image/jpeg",
     facial: bool = False,
     facial_vocab: list[str] | None = None,
+    hpo_vocab: list[tuple[str, str]] | None = None,
 ) -> list[HPOTerm]:
     """Extract HPO terms from a clinical photograph using Groq Vision."""
     api_key = os.environ.get("GROQ_API_KEY")
@@ -50,9 +57,14 @@ async def extract_photo(
         client = AsyncGroq(api_key=api_key)
 
         system = _SYSTEM_BASE
+        if hpo_vocab:
+            vocab_block = "\n".join(
+                f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(hpo_vocab[:400])
+            )
+            system = system + _VOCAB_ADDENDUM.format(vocab=vocab_block)
         if facial and facial_vocab:
             vocab_str = "\n".join(f"- {v}" for v in facial_vocab[:200])
-            system = _SYSTEM_BASE + _FACIAL_ADDENDUM.format(vocab=vocab_str)
+            system = system + _FACIAL_ADDENDUM.format(vocab=vocab_str)
 
         image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 

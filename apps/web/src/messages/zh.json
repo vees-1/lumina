@@ -87,7 +87,9 @@
     "errorNoHpo": "未提取到 HPO 表型 — 请尝试添加更多详细信息",
     "errorApiFailed": "分析失败 — API 是否正在运行？",
     "confidenceCeiling": "置信度上限",
-    "warmingUp": "API 启动中 — 首次请求可能需要 15–30 秒…"
+    "warmingUp": "API 启动中 — 首次请求可能需要 15–30 秒…",
+    "addingToCase": "向现有病例添加数据 — 新发现将被合并",
+    "titleAdd": "添加至病例"
   },
   "case": {
     "topDiagnosis": "首选诊断",
@@ -137,7 +139,8 @@
     "modalityNextPhoto": "一张临床照片",
     "modalityNextLab": "一份实验室报告",
     "modalityNextVcf": "一个基因组 VCF",
-    "caseTitle": "病例 {id}"
+    "caseTitle": "病例 {id}",
+    "addData": "添加数据"
   },
   "letter": {
     "title": "转诊信",

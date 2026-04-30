@@ -87,7 +87,9 @@
     "errorNoHpo": "HPO 表現型が抽出されませんでした — 詳細を追加してみてください",
     "errorApiFailed": "分析に失敗しました — API は実行中ですか？",
     "confidenceCeiling": "信頼度上限",
-    "warmingUp": "API起動中 — 初回リクエストは15〜30秒かかる場合があります…"
+    "warmingUp": "API起動中 — 初回リクエストは15〜30秒かかる場合があります…",
+    "addingToCase": "既存のケースにデータを追加中 — 新しい所見がマージされます",
+    "titleAdd": "ケースに追加"
   },
   "case": {
     "topDiagnosis": "トップ診断",
@@ -137,7 +139,8 @@
     "modalityNextPhoto": "臨床写真",
     "modalityNextLab": "検査レポート",
     "modalityNextVcf": "ゲノムVCF",
-    "caseTitle": "ケース {id}"
+    "caseTitle": "ケース {id}",
+    "addData": "データ追加"
   },
   "letter": {
     "title": "紹介状",

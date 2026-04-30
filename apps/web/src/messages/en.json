@@ -87,7 +87,9 @@
     "errorNoHpo": "No HPO phenotypes extracted — try adding more detail",
     "errorApiFailed": "Analysis failed — is the API running?",
     "confidenceCeiling": "Confidence ceiling",
-    "warmingUp": "API warming up — first request may take 15–30s…"
+    "warmingUp": "API warming up — first request may take 15–30s…",
+    "addingToCase": "Adding data to existing case — new findings will be merged",
+    "titleAdd": "Add to case"
   },
   "case": {
     "topDiagnosis": "Top diagnosis",
@@ -137,7 +139,8 @@
     "modalityNextPhoto": "a clinical photo",
     "modalityNextLab": "a lab report",
     "modalityNextVcf": "a genomic VCF",
-    "caseTitle": "Case {id}"
+    "caseTitle": "Case {id}",
+    "addData": "Add data"
   },
   "letter": {
     "title": "Referral Letter",

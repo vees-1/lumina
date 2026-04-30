@@ -52,6 +52,7 @@ async def lifespan(app: FastAPI):
     app.state.db_engine = engine
     app.state.scoring_index = ScoringIndex.load()
     app.state.hpo_vocab = _load_hpo_vocab(engine)
+    app.state.hpo_names = {hpo_id: name for hpo_id, name in app.state.hpo_vocab}
     app.state.facial_vocab = _load_facial_vocab(engine)
     from scoring.embeddings import _embedder
 

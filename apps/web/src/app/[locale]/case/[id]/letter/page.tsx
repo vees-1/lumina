@@ -11,6 +11,93 @@ import type { CaseData } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
+function renderInline(text: string): React.ReactNode {
+  // Replace **bold** with <strong>
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+function formatLetter(text: string): React.ReactNode {
+  const lines = text.split("\n");
+  const nodes: React.ReactNode[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Headings: #, ##, ###
+    if (/^#{1,3}\s/.test(line)) {
+      const content = line.replace(/^#{1,3}\s+/, "");
+      nodes.push(
+        <h3
+          key={i}
+          className="font-semibold text-[15px] mt-5 mb-2 text-foreground"
+        >
+          {renderInline(content)}
+        </h3>
+      );
+      i++;
+      continue;
+    }
+
+    // Horizontal rule
+    if (line.trim() === "---") {
+      nodes.push(<hr key={i} className="my-4 border-black/10" />);
+      i++;
+      continue;
+    }
+
+    // Empty line
+    if (line.trim() === "") {
+      nodes.push(<div key={i} className="h-3" />);
+      i++;
+      continue;
+    }
+
+    // List items — collect consecutive list lines into a <ul>
+    if (/^[-*]\s/.test(line)) {
+      const listItems: React.ReactNode[] = [];
+      while (i < lines.length && /^[-*]\s/.test(lines[i])) {
+        const content = lines[i].replace(/^[-*]\s+/, "");
+        listItems.push(
+          <li
+            key={i}
+            className="ml-4 text-[14px] leading-relaxed text-foreground/90 list-disc"
+          >
+            {renderInline(content)}
+          </li>
+        );
+        i++;
+      }
+      nodes.push(
+        <ul key={`ul-${i}`} className="space-y-1 my-2">
+          {listItems}
+        </ul>
+      );
+      continue;
+    }
+
+    // Regular paragraph
+    nodes.push(
+      <p
+        key={i}
+        className="text-[14px] leading-relaxed text-foreground/90 mb-1"
+      >
+        {renderInline(line)}
+      </p>
+    );
+    i++;
+  }
+
+  return <>{nodes}</>;
+}
+
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations("letter");
   const { id } = use(params);
@@ -19,7 +106,6 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   const [streaming, setStreaming] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const editorRef = useRef<HTMLTextAreaElement>(null);
   const hasStarted = useRef(false);
 
   useEffect(() => {
@@ -45,11 +131,16 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   };
 
   const handleDownload = () => {
-    const blob = new Blob([letter], { type: "text/plain" });
+    const clean = letter
+      .replace(/^#{1,3}\s+/gm, "")
+      .replace(/\*\*/g, "")
+      .replace(/^[-*]\s+/gm, "• ")
+      .trim();
+    const blob = new Blob([clean], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `lumina_letter_${id}.txt`;
+    a.download = `referral_letter_${id}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -57,7 +148,13 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   const handlePrint = () => {
     const win = window.open("", "_blank");
     if (!win) return;
-    win.document.write(`<html><head><title>Referral Letter</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.7;font-size:14px}h1,h2,h3{margin-top:1.5em}ul{padding-left:1.5em}@media print{body{margin:20px}}</style></head><body><pre style="white-space:pre-wrap;font-family:inherit">${letter.replace(/</g, "&lt;")}</pre></body></html>`);
+    const clean = letter
+      .replace(/^#{1,3}\s+/gm, "")
+      .replace(/\*\*/g, "")
+      .replace(/^[-*]\s+/gm, "• ");
+    win.document.write(
+      `<html><head><title>Referral Letter</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.7;font-size:14px}@media print{body{margin:20px}}</style></head><body><pre style="white-space:pre-wrap;font-family:inherit">${clean.replace(/</g, "&lt;")}</pre></body></html>`
+    );
     win.document.close();
     win.print();
   };
@@ -77,13 +174,14 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
           className="flex items-center justify-between mb-8 pt-4"
         >
           <div>
-            <Link href={`/case/${id}`} className="text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-1 block">
+            <Link
+              href={`/case/${id}`}
+              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-1 block"
+            >
               {t("backToCase")}
             </Link>
             <h1 className="serif text-[26px] tracking-tight">{t("title")}</h1>
-            <p className="text-[13px] text-muted-foreground mt-0.5">
-              {topDx}
-            </p>
+            <p className="text-[13px] text-muted-foreground mt-0.5">{topDx}</p>
           </div>
           {done && (
             <div className="flex items-center gap-2">
@@ -123,7 +221,15 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         >
           {/* Status bar */}
           <div className="flex items-center gap-2 px-5 py-3 border-b border-black/[0.06]">
-            <div className={`w-2 h-2 rounded-full ${streaming ? "bg-[oklch(0.52_0.21_255)] animate-pulse" : done ? "bg-[oklch(0.52_0.19_160)]" : "bg-[oklch(0.75_0_0)]"}`} />
+            <div
+              className={`w-2 h-2 rounded-full ${
+                streaming
+                  ? "bg-[oklch(0.52_0.21_255)] animate-pulse"
+                  : done
+                  ? "bg-[oklch(0.52_0.19_160)]"
+                  : "bg-[oklch(0.75_0_0)]"
+              }`}
+            />
             <span className="text-[12px] text-muted-foreground">
               {streaming ? t("generating") : done ? t("complete") : t("waiting")}
             </span>
@@ -132,19 +238,22 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
           {error ? (
             <div className="p-6 text-[13px] text-red-500">{error}</div>
           ) : (
-            <textarea
-              ref={editorRef}
-              value={letter}
-              onChange={(e) => setLetter(e.target.value)}
-              className="w-full min-h-[600px] p-6 text-[14px] leading-relaxed font-mono resize-none outline-none bg-white"
-              placeholder={streaming ? "" : t("placeholder")}
-              spellCheck
-            />
+            <div className="p-8 min-h-[400px]">
+              {letter ? (
+                formatLetter(letter)
+              ) : (
+                !streaming && (
+                  <p className="text-[14px] text-muted-foreground">
+                    {t("placeholder")}
+                  </p>
+                )
+              )}
+            </div>
           )}
 
           {/* Streaming cursor */}
           {streaming && letter && (
-            <div className="px-6 pb-4">
+            <div className="px-8 pb-4">
               <span className="inline-block w-2 h-4 bg-[oklch(0.52_0.21_255)] animate-pulse rounded-sm" />
             </div>
           )}

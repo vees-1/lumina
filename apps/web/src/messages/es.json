@@ -87,7 +87,9 @@
     "errorNoHpo": "No se extrajeron fenotipos HPO — intenta añadir más detalles",
     "errorApiFailed": "Análisis fallido — ¿está la API en funcionamiento?",
     "confidenceCeiling": "Límite de confianza",
-    "warmingUp": "API iniciando — la primera solicitud puede tardar 15–30s…"
+    "warmingUp": "API iniciando — la primera solicitud puede tardar 15–30s…",
+    "addingToCase": "Agregando datos al caso existente — los nuevos hallazgos se fusionarán",
+    "titleAdd": "Agregar al caso"
   },
   "case": {
     "topDiagnosis": "Diagnóstico principal",
@@ -137,7 +139,8 @@
     "modalityNextPhoto": "una foto clínica",
     "modalityNextLab": "un informe de laboratorio",
     "modalityNextVcf": "un VCF genómico",
-    "caseTitle": "Caso {id}"
+    "caseTitle": "Caso {id}",
+    "addData": "Agregar datos"
   },
   "letter": {
     "title": "Carta de derivación",

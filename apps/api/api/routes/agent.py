@@ -12,8 +12,13 @@ _MODEL_NEXT = "llama-3.3-70b-versatile"
 _MODEL_LETTER = "llama-3.3-70b-versatile"
 
 _LANG_NAMES: dict[str, str] = {
-    "en": "English", "hi": "Hindi", "de": "German",
-    "fr": "French", "es": "Spanish", "zh": "Chinese (Simplified)", "ja": "Japanese",
+    "en": "English",
+    "hi": "Hindi",
+    "de": "German",
+    "fr": "French",
+    "es": "Spanish",
+    "zh": "Chinese (Simplified)",
+    "ja": "Japanese",
 }
 
 _NEXT_SYSTEM = """You are a clinical reasoning assistant for rare disease diagnosis.
@@ -26,11 +31,42 @@ Modalities: notes (clinical text), photo (clinical photo), lab (lab reports), vc
 If confidence is high enough (top-1 > 85 AND gap to top-2 > 15), return cycles_remaining: 0.
 Write the "reasoning" value in {lang_name}. Keep all JSON keys in English."""
 
-_LETTER_SYSTEM = """You are a clinical specialist writing a concise referral letter for a rare disease patient.
-Write in professional medical style in {lang_name}. Keep it under 300 words.
-Structure: patient summary (1-2 sentences), key clinical findings (bullet list),
-suspected diagnosis with brief reasoning (2-3 sentences), recommended next steps (bullet list), closing.
-Use markdown headers. Disease names may remain in English as they are proper clinical terms."""
+_LETTER_SYSTEM = """You are a specialist physician writing a formal clinical referral letter.
+
+Write in formal medical prose in {lang_name}. Structure exactly as follows — use these exact section headers as plain text (no markdown symbols):
+
+CLINICAL REFERRAL LETTER
+
+Date: [today's date]
+Re: [Patient name if known, otherwise "The patient"]
+
+Dear Colleague,
+
+[Opening paragraph: reason for referral, 2-3 sentences. Be direct and clinical.]
+
+PRESENTING HISTORY
+[2-3 sentences on the key presenting complaint and timeline.]
+
+CLINICAL FINDINGS
+[Bullet list of the most relevant findings, written as plain clinical prose. No markdown bullets — use a dash and space: "- Finding"]
+
+DIAGNOSTIC IMPRESSION
+[The top 1-2 differential diagnoses with brief reasoning. Mention the phenotypic overlap score as supporting evidence. 3-4 sentences.]
+
+RECOMMENDED INVESTIGATIONS
+[Specific actionable next steps: genetic panels, specialist consultations, imaging. Use "- " for each.]
+
+I would be grateful for your assessment and any further management recommendations.
+
+Yours sincerely,
+[Referring Clinician]
+
+---
+Rules:
+- Use ONLY plain text. No #, ##, ###, **, *, or backticks.
+- Disease names stay in English even if letter is in {lang_name}.
+- Be concise — under 350 words total.
+- Sound like a real clinician wrote this, not an AI."""
 
 
 class AgentNextRequest(BaseModel):
