@@ -15,6 +15,40 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 type Tab = "notes" | "photo" | "lab" | "vcf";
 
+const TAB_ICONS: Record<Tab, React.ReactNode> = {
+  notes: (
+    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+      <rect x="2" y="1" width="12" height="14" rx="2" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  ),
+  photo: (
+    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+      <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.3" />
+      <circle cx="8" cy="8" r="2.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M5.5 3l1-2h3l1 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  lab: (
+    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+      <path d="M6 1v6L2 13a1 1 0 00.9 1.5h10.2A1 1 0 0014 13L10 7V1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5.5 1h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="6.5" cy="11" r="0.8" fill="currentColor" />
+      <circle cx="9.5" cy="12" r="0.8" fill="currentColor" />
+    </svg>
+  ),
+  vcf: (
+    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+      <path d="M8 1c0 0-2 2.5-2 5s2 5 2 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M8 1c0 0 2 2.5 2 5s-2 5-2 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M3 5.5h10M3 10.5h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <circle cx="8" cy="14.5" r="1" fill="currentColor" />
+    </svg>
+  ),
+};
+
+const CONFIDENCE_CAPS: Record<number, number> = { 0: 0, 1: 40, 2: 55, 3: 65, 4: 80 };
+
 function DropZone({
   accept, label, hint, file, onFile, onClear,
 }: {
@@ -114,6 +148,7 @@ export default function IntakePage() {
   const [isFacial, setIsFacial] = useState(false);
   const [lab, setLab] = useState<File | null>(null);
   const [vcf, setVcf] = useState<File | null>(null);
+  const [patientName, setPatientName] = useState("");
   const [age, setAge] = useState("");
   const [sex, setSex] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
@@ -127,7 +162,9 @@ export default function IntakePage() {
     { id: "vcf",   label: t("tabVcfLabel"),   hint: t("tabVcfHint")   },
   ];
 
-  const hasAnyInput = notes.trim() || photo || lab || vcf;
+  const activeModalities = [!!notes.trim(), !!photo, !!lab, !!vcf].filter(Boolean).length;
+  const hasAnyInput = activeModalities > 0;
+  const confidenceCap = CONFIDENCE_CAPS[activeModalities];
 
   const addProgress = (msg: string) => {
     setActiveStep(msg);
@@ -195,7 +232,6 @@ export default function IntakePage() {
 
       addProgress(t("progressScoring"));
 
-      // Deduplicate by hpo_id, keep highest confidence
       const termMap = new Map<string, HPOTerm>();
       for (const term of allTerms) {
         const existing = termMap.get(term.hpo_id);
@@ -214,7 +250,7 @@ export default function IntakePage() {
         modalities,
         hpoTerms: dedupedTerms,
         rankings,
-        patientContext: { age: age || undefined, sex: sex || undefined },
+        patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
       });
 
       router.push(`/case/${caseId}`);
@@ -238,13 +274,12 @@ export default function IntakePage() {
           className="pt-6 mb-8"
         >
           <h1 className="serif text-[28px] tracking-tight">{t("title")}</h1>
-          <p className="text-[14px] text-muted-foreground mt-1">
-            {t("subtitle")}
-          </p>
+          <p className="text-[14px] text-muted-foreground mt-1">{t("subtitle")}</p>
         </motion.div>
 
         <div className="grid lg:grid-cols-[1fr_220px] gap-6">
           <div className="space-y-4">
+
             {/* Patient context */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
@@ -252,7 +287,29 @@ export default function IntakePage() {
               transition={{ duration: 0.4, ease, delay: 0.05 }}
               className="bg-white rounded-2xl border border-black/[0.06] p-5"
             >
-              <h2 className="text-[14px] font-semibold mb-3">{t("patientContext")} <span className="text-muted-foreground font-normal">{t("optional")}</span></h2>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-6 h-6 rounded-lg bg-[oklch(0.97_0_0)] flex items-center justify-center">
+                  <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" viewBox="0 0 16 16">
+                    <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <h2 className="text-[14px] font-semibold">{t("patientContext")}</h2>
+                <span className="text-[12px] text-muted-foreground font-normal">{t("optional")}</span>
+              </div>
+
+              {/* Patient name — full width */}
+              <div className="mb-3">
+                <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">{t("patientName")}</label>
+                <input
+                  value={patientName}
+                  onChange={(e) => setPatientName(e.target.value)}
+                  placeholder={t("patientNamePlaceholder")}
+                  className="w-full h-9 px-3 rounded-lg border border-black/10 text-[13px] outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all bg-white"
+                />
+              </div>
+
+              {/* Age + Sex */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">{t("age")}</label>
@@ -283,8 +340,28 @@ export default function IntakePage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease, delay: 0.1 }}
-              className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden"
+              className={`bg-white rounded-2xl border overflow-hidden transition-all duration-500 ${
+                analyzing
+                  ? "border-[oklch(0.52_0.21_255/0.4)] shadow-[0_0_0_3px_oklch(0.52_0.21_255/0.08)]"
+                  : "border-black/[0.06]"
+              }`}
             >
+              {/* Modality progress bar */}
+              <div className="flex items-center gap-3 px-5 pt-4 pb-3">
+                <div className="flex gap-1.5 flex-1">
+                  {[!!notes.trim(), !!photo, !!lab, !!vcf].map((active, i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ opacity: active ? 1 : 1 }}
+                      className={`h-1 flex-1 rounded-full transition-all duration-300 ${active ? "bg-[oklch(0.52_0.21_255)]" : "bg-black/[0.06]"}`}
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] text-muted-foreground flex-shrink-0 tabular-nums">
+                  {activeModalities} / 4 {t("modalitiesActive")}
+                </span>
+              </div>
+
               {/* Tab bar */}
               <div className="flex border-b border-black/[0.06] overflow-x-auto scrollbar-none">
                 {TABS.map((tabItem) => {
@@ -303,6 +380,7 @@ export default function IntakePage() {
                           : "text-muted-foreground border-transparent hover:text-foreground"
                       }`}
                     >
+                      {TAB_ICONS[tabItem.id]}
                       {tabItem.label}
                       {hasData && (
                         <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.52_0.21_255)]" />
@@ -324,9 +402,7 @@ export default function IntakePage() {
                   >
                     {tab === "notes" && (
                       <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">
-                          {t("notesDesc")}
-                        </p>
+                        <p className="text-[12px] text-muted-foreground mb-3">{t("notesDesc")}</p>
                         <textarea
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
@@ -342,9 +418,7 @@ export default function IntakePage() {
 
                     {tab === "photo" && (
                       <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">
-                          {t("photoDesc")}
-                        </p>
+                        <p className="text-[12px] text-muted-foreground mb-3">{t("photoDesc")}</p>
                         <DropZone
                           accept="image/*"
                           label={t("photoDropLabel")}
@@ -369,9 +443,7 @@ export default function IntakePage() {
 
                     {tab === "lab" && (
                       <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">
-                          {t("labDesc")}
-                        </p>
+                        <p className="text-[12px] text-muted-foreground mb-3">{t("labDesc")}</p>
                         <DropZone
                           accept="image/*,.pdf"
                           label={t("labDropLabel")}
@@ -385,9 +457,7 @@ export default function IntakePage() {
 
                     {tab === "vcf" && (
                       <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">
-                          {t("vcfDesc")}
-                        </p>
+                        <p className="text-[12px] text-muted-foreground mb-3">{t("vcfDesc")}</p>
                         <DropZone
                           accept=".vcf,.vcf.gz"
                           label={t("vcfDropLabel")}
@@ -396,9 +466,7 @@ export default function IntakePage() {
                           onFile={setVcf}
                           onClear={() => setVcf(null)}
                         />
-                        <p className="text-[12px] text-muted-foreground mt-3">
-                          {t("vcfNote")}
-                        </p>
+                        <p className="text-[12px] text-muted-foreground mt-3">{t("vcfNote")}</p>
                       </div>
                     )}
                   </motion.div>
@@ -463,6 +531,27 @@ export default function IntakePage() {
                   </div>
                 ))}
               </div>
+
+              {/* Confidence ceiling preview */}
+              {activeModalities > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="mt-3 pt-3 border-t border-black/[0.06]"
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[11px] text-muted-foreground">{t("confidenceCeiling")}</span>
+                    <span className="text-[12px] font-semibold text-[oklch(0.52_0.21_255)]">{confidenceCap}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-black/[0.05] overflow-hidden">
+                    <motion.div
+                      animate={{ width: `${confidenceCap}%` }}
+                      transition={{ duration: 0.5, ease }}
+                      className="h-full rounded-full bg-[oklch(0.52_0.21_255)]"
+                    />
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
 
             {/* Analysis progress */}
@@ -494,10 +583,15 @@ export default function IntakePage() {
               transition={{ duration: 0.4, ease, delay: 0.3 }}
               className="rounded-xl bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.15)] p-4"
             >
-              <p className="text-[12px] text-[oklch(0.52_0.21_255)] font-medium mb-1">{t("tipTitle")}</p>
-              <p className="text-[12px] text-muted-foreground leading-relaxed">
-                {t("tipBody")}
-              </p>
+              <div className="flex items-center gap-1.5 mb-1">
+                <svg className="w-3.5 h-3.5 text-[oklch(0.52_0.21_255)]" fill="none" viewBox="0 0 16 16">
+                  <circle cx="8" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
+                  <path d="M6 10.5c0 1.1.9 2 2 2s2-.9 2-2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  <path d="M8 14.5v-2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                <p className="text-[12px] text-[oklch(0.52_0.21_255)] font-medium">{t("tipTitle")}</p>
+              </div>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">{t("tipBody")}</p>
             </motion.div>
           </div>
         </div>

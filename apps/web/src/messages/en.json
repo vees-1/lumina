@@ -1,12 +1,45 @@
 {
-  "nav": { "cases": "Cases", "newCase": "New case", "signIn": "Sign in", "getStarted": "Get started", "dashboard": "Dashboard", "howItWorks": "How it works", "technology": "Technology", "science": "Science" },
-  "dashboard": { "title": "Cases", "subtitle": "Your diagnostic history", "newCase": "New case", "totalCases": "Total cases", "avgConfidence": "Avg confidence", "hpoAvg": "HPO terms avg", "noCases": "No cases yet", "startFirst": "Start your first case", "clearAll": "Clear all cases", "casesTotal": "{count} cases total", "hpoTerms": "{count} HPO terms", "matchLabel": "match", "deleteAllConfirm": "Delete all {count} cases?", "yesDeleteAll": "Yes, delete all", "cancel": "Cancel", "emptyStateDesc": "Start your first case by uploading patient data across one or more clinical modalities.", "modalityNotes": "Notes", "modalityPhoto": "Photo", "modalityLab": "Lab", "modalityVcf": "Genomic" },
+  "nav": {
+    "cases": "Cases",
+    "newCase": "New case",
+    "signIn": "Sign in",
+    "getStarted": "Get started",
+    "dashboard": "Dashboard",
+    "howItWorks": "How it works",
+    "technology": "Technology",
+    "science": "Science"
+  },
+  "dashboard": {
+    "title": "Cases",
+    "subtitle": "Your diagnostic history",
+    "newCase": "New case",
+    "totalCases": "Total cases",
+    "avgConfidence": "Avg confidence",
+    "hpoAvg": "HPO terms avg",
+    "noCases": "No cases yet",
+    "startFirst": "Start your first case",
+    "clearAll": "Clear all cases",
+    "casesTotal": "{count} cases total",
+    "hpoTerms": "{count} HPO terms",
+    "matchLabel": "match",
+    "deleteAllConfirm": "Delete all {count} cases?",
+    "yesDeleteAll": "Yes, delete all",
+    "cancel": "Cancel",
+    "emptyStateDesc": "Start your first case by uploading patient data across one or more clinical modalities.",
+    "modalityNotes": "Notes",
+    "modalityPhoto": "Photo",
+    "modalityLab": "Lab",
+    "modalityVcf": "Genomic"
+  },
   "intake": {
     "title": "New case",
     "analyseButton": "Analyse case",
     "subtitle": "Submit any combination of clinical inputs — Lumina handles the rest.",
     "patientContext": "Patient context",
     "optional": "(optional)",
+    "patientName": "Patient name",
+    "patientNamePlaceholder": "e.g. John Doe",
+    "modalitiesActive": "active",
     "age": "Age",
     "sex": "Sex",
     "agePlaceholder": "e.g. 8 years",
@@ -52,7 +85,8 @@
     "progressRanking": "Ranking complete",
     "errorNoInput": "Add at least one input to analyze",
     "errorNoHpo": "No HPO phenotypes extracted — try adding more detail",
-    "errorApiFailed": "Analysis failed — is the API running?"
+    "errorApiFailed": "Analysis failed — is the API running?",
+    "confidenceCeiling": "Confidence ceiling"
   },
   "case": {
     "topDiagnosis": "Top diagnosis",
@@ -83,7 +117,7 @@
     "newCase": "New case",
     "allCases": "All cases",
     "clinicalReferralLetter": "Clinical Referral Letter",
-    "generating": "Generating\u2026",
+    "generating": "Generating…",
     "copy": "Copy",
     "copiedToClipboard": "Copied to clipboard",
     "letterGenerationFailed": "Letter generation failed",
@@ -106,18 +140,18 @@
   },
   "letter": {
     "title": "Referral Letter",
-    "backToCase": "\u2190 Back to case",
-    "generating": "Generating letter\u2026",
+    "backToCase": "← Back to case",
+    "generating": "Generating letter…",
     "complete": "Complete",
-    "waiting": "Waiting for case data\u2026",
-    "placeholder": "Letter will appear here\u2026",
+    "waiting": "Waiting for case data…",
+    "placeholder": "Letter will appear here…",
     "copy": "Copy",
     "download": "Download",
     "words": "{count} words"
   },
   "disease": {
     "back": "Disease Catalog",
-    "loading": "Loading\u2026",
+    "loading": "Loading…",
     "notFound": "Disease not found",
     "notFoundSub": "{orpha} could not be found in the database.",
     "backToCatalog": "Back to catalog",
@@ -137,7 +171,7 @@
     "noGeneData": "No gene data available",
     "noPrevalenceData": "No prevalence data available",
     "meanValue": "Mean value:",
-    "ensembl": "Ensembl \u2197"
+    "ensembl": "Ensembl ↗"
   },
   "landing": {
     "betaPill": "Now in clinical beta",
@@ -149,7 +183,7 @@
     "workflowHeadline": "From input to insight in seconds.",
     "workflowSub": "Lumina's pipeline extracts phenotypic signals from every modality and matches them against the world's largest rare disease ontology.",
     "step1Title": "Upload patient data",
-    "step1Desc": "Submit clinical notes, photos, lab reports, or genetic data \u2014 any combination works.",
+    "step1Desc": "Submit clinical notes, photos, lab reports, or genetic data — any combination works.",
     "step2Title": "AI extracts HPO phenotypes",
     "step2Desc": "Our models identify Human Phenotype Ontology terms from every modality with confidence scores.",
     "step3Title": "Score against 7,000+ diseases",
@@ -179,7 +213,7 @@
     "statScoring": "ms scoring time",
     "orphanetDesc": "7,000+ diseases with curated phenotype-gene associations",
     "hpoOntologyDesc": "Human Phenotype Ontology with information content scoring",
-    "clinvarDesc": "Pathogenic variant \u2192 gene \u2192 disease resolution chain",
+    "clinvarDesc": "Pathogenic variant → gene → disease resolution chain",
     "ctaHeadline": "Start diagnosing today.",
     "ctaSub": "Join clinical teams using Lumina to reach diagnoses faster and more accurately.",
     "getEarlyAccess": "Get early access",
@@ -191,5 +225,8 @@
     "labReport": "Lab report",
     "vcfFile": "VCF file"
   },
-  "common": { "loading": "Loading...", "error": "Something went wrong" }
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong"
+  }
 }

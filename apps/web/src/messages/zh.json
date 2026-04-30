@@ -1,12 +1,45 @@
 {
-  "nav": { "cases": "病例", "newCase": "新建病例", "signIn": "登录", "getStarted": "开始使用", "dashboard": "控制台", "howItWorks": "使用方法", "technology": "技术", "science": "科学" },
-  "dashboard": { "title": "病例", "subtitle": "您的诊断历史", "newCase": "新建病例", "totalCases": "总病例数", "avgConfidence": "平均置信度", "hpoAvg": "HPO 术语均值", "noCases": "暂无病例", "startFirst": "创建您的第一个病例", "clearAll": "清除所有病例", "casesTotal": "共 {count} 个病例", "hpoTerms": "{count} 个 HPO 术语", "matchLabel": "匹配度", "deleteAllConfirm": "删除全部 {count} 个病例？", "yesDeleteAll": "是，全部删除", "cancel": "取消", "emptyStateDesc": "通过上传一种或多种临床模态的患者数据来创建您的第一个病例。", "modalityNotes": "笔记", "modalityPhoto": "照片", "modalityLab": "检验", "modalityVcf": "基因组" },
+  "nav": {
+    "cases": "病例",
+    "newCase": "新建病例",
+    "signIn": "登录",
+    "getStarted": "开始使用",
+    "dashboard": "控制台",
+    "howItWorks": "使用方法",
+    "technology": "技术",
+    "science": "科学"
+  },
+  "dashboard": {
+    "title": "病例",
+    "subtitle": "您的诊断历史",
+    "newCase": "新建病例",
+    "totalCases": "总病例数",
+    "avgConfidence": "平均置信度",
+    "hpoAvg": "HPO 术语均值",
+    "noCases": "暂无病例",
+    "startFirst": "创建您的第一个病例",
+    "clearAll": "清除所有病例",
+    "casesTotal": "共 {count} 个病例",
+    "hpoTerms": "{count} 个 HPO 术语",
+    "matchLabel": "匹配度",
+    "deleteAllConfirm": "删除全部 {count} 个病例？",
+    "yesDeleteAll": "是，全部删除",
+    "cancel": "取消",
+    "emptyStateDesc": "通过上传一种或多种临床模态的患者数据来创建您的第一个病例。",
+    "modalityNotes": "笔记",
+    "modalityPhoto": "照片",
+    "modalityLab": "检验",
+    "modalityVcf": "基因组"
+  },
   "intake": {
     "title": "新建病例",
     "analyseButton": "分析病例",
     "subtitle": "提交任意组合的临床输入 — Lumina 处理其余事项。",
     "patientContext": "患者背景",
     "optional": "（可选）",
+    "patientName": "患者姓名",
+    "patientNamePlaceholder": "例如：张伟",
+    "modalitiesActive": "已填写",
     "age": "年龄",
     "sex": "性别",
     "agePlaceholder": "例如 8 岁",
@@ -52,7 +85,8 @@
     "progressRanking": "排名完成",
     "errorNoInput": "请至少添加一项输入进行分析",
     "errorNoHpo": "未提取到 HPO 表型 — 请尝试添加更多详细信息",
-    "errorApiFailed": "分析失败 — API 是否正在运行？"
+    "errorApiFailed": "分析失败 — API 是否正在运行？",
+    "confidenceCeiling": "置信度上限"
   },
   "case": {
     "topDiagnosis": "首选诊断",
@@ -191,5 +225,8 @@
     "labReport": "实验室报告",
     "vcfFile": "VCF 文件"
   },
-  "common": { "loading": "加载中……", "error": "出现错误" }
+  "common": {
+    "loading": "加载中……",
+    "error": "出现错误"
+  }
 }

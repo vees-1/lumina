@@ -1,12 +1,45 @@
 {
-  "nav": { "cases": "केस", "newCase": "नया केस", "signIn": "साइन इन", "getStarted": "शुरू करें", "dashboard": "डैशबोर्ड", "howItWorks": "यह कैसे काम करता है", "technology": "तकनीक", "science": "विज्ञान" },
-  "dashboard": { "title": "केस", "subtitle": "आपका निदान इतिहास", "newCase": "नया केस", "totalCases": "कुल केस", "avgConfidence": "औसत विश्वास", "hpoAvg": "HPO शब्द औसत", "noCases": "अभी कोई केस नहीं", "startFirst": "पहला केस शुरू करें", "clearAll": "सभी केस हटाएं", "casesTotal": "कुल {count} केस", "hpoTerms": "{count} HPO शब्द", "matchLabel": "मिलान", "deleteAllConfirm": "सभी {count} केस हटाएं?", "yesDeleteAll": "हाँ, सभी हटाएं", "cancel": "रद्द करें", "emptyStateDesc": "एक या अधिक क्लिनिकल मोडैलिटी के माध्यम से रोगी डेटा अपलोड करके अपना पहला केस शुरू करें।", "modalityNotes": "नोट्स", "modalityPhoto": "फ़ोटो", "modalityLab": "लैब", "modalityVcf": "जीनोमिक" },
+  "nav": {
+    "cases": "केस",
+    "newCase": "नया केस",
+    "signIn": "साइन इन",
+    "getStarted": "शुरू करें",
+    "dashboard": "डैशबोर्ड",
+    "howItWorks": "यह कैसे काम करता है",
+    "technology": "तकनीक",
+    "science": "विज्ञान"
+  },
+  "dashboard": {
+    "title": "केस",
+    "subtitle": "आपका निदान इतिहास",
+    "newCase": "नया केस",
+    "totalCases": "कुल केस",
+    "avgConfidence": "औसत विश्वास",
+    "hpoAvg": "HPO शब्द औसत",
+    "noCases": "अभी कोई केस नहीं",
+    "startFirst": "पहला केस शुरू करें",
+    "clearAll": "सभी केस हटाएं",
+    "casesTotal": "कुल {count} केस",
+    "hpoTerms": "{count} HPO शब्द",
+    "matchLabel": "मिलान",
+    "deleteAllConfirm": "सभी {count} केस हटाएं?",
+    "yesDeleteAll": "हाँ, सभी हटाएं",
+    "cancel": "रद्द करें",
+    "emptyStateDesc": "एक या अधिक क्लिनिकल मोडैलिटी के माध्यम से रोगी डेटा अपलोड करके अपना पहला केस शुरू करें।",
+    "modalityNotes": "नोट्स",
+    "modalityPhoto": "फ़ोटो",
+    "modalityLab": "लैब",
+    "modalityVcf": "जीनोमिक"
+  },
   "intake": {
     "title": "नया केस",
     "analyseButton": "केस विश्लेषण करें",
     "subtitle": "किसी भी संयोजन में क्लिनिकल इनपुट सबमिट करें — Lumina बाकी संभाल लेगा।",
     "patientContext": "रोगी संदर्भ",
     "optional": "(वैकल्पिक)",
+    "patientName": "मरीज़ का नाम",
+    "patientNamePlaceholder": "जैसे राजेश कुमार",
+    "modalitiesActive": "सक्रिय",
     "age": "आयु",
     "sex": "लिंग",
     "agePlaceholder": "जैसे 8 वर्ष",
@@ -52,7 +85,8 @@
     "progressRanking": "रैंकिंग पूर्ण",
     "errorNoInput": "विश्लेषण के लिए कम से कम एक इनपुट जोड़ें",
     "errorNoHpo": "कोई HPO फेनोटाइप नहीं निकाला — अधिक विवरण जोड़ने का प्रयास करें",
-    "errorApiFailed": "विश्लेषण विफल — क्या API चल रहा है?"
+    "errorApiFailed": "विश्लेषण विफल — क्या API चल रहा है?",
+    "confidenceCeiling": "अधिकतम विश्वास"
   },
   "case": {
     "topDiagnosis": "शीर्ष निदान",
@@ -191,5 +225,8 @@
     "labReport": "लैब रिपोर्ट",
     "vcfFile": "VCF फाइल"
   },
-  "common": { "loading": "लोड हो रहा है...", "error": "कुछ गलत हो गया" }
+  "common": {
+    "loading": "लोड हो रहा है...",
+    "error": "कुछ गलत हो गया"
+  }
 }

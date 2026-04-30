@@ -1,12 +1,45 @@
 {
-  "nav": { "cases": "ケース", "newCase": "新規ケース", "signIn": "サインイン", "getStarted": "始める", "dashboard": "ダッシュボード", "howItWorks": "使い方", "technology": "テクノロジー", "science": "サイエンス" },
-  "dashboard": { "title": "ケース", "subtitle": "診断履歴", "newCase": "新規ケース", "totalCases": "総ケース数", "avgConfidence": "平均信頼度", "hpoAvg": "HPO用語平均", "noCases": "ケースはまだありません", "startFirst": "最初のケースを開始する", "clearAll": "すべて削除", "casesTotal": "合計{count}件", "hpoTerms": "{count}個のHPO用語", "matchLabel": "一致", "deleteAllConfirm": "{count}件すべてを削除しますか？", "yesDeleteAll": "はい、すべて削除", "cancel": "キャンセル", "emptyStateDesc": "1つ以上の臨床モダリティを通じて患者データをアップロードして最初のケースを開始してください。", "modalityNotes": "ノート", "modalityPhoto": "写真", "modalityLab": "検査", "modalityVcf": "ゲノム" },
+  "nav": {
+    "cases": "ケース",
+    "newCase": "新規ケース",
+    "signIn": "サインイン",
+    "getStarted": "始める",
+    "dashboard": "ダッシュボード",
+    "howItWorks": "使い方",
+    "technology": "テクノロジー",
+    "science": "サイエンス"
+  },
+  "dashboard": {
+    "title": "ケース",
+    "subtitle": "診断履歴",
+    "newCase": "新規ケース",
+    "totalCases": "総ケース数",
+    "avgConfidence": "平均信頼度",
+    "hpoAvg": "HPO用語平均",
+    "noCases": "ケースはまだありません",
+    "startFirst": "最初のケースを開始する",
+    "clearAll": "すべて削除",
+    "casesTotal": "合計{count}件",
+    "hpoTerms": "{count}個のHPO用語",
+    "matchLabel": "一致",
+    "deleteAllConfirm": "{count}件すべてを削除しますか？",
+    "yesDeleteAll": "はい、すべて削除",
+    "cancel": "キャンセル",
+    "emptyStateDesc": "1つ以上の臨床モダリティを通じて患者データをアップロードして最初のケースを開始してください。",
+    "modalityNotes": "ノート",
+    "modalityPhoto": "写真",
+    "modalityLab": "検査",
+    "modalityVcf": "ゲノム"
+  },
   "intake": {
     "title": "新規ケース",
     "analyseButton": "ケースを分析する",
     "subtitle": "任意の組み合わせで臨床入力を送信してください — Lumina が残りを処理します。",
     "patientContext": "患者情報",
     "optional": "（任意）",
+    "patientName": "患者名",
+    "patientNamePlaceholder": "例: 田中太郎",
+    "modalitiesActive": "入力済み",
     "age": "年齢",
     "sex": "性別",
     "agePlaceholder": "例：8歳",
@@ -52,7 +85,8 @@
     "progressRanking": "ランキング完了",
     "errorNoInput": "分析するには少なくとも1つの入力を追加してください",
     "errorNoHpo": "HPO 表現型が抽出されませんでした — 詳細を追加してみてください",
-    "errorApiFailed": "分析に失敗しました — API は実行中ですか？"
+    "errorApiFailed": "分析に失敗しました — API は実行中ですか？",
+    "confidenceCeiling": "信頼度上限"
   },
   "case": {
     "topDiagnosis": "トップ診断",
@@ -191,5 +225,8 @@
     "labReport": "検査レポート",
     "vcfFile": "VCFファイル"
   },
-  "common": { "loading": "読み込み中...", "error": "問題が発生しました" }
+  "common": {
+    "loading": "読み込み中...",
+    "error": "問題が発生しました"
+  }
 }

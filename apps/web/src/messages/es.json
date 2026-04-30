@@ -1,12 +1,45 @@
 {
-  "nav": { "cases": "Casos", "newCase": "Nuevo caso", "signIn": "Iniciar sesión", "getStarted": "Comenzar", "dashboard": "Panel", "howItWorks": "Cómo funciona", "technology": "Tecnología", "science": "Ciencia" },
-  "dashboard": { "title": "Casos", "subtitle": "Tu historial diagnóstico", "newCase": "Nuevo caso", "totalCases": "Total de casos", "avgConfidence": "Confianza promedio", "hpoAvg": "Promedio términos HPO", "noCases": "Aún no hay casos", "startFirst": "Comienza tu primer caso", "clearAll": "Borrar todos los casos", "casesTotal": "{count} casos en total", "hpoTerms": "{count} términos HPO", "matchLabel": "coincidencia", "deleteAllConfirm": "¿Eliminar todos los {count} casos?", "yesDeleteAll": "Sí, eliminar todos", "cancel": "Cancelar", "emptyStateDesc": "Comienza tu primer caso subiendo datos del paciente a través de una o más modalidades clínicas.", "modalityNotes": "Notas", "modalityPhoto": "Foto", "modalityLab": "Laboratorio", "modalityVcf": "Genómico" },
+  "nav": {
+    "cases": "Casos",
+    "newCase": "Nuevo caso",
+    "signIn": "Iniciar sesión",
+    "getStarted": "Comenzar",
+    "dashboard": "Panel",
+    "howItWorks": "Cómo funciona",
+    "technology": "Tecnología",
+    "science": "Ciencia"
+  },
+  "dashboard": {
+    "title": "Casos",
+    "subtitle": "Tu historial diagnóstico",
+    "newCase": "Nuevo caso",
+    "totalCases": "Total de casos",
+    "avgConfidence": "Confianza promedio",
+    "hpoAvg": "Promedio términos HPO",
+    "noCases": "Aún no hay casos",
+    "startFirst": "Comienza tu primer caso",
+    "clearAll": "Borrar todos los casos",
+    "casesTotal": "{count} casos en total",
+    "hpoTerms": "{count} términos HPO",
+    "matchLabel": "coincidencia",
+    "deleteAllConfirm": "¿Eliminar todos los {count} casos?",
+    "yesDeleteAll": "Sí, eliminar todos",
+    "cancel": "Cancelar",
+    "emptyStateDesc": "Comienza tu primer caso subiendo datos del paciente a través de una o más modalidades clínicas.",
+    "modalityNotes": "Notas",
+    "modalityPhoto": "Foto",
+    "modalityLab": "Laboratorio",
+    "modalityVcf": "Genómico"
+  },
   "intake": {
     "title": "Nuevo caso",
     "analyseButton": "Analizar caso",
     "subtitle": "Envía cualquier combinación de entradas clínicas — Lumina se encarga del resto.",
     "patientContext": "Contexto del paciente",
     "optional": "(opcional)",
+    "patientName": "Nombre del paciente",
+    "patientNamePlaceholder": "p.ej. Juan García",
+    "modalitiesActive": "activas",
     "age": "Edad",
     "sex": "Sexo",
     "agePlaceholder": "p. ej. 8 años",
@@ -52,7 +85,8 @@
     "progressRanking": "Clasificación completa",
     "errorNoInput": "Añade al menos una entrada para analizar",
     "errorNoHpo": "No se extrajeron fenotipos HPO — intenta añadir más detalles",
-    "errorApiFailed": "Análisis fallido — ¿está la API en funcionamiento?"
+    "errorApiFailed": "Análisis fallido — ¿está la API en funcionamiento?",
+    "confidenceCeiling": "Límite de confianza"
   },
   "case": {
     "topDiagnosis": "Diagnóstico principal",
@@ -191,5 +225,8 @@
     "labReport": "Informe de laboratorio",
     "vcfFile": "Archivo VCF"
   },
-  "common": { "loading": "Cargando...", "error": "Algo salió mal" }
+  "common": {
+    "loading": "Cargando...",
+    "error": "Algo salió mal"
+  }
 }

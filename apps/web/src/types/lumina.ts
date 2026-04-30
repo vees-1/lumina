@@ -19,7 +19,7 @@ export interface CaseData {
   modalities: string[];
   hpoTerms: HPOTerm[];
   rankings: RankResult[];
-  patientContext?: { age?: string; sex?: string };
+  patientContext?: { patientName?: string; age?: string; sex?: string };
 }
 
 export interface CaseSummary {

@@ -333,19 +333,6 @@ export default function HomePage() {
             <ModalityCard delay={0.14} icon={<LabIcon />} title={t("modalityLabTitle")} description={t("modalityLabDesc")} />
             <ModalityCard delay={0.21} icon={<DnaIcon />} title={t("modalityDnaTitle")} description={t("modalityDnaDesc")} />
             <ModalityCard delay={0.28} icon={<ChatIcon />} title={t("modalityChatTitle")} description={t("modalityChatDesc")} />
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, ease, delay: 0.35 }}
-              className="relative bg-foreground rounded-2xl p-6 flex flex-col justify-between min-h-[160px] overflow-hidden"
-            >
-              <div className="orb absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20"
-                style={{ background: "radial-gradient(circle, oklch(0.52 0.21 255) 0%, transparent 70%)", filter: "blur(20px)" }} />
-              <div className="text-[15px] font-semibold text-white">{t("poweredBy")}</div>
-              <p className="text-[13px] text-white/60 mt-2">{t("poweredByDesc")}</p>
-              <div className="mt-4 text-[12px] font-medium text-white/40 uppercase tracking-wider">claude-sonnet-4-6</div>
-            </motion.div>
           </div>
         </div>
       </section>

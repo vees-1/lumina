@@ -1,12 +1,45 @@
 {
-  "nav": { "cases": "Dossiers", "newCase": "Nouveau dossier", "signIn": "Se connecter", "getStarted": "Commencer", "dashboard": "Tableau de bord", "howItWorks": "Comment ça marche", "technology": "Technologie", "science": "Science" },
-  "dashboard": { "title": "Dossiers", "subtitle": "Votre historique de diagnostics", "newCase": "Nouveau dossier", "totalCases": "Total des dossiers", "avgConfidence": "Confiance moyenne", "hpoAvg": "Moyenne des termes HPO", "noCases": "Aucun dossier pour l'instant", "startFirst": "Créez votre premier dossier", "clearAll": "Effacer tous les dossiers", "casesTotal": "{count} dossiers au total", "hpoTerms": "{count} termes HPO", "matchLabel": "correspondance", "deleteAllConfirm": "Supprimer les {count} dossiers ?", "yesDeleteAll": "Oui, tout supprimer", "cancel": "Annuler", "emptyStateDesc": "Créez votre premier dossier en téléchargeant des données patient via une ou plusieurs modalités cliniques.", "modalityNotes": "Notes", "modalityPhoto": "Photo", "modalityLab": "Laboratoire", "modalityVcf": "Génomique" },
+  "nav": {
+    "cases": "Dossiers",
+    "newCase": "Nouveau dossier",
+    "signIn": "Se connecter",
+    "getStarted": "Commencer",
+    "dashboard": "Tableau de bord",
+    "howItWorks": "Comment ça marche",
+    "technology": "Technologie",
+    "science": "Science"
+  },
+  "dashboard": {
+    "title": "Dossiers",
+    "subtitle": "Votre historique de diagnostics",
+    "newCase": "Nouveau dossier",
+    "totalCases": "Total des dossiers",
+    "avgConfidence": "Confiance moyenne",
+    "hpoAvg": "Moyenne des termes HPO",
+    "noCases": "Aucun dossier pour l'instant",
+    "startFirst": "Créez votre premier dossier",
+    "clearAll": "Effacer tous les dossiers",
+    "casesTotal": "{count} dossiers au total",
+    "hpoTerms": "{count} termes HPO",
+    "matchLabel": "correspondance",
+    "deleteAllConfirm": "Supprimer les {count} dossiers ?",
+    "yesDeleteAll": "Oui, tout supprimer",
+    "cancel": "Annuler",
+    "emptyStateDesc": "Créez votre premier dossier en téléchargeant des données patient via une ou plusieurs modalités cliniques.",
+    "modalityNotes": "Notes",
+    "modalityPhoto": "Photo",
+    "modalityLab": "Laboratoire",
+    "modalityVcf": "Génomique"
+  },
   "intake": {
     "title": "Nouveau dossier",
     "analyseButton": "Analyser le dossier",
     "subtitle": "Soumettez toute combinaison d'entrées cliniques — Lumina s'occupe du reste.",
     "patientContext": "Contexte patient",
     "optional": "(optionnel)",
+    "patientName": "Nom du patient",
+    "patientNamePlaceholder": "p.ex. Jean Dupont",
+    "modalitiesActive": "actives",
     "age": "Âge",
     "sex": "Sexe",
     "agePlaceholder": "ex. 8 ans",
@@ -52,7 +85,8 @@
     "progressRanking": "Classement terminé",
     "errorNoInput": "Ajoutez au moins une entrée à analyser",
     "errorNoHpo": "Aucun phénotype HPO extrait — essayez d'ajouter plus de détails",
-    "errorApiFailed": "Analyse échouée — l'API est-elle en cours d'exécution ?"
+    "errorApiFailed": "Analyse échouée — l'API est-elle en cours d'exécution ?",
+    "confidenceCeiling": "Plafond de confiance"
   },
   "case": {
     "topDiagnosis": "Diagnostic principal",
@@ -191,5 +225,8 @@
     "labReport": "Rapport de laboratoire",
     "vcfFile": "Fichier VCF"
   },
-  "common": { "loading": "Chargement...", "error": "Une erreur est survenue" }
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue"
+  }
 }
