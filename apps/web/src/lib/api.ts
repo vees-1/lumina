@@ -55,18 +55,19 @@ export interface AgentSuggestion {
 export async function getAgentSuggestion(
   top5: RankResult[],
   modalitiesUsed: string[],
-  cycle = 0
+  cycle = 0,
+  lang = "en"
 ): Promise<AgentSuggestion> {
   const res = await fetch(`${API}/agent/next`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ top5, modalities_used: modalitiesUsed, cycle }),
+    body: JSON.stringify({ top5, modalities_used: modalitiesUsed, cycle, lang }),
   });
   if (!res.ok) throw new Error("Agent suggestion failed");
   return res.json();
 }
 
-export async function* streamLetter(caseData: CaseData): AsyncGenerator<string> {
+export async function* streamLetter(caseData: CaseData, lang = "en"): AsyncGenerator<string> {
   const res = await fetch(`${API}/agent/letter`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -74,6 +75,7 @@ export async function* streamLetter(caseData: CaseData): AsyncGenerator<string> 
       top5: caseData.rankings.slice(0, 5),
       evidence: { hpo_terms: caseData.hpoTerms, modalities: caseData.modalities },
       patient_context: caseData.patientContext ?? {},
+      lang,
     }),
   });
   if (!res.ok || !res.body) throw new Error("Letter generation failed");

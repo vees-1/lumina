@@ -75,7 +75,7 @@
     "sidebarLab": "Rapport de laboratoire",
     "sidebarVcf": "Données génomiques",
     "tipTitle": "Conseil",
-    "tipBody": "Plus de modalités = plus de confiance. L'ajout de données génomiques aux notes double généralement la précision.",
+    "tipBody": "Plus de modalités augmentent le plafond de confiance. Une entrée plafonne à 40% — les quatre atteignent 80%.",
     "analyzing": "Analyse…",
     "progressNotes": "Notes cliniques analysées",
     "progressPhoto": "Photo clinique analysée",

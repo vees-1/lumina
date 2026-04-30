@@ -75,7 +75,7 @@
     "sidebarLab": "Lab report",
     "sidebarVcf": "Genomic data",
     "tipTitle": "Tip",
-    "tipBody": "More modalities = higher confidence. Adding genomic data alongside notes typically doubles accuracy.",
+    "tipBody": "More modalities raise the confidence ceiling. One input caps at 40% — all four unlock 80%.",
     "analyzing": "Analyzing…",
     "progressNotes": "Clinical notes analyzed",
     "progressPhoto": "Clinical photo analyzed",

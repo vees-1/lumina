@@ -75,7 +75,7 @@
     "sidebarLab": "Laborbericht",
     "sidebarVcf": "Genomische Daten",
     "tipTitle": "Tipp",
-    "tipBody": "Mehr Modalitäten = höhere Konfidenz. Das Hinzufügen genomischer Daten neben Notizen verdoppelt die Genauigkeit typischerweise.",
+    "tipBody": "Mehr Modalitäten erhöhen die Konfidenz-Obergrenze. Eine Eingabe begrenzt auf 40% — alle vier ermöglichen 80%.",
     "analyzing": "Analysiere…",
     "progressNotes": "Klinische Notizen analysiert",
     "progressPhoto": "Klinisches Foto analysiert",

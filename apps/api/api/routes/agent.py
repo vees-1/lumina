@@ -11,25 +11,33 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 _MODEL_NEXT = "llama-3.3-70b-versatile"
 _MODEL_LETTER = "llama-3.3-70b-versatile"
 
+_LANG_NAMES: dict[str, str] = {
+    "en": "English", "hi": "Hindi", "de": "German",
+    "fr": "French", "es": "Spanish", "zh": "Chinese (Simplified)", "ja": "Japanese",
+}
+
 _NEXT_SYSTEM = """You are a clinical reasoning assistant for rare disease diagnosis.
 Given a ranked disease list and the modalities already used, suggest which modality to try next.
 
 Return JSON only:
-{"modality": "notes|photo|lab|vcf", "reasoning": "one sentence", "cycles_remaining": 0-2}
+{{"modality": "notes|photo|lab|vcf", "reasoning": "one sentence", "cycles_remaining": 0-2}}
 
 Modalities: notes (clinical text), photo (clinical photo), lab (lab reports), vcf (genetics VCF)
-If confidence is high enough (top-1 > 85 AND gap to top-2 > 15), return cycles_remaining: 0."""
+If confidence is high enough (top-1 > 85 AND gap to top-2 > 15), return cycles_remaining: 0.
+Write the "reasoning" value in {lang_name}. Keep all JSON keys in English."""
 
 _LETTER_SYSTEM = """You are a clinical specialist writing a concise referral letter for a rare disease patient.
-Write in professional medical style. Keep it under 300 words. Structure: patient summary (1-2 sentences),
-key clinical findings (bullet list), suspected diagnosis with brief reasoning (2-3 sentences),
-recommended next steps (bullet list), closing. Use markdown headers."""
+Write in professional medical style in {lang_name}. Keep it under 300 words.
+Structure: patient summary (1-2 sentences), key clinical findings (bullet list),
+suspected diagnosis with brief reasoning (2-3 sentences), recommended next steps (bullet list), closing.
+Use markdown headers. Disease names may remain in English as they are proper clinical terms."""
 
 
 class AgentNextRequest(BaseModel):
     top5: list[RankResult]
     modalities_used: list[str]
     cycle: int = 0
+    lang: str = "en"
 
 
 class AgentSuggestion(BaseModel):
@@ -42,6 +50,7 @@ class LetterRequest(BaseModel):
     top5: list[RankResult]
     evidence: dict
     patient_context: dict
+    lang: str = "en"
 
 
 @router.post("/next", response_model=AgentSuggestion)
@@ -50,6 +59,7 @@ async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
 
     client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
 
+    lang_name = _LANG_NAMES.get(body.lang, "English")
     top5_text = "\n".join(
         f"#{i + 1} ORPHA:{r.orpha_code} {r.name} — confidence {r.confidence:.1f}"
         for i, r in enumerate(body.top5)
@@ -66,7 +76,7 @@ async def agent_next(body: AgentNextRequest) -> AgentSuggestion:
             max_tokens=256,
             temperature=0.0,
             messages=[
-                {"role": "system", "content": _NEXT_SYSTEM},
+                {"role": "system", "content": _NEXT_SYSTEM.format(lang_name=lang_name)},
                 {"role": "user", "content": user_msg},
             ],
         )
@@ -103,6 +113,8 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
         f"Evidence summary:\n{json.dumps(body.evidence, indent=2)}"
     )
 
+    lang_name = _LANG_NAMES.get(body.lang, "English")
+
     async def stream_letter():
         try:
             stream = await client.chat.completions.create(
@@ -111,7 +123,7 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
                 temperature=0.3,
                 stream=True,
                 messages=[
-                    {"role": "system", "content": _LETTER_SYSTEM},
+                    {"role": "system", "content": _LETTER_SYSTEM.format(lang_name=lang_name)},
                     {"role": "user", "content": user_msg},
                 ],
             )

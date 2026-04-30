@@ -4,7 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { getCaseById, getAgentSuggestion, streamLetter } from "@/lib/api";
@@ -379,6 +379,7 @@ function LetterView({ letter, streaming }: { letter: string; streaming: boolean 
 
 export default function CasePage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations("case");
+  const locale = useLocale();
   const { id } = use(params);
   const [caseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
@@ -393,7 +394,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
     const allModalities = ["notes", "photo", "lab", "vcf"];
     const unused = allModalities.filter((m) => !caseData.modalities.includes(m));
     if (topConf < 85 && unused.length > 0) {
-      getAgentSuggestion(caseData.rankings.slice(0, 5), caseData.modalities, 0)
+      getAgentSuggestion(caseData.rankings.slice(0, 5), caseData.modalities, 0, locale)
         .then((s) => { if (s.modality) setAgentSuggestion(s); })
         .catch(() => {});
     }
@@ -405,7 +406,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
     setLetter("");
     setStreaming(true);
     try {
-      for await (const chunk of streamLetter(caseData)) {
+      for await (const chunk of streamLetter(caseData, locale)) {
         setLetter((prev) => prev + chunk);
       }
     } catch {

@@ -75,7 +75,7 @@
     "sidebarLab": "Informe de laboratorio",
     "sidebarVcf": "Datos genómicos",
     "tipTitle": "Consejo",
-    "tipBody": "Más modalidades = mayor confianza. Añadir datos genómicos junto con notas típicamente duplica la precisión.",
+    "tipBody": "Más modalidades aumentan el techo de confianza. Una entrada limita al 40% — las cuatro desbloquean el 80%.",
     "analyzing": "Analizando…",
     "progressNotes": "Notas clínicas analizadas",
     "progressPhoto": "Foto clínica analizada",

@@ -75,7 +75,7 @@
     "sidebarLab": "实验室报告",
     "sidebarVcf": "基因组数据",
     "tipTitle": "提示",
-    "tipBody": "更多模态 = 更高置信度。在笔记旁边添加基因组数据通常可使准确率翻倍。",
+    "tipBody": "更多模态可提高置信度上限。单一输入上限为40%——四种全部使用可达80%。",
     "analyzing": "分析中…",
     "progressNotes": "临床笔记已分析",
     "progressPhoto": "临床照片已分析",
