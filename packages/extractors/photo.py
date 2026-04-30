@@ -59,7 +59,7 @@ async def extract_photo(
         system = _SYSTEM_BASE
         if hpo_vocab:
             vocab_block = "\n".join(
-                f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(hpo_vocab[:400])
+                f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(hpo_vocab[:2000])
             )
             system = system + _VOCAB_ADDENDUM.format(vocab=vocab_block)
         if facial and facial_vocab:

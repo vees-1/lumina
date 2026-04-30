@@ -42,7 +42,7 @@ async def _extract_via_groq(text: str, hpo_vocab: list[tuple[str, str]]) -> list
     try:
         from groq import AsyncGroq
         client = AsyncGroq(api_key=api_key)
-        vocab_block = "\n".join(f"{hid}: {name}" for hid, name in hpo_vocab[:300])
+        vocab_block = "\n".join(f"{hid}: {name}" for hid, name in hpo_vocab[:2000])
         system = f"{_SYSTEM}\n\nHPO vocabulary:\n{vocab_block}"
         response = await client.chat.completions.create(
             model=_GROQ_MODEL,
