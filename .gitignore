@@ -2,6 +2,7 @@
 *.md
 **/*.md
 !README.md
+!apps/api/README.md
 
 # deps
 node_modules/
