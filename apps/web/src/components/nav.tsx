@@ -8,6 +8,7 @@ import { Globe, Check } from "lucide-react";
 import { useAuth, UserButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { getApiHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 export function Nav({ transparent = false }: { transparent?: boolean }) {
@@ -208,6 +209,27 @@ export function DashboardNav() {
   const pathname = usePathname();
   const segments = pathname.split('/');
   const locale = ['en','hi','de','fr','es','zh','ja'].includes(segments[1]) ? segments[1] : 'en';
+  const [apiStatus, setApiStatus] = useState<"loading" | "ready" | "starting" | "unavailable">("loading");
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    void getApiHealth(controller.signal)
+      .then((health) => {
+        if (cancelled) return;
+        setApiStatus(health.status === "ok" && !health.db?.startsWith("error") ? "ready" : "starting");
+      })
+      .catch(() => {
+        if (!cancelled) setApiStatus("unavailable");
+      });
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, []);
+
   return (
     <motion.header
       initial={{ y: -20, opacity: 0 }}
@@ -245,6 +267,31 @@ export function DashboardNav() {
             </Button>
           </Link>
           <LanguageSwitcher />
+          <div
+            className="flex items-center gap-1.5"
+            title={
+              apiStatus === "ready"
+                ? t("apiStatusReady")
+                : apiStatus === "loading"
+                  ? t("apiStatusLoading")
+                  : apiStatus === "starting"
+                    ? t("apiStatusStarting")
+                    : t("apiStatusUnavailable")
+            }
+          >
+            <div className={`w-2 h-2 rounded-full transition-colors ${
+              apiStatus === "ready" ? "bg-[oklch(0.52_0.19_160)]" : "bg-[oklch(0.75_0.15_60)]"
+            } ${apiStatus === "loading" || apiStatus === "starting" ? "animate-pulse" : ""}`} />
+            <span className="text-[11px] text-muted-foreground hidden sm:inline">
+              {apiStatus === "ready"
+                ? t("apiStatusReady")
+                : apiStatus === "loading"
+                  ? t("apiStatusLoading")
+                  : apiStatus === "starting"
+                    ? t("apiStatusStarting")
+                    : t("apiStatusUnavailable")}
+            </span>
+          </div>
           <UserButton />
         </div>
       </nav>

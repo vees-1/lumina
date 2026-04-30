@@ -106,6 +106,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   const [streaming, setStreaming] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
   const hasStarted = useRef(false);
 
   useEffect(() => {
@@ -188,6 +189,14 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
               <Button
                 variant="outline"
                 size="sm"
+                onClick={() => setEditing((e) => !e)}
+                className="text-[13px] h-8 rounded-full"
+              >
+                {editing ? t("doneEditing") : t("edit")}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleCopy}
                 className="text-[13px] h-8 rounded-full"
               >
@@ -239,7 +248,13 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
             <div className="p-6 text-[13px] text-red-500">{error}</div>
           ) : (
             <div className="p-8 min-h-[400px]">
-              {letter ? (
+              {editing ? (
+                <textarea
+                  value={letter}
+                  onChange={(e) => setLetter(e.target.value)}
+                  className="w-full min-h-[500px] p-8 text-[14px] leading-relaxed font-serif resize-none outline-none bg-transparent"
+                />
+              ) : letter ? (
                 formatLetter(letter)
               ) : (
                 !streaming && (

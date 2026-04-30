@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -12,6 +12,94 @@ import { getCaseById, saveCaseToStorage, scoreCase, submitLab, submitNotes, subm
 import type { HPOTerm } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
+
+const SYMPTOM_CATEGORIES = [
+  {
+    id: "growth",
+    i18nKey: "catGrowth",
+    symptoms: [
+      "Short stature",
+      "Failure to thrive",
+      "Microcephaly",
+      "Macrocephaly",
+      "Tall stature",
+      "Obesity",
+    ],
+  },
+  {
+    id: "neurological",
+    i18nKey: "catNeurological",
+    symptoms: [
+      "Seizures",
+      "Developmental delay",
+      "Intellectual disability",
+      "Hypotonia",
+      "Ataxia",
+      "Spasticity",
+      "Nystagmus",
+    ],
+  },
+  {
+    id: "facial",
+    i18nKey: "catFacial",
+    symptoms: [
+      "Hypertelorism",
+      "Low-set ears",
+      "Epicanthal folds",
+      "Broad nasal bridge",
+      "Upslanted palpebral fissures",
+      "Downslanted palpebral fissures",
+      "Short philtrum",
+      "Micrognathia",
+    ],
+  },
+  {
+    id: "skeletal",
+    i18nKey: "catSkeletal",
+    symptoms: [
+      "Clinodactyly",
+      "Brachydactyly",
+      "Scoliosis",
+      "Joint hypermobility",
+      "Polydactyly",
+      "Syndactyly",
+    ],
+  },
+  {
+    id: "metabolic",
+    i18nKey: "catMetabolic",
+    symptoms: [
+      "Hypoglycemia",
+      "Lactic acidosis",
+      "Metabolic acidosis",
+      "Hyperammonemia",
+      "Developmental regression",
+      "Hepatomegaly",
+    ],
+  },
+  {
+    id: "renalHearing",
+    i18nKey: "catRenalHearing",
+    symptoms: [
+      "Renal anomaly",
+      "Hydronephrosis",
+      "Proteinuria",
+      "Hearing impairment",
+      "Sensorineural hearing loss",
+    ],
+  },
+  {
+    id: "cardiac",
+    i18nKey: "catCardiac",
+    symptoms: [
+      "Ventricular septal defect",
+      "Atrial septal defect",
+      "Cardiomyopathy",
+      "Arrhythmia",
+      "Congenital heart disease",
+    ],
+  },
+] as const;
 
 type Tab = "notes" | "photo" | "lab" | "vcf";
 
@@ -46,8 +134,6 @@ const TAB_ICONS: Record<Tab, React.ReactNode> = {
     </svg>
   ),
 };
-
-const CONFIDENCE_CAPS: Record<number, number> = { 0: 0, 1: 40, 2: 55, 3: 65, 4: 80 };
 
 function DropZone({
   accept, label, hint, file, onFile, onClear,
@@ -150,26 +236,19 @@ export default function IntakePage() {
   const firstUnused = (["notes", "photo", "lab", "vcf"] as Tab[]).find((m) => !usedModalities.includes(m)) ?? "notes";
 
   const [tab, setTab] = useState<Tab>(firstUnused);
+  const [showChecklist, setShowChecklist] = useState(false);
   const [notes, setNotes] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [isFacial, setIsFacial] = useState(false);
   const [lab, setLab] = useState<File | null>(null);
   const [vcf, setVcf] = useState<File | null>(null);
-  const [patientName, setPatientName] = useState("");
-  const [age, setAge] = useState("");
-  const [sex, setSex] = useState("");
+  const [patientName, setPatientName] = useState(existingCase?.patientContext?.patientName ?? "");
+  const [age, setAge] = useState(existingCase?.patientContext?.age ?? "");
+  const [sex, setSex] = useState(existingCase?.patientContext?.sex ?? "");
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState<string[]>([]);
   const [activeStep, setActiveStep] = useState("");
-
-  useEffect(() => {
-    if (addToId && existingCase) {
-      setPatientName(existingCase.patientContext?.patientName ?? "");
-      setAge(existingCase.patientContext?.age ?? "");
-      setSex(existingCase.patientContext?.sex ?? "");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   const TABS: { id: Tab; label: string; hint: string }[] = [
     { id: "notes", label: t("tabNotesLabel"), hint: t("tabNotesHint") },
@@ -180,7 +259,6 @@ export default function IntakePage() {
 
   const activeModalities = [!!notes.trim(), !!photo, !!lab, !!vcf].filter(Boolean).length;
   const hasAnyInput = activeModalities > 0;
-  const confidenceCap = CONFIDENCE_CAPS[activeModalities];
 
   const addProgress = (msg: string) => {
     setActiveStep(msg);
@@ -306,6 +384,40 @@ export default function IntakePage() {
       setAnalyzing(false);
     }
   };
+
+  function appendSymptom(categoryLabel: string, symptom: string, status: "present" | "absent") {
+    const nextLine = `${categoryLabel}: ${status === "present" ? symptom : `No ${symptom.toLowerCase()}`}.`;
+
+    setNotes((prev) => {
+      const lines = prev
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const symptomPattern = new RegExp(
+        `^${categoryLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}:\\s+(?:${symptom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}|No\\s+${symptom.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})\\.$`,
+        "i",
+      );
+      const nextLines = lines.filter((line) => !symptomPattern.test(line));
+      nextLines.push(nextLine);
+      return nextLines.join("\n");
+    });
+
+    requestAnimationFrame(() => {
+      notesRef.current?.focus();
+      notesRef.current?.setSelectionRange(notesRef.current.value.length, notesRef.current.value.length);
+    });
+  }
+
+  function symptomState(categoryLabel: string, symptom: string) {
+    const normalized = notes.toLowerCase();
+    if (normalized.includes(`${categoryLabel.toLowerCase()}: ${symptom.toLowerCase()}.`)) {
+      return "present";
+    }
+    if (normalized.includes(`${categoryLabel.toLowerCase()}: no ${symptom.toLowerCase()}.`)) {
+      return "absent";
+    }
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
@@ -447,8 +559,87 @@ export default function IntakePage() {
                   >
                     {tab === "notes" && (
                       <div>
+                        <div className="mb-4">
+                          <button
+                            type="button"
+                            onClick={() => setShowChecklist((s) => !s)}
+                            className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-2"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+                              <path d="M2 5h12M2 8h8M2 11h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                            </svg>
+                            {showChecklist ? t("hideChecklist") : t("quickAdd")}
+                          </button>
+
+                          {showChecklist && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="space-y-3 p-3 rounded-xl bg-[oklch(0.975_0_0)] border border-black/[0.06]"
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="text-[12px] text-muted-foreground">
+                                  {t("checklistDesc")}
+                                </p>
+                                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                  <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-emerald-700">
+                                    {t("present")}
+                                  </span>
+                                  <span className="rounded-full border border-slate-300 bg-white px-2 py-0.5">
+                                    {t("absent")}
+                                  </span>
+                                </div>
+                              </div>
+                              {SYMPTOM_CATEGORIES.map((category) => (
+                                <div key={category.id}>
+                                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                                    {t(category.i18nKey)}
+                                  </p>
+                                  <div className="space-y-1.5">
+                                    {category.symptoms.map((symptom) => {
+                                      const state = symptomState(t(category.i18nKey), symptom);
+                                      return (
+                                        <div key={symptom} className="flex flex-wrap items-center gap-2">
+                                          <span className="min-w-[180px] flex-1 text-[12px] text-foreground/85">
+                                            {symptom}
+                                          </span>
+                                          <div className="flex items-center gap-1">
+                                            <button
+                                              type="button"
+                                              onClick={() => appendSymptom(t(category.i18nKey), symptom, "present")}
+                                              className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
+                                                state === "present"
+                                                  ? "border-emerald-500/30 bg-emerald-500/12 text-emerald-700"
+                                                  : "border-black/10 bg-white text-foreground/75 hover:border-emerald-500/25 hover:bg-emerald-500/6"
+                                              }`}
+                                            >
+                                              {t("present")}
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => appendSymptom(t(category.i18nKey), symptom, "absent")}
+                                              className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
+                                                state === "absent"
+                                                  ? "border-slate-400 bg-slate-100 text-slate-700"
+                                                  : "border-black/10 bg-white text-foreground/75 hover:border-slate-300 hover:bg-slate-50"
+                                              }`}
+                                            >
+                                              {t("absent")}
+                                            </button>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              ))}
+                            </motion.div>
+                          )}
+                        </div>
                         <p className="text-[12px] text-muted-foreground mb-3">{t("notesDesc")}</p>
                         <textarea
+                          ref={notesRef}
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
                           placeholder={t("notesPlaceholder")}

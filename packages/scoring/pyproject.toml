@@ -11,9 +11,11 @@ dependencies = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = [".."]
-include = ["scoring*"]
+[tool.setuptools]
+packages = ["scoring"]
+
+[tool.setuptools.package-dir]
+scoring = "."
 
 [dependency-groups]
 dev = [

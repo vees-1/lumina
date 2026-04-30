@@ -41,6 +41,12 @@ interface DiseaseDetail {
   phenotypes: Phenotype[];
   genes: Gene[];
   prevalence: Prevalence[];
+  clinical_summary: {
+    inheritance: string | null;
+    confirmatory_workup: string | null;
+    typical_age_of_onset: string | null;
+    prevalence_summary: string | null;
+  };
 }
 
 const FREQ_COLORS: Record<string, { bg: string; color: string }> = {
@@ -188,6 +194,83 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                   </div>
                 </div>
 
+                {/* Clinical action summary */}
+                <div className="mb-6 rounded-2xl border border-black/[0.06] bg-white p-4 sm:p-5">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <h2 className="text-[14px] font-semibold">{t("clinicalSummary")}</h2>
+                    <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                      {t("summaryAtGlance")}
+                    </span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {[
+                      {
+                        label: t("inheritance"),
+                        value: disease.clinical_summary.inheritance,
+                      },
+                      {
+                        label: t("confirmatoryWorkup"),
+                        value: disease.clinical_summary.confirmatory_workup,
+                      },
+                      {
+                        label: t("ageOfOnset"),
+                        value: disease.clinical_summary.typical_age_of_onset,
+                      },
+                      {
+                        label: t("prevalenceSummary"),
+                        value: disease.clinical_summary.prevalence_summary,
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="rounded-xl border border-black/[0.06] bg-[oklch(0.985_0_0)] px-4 py-3"
+                      >
+                        <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                          {item.label}
+                        </p>
+                        <p className="text-[13px] leading-5 text-foreground">
+                          {item.value?.trim() || t("notAvailable")}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clinical Summary */}
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {disease.disorder_type && (
+                    <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
+                      <span className="font-medium text-foreground">{t("disorderType")}:</span> {disease.disorder_type}
+                    </span>
+                  )}
+                  {disease.disorder_group && (
+                    <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
+                      <span className="font-medium text-foreground">{t("disorderGroup")}:</span> {disease.disorder_group}
+                    </span>
+                  )}
+                  {disease.omim.length > 0 && (
+                    <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
+                      <span className="font-medium text-foreground">{t("omim")}:</span>{" "}
+                      {disease.omim.map((id, idx) => (
+                        <a
+                          key={id}
+                          href={`https://omim.org/entry/${id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[oklch(0.38_0.21_255)] hover:underline"
+                        >
+                          {id}{idx < disease.omim.length - 1 ? ", " : ""}
+                        </a>
+                      ))}
+                    </span>
+                  )}
+                  {disease.icd10.length > 0 && (
+                    <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
+                      <span className="font-medium text-foreground">{t("icd10")}:</span> {disease.icd10.join(", ")}
+                    </span>
+                  )}
+                </div>
+
                 {/* Action buttons */}
                 <div className="flex items-center gap-3 mb-8">
                   <Link href="/intake">
@@ -198,9 +281,8 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 </div>
 
                 {/* Tabs */}
-                <Tabs defaultValue="overview">
+                <Tabs defaultValue="phenotypes">
                   <TabsList className="mb-6">
-                    <TabsTrigger value="overview">{t("tabOverview")}</TabsTrigger>
                     <TabsTrigger value="phenotypes">
                       {t("tabPhenotypes")}
                       {disease.phenotypes.length > 0 && (
@@ -209,6 +291,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                         </span>
                       )}
                     </TabsTrigger>
+                    <TabsTrigger value="overview">{t("tabOverview")}</TabsTrigger>
                     <TabsTrigger value="genes">
                       {t("tabGenes")}
                       {disease.genes.length > 0 && (
@@ -219,6 +302,41 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                     </TabsTrigger>
                     <TabsTrigger value="prevalence">{t("tabPrevalence")}</TabsTrigger>
                   </TabsList>
+
+                  {/* Phenotypes */}
+                  <TabsContent value="phenotypes">
+                    {disease.phenotypes.length === 0 ? (
+                      <div className="bg-white rounded-2xl border border-black/[0.06] p-10 text-center">
+                        <p className="text-[14px] text-muted-foreground">{t("noPhenotypeData")}</p>
+                      </div>
+                    ) : (
+                      <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
+                        <div className="px-5 py-3 border-b border-black/[0.06] flex items-center gap-3">
+                          <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("hpoTerm")}</span>
+                          <span className="ml-auto text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("frequency")}</span>
+                        </div>
+                        <div className="divide-y divide-black/[0.04] max-h-[500px] overflow-y-auto">
+                          {[...disease.phenotypes]
+                            .sort((a, b) => b.frequency_weight - a.frequency_weight)
+                            .map((p, i) => (
+                              <motion.div
+                                key={p.hpo_id}
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.02, duration: 0.25 }}
+                                className="flex items-center justify-between px-5 py-3 gap-4"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[13px] font-medium">{p.hpo_term}</p>
+                                  <p className="text-[11px] font-mono text-muted-foreground">{p.hpo_id}</p>
+                                </div>
+                                <FreqBadge label={p.frequency_label} />
+                              </motion.div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                  </TabsContent>
 
                   {/* Overview */}
                   <TabsContent value="overview">
@@ -276,41 +394,6 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                         </div>
                       </div>
                     </div>
-                  </TabsContent>
-
-                  {/* Phenotypes */}
-                  <TabsContent value="phenotypes">
-                    {disease.phenotypes.length === 0 ? (
-                      <div className="bg-white rounded-2xl border border-black/[0.06] p-10 text-center">
-                        <p className="text-[14px] text-muted-foreground">{t("noPhenotypeData")}</p>
-                      </div>
-                    ) : (
-                      <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
-                        <div className="px-5 py-3 border-b border-black/[0.06] flex items-center gap-3">
-                          <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("hpoTerm")}</span>
-                          <span className="ml-auto text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("frequency")}</span>
-                        </div>
-                        <div className="divide-y divide-black/[0.04] max-h-[500px] overflow-y-auto">
-                          {[...disease.phenotypes]
-                            .sort((a, b) => b.frequency_weight - a.frequency_weight)
-                            .map((p, i) => (
-                              <motion.div
-                                key={p.hpo_id}
-                                initial={{ opacity: 0, x: -8 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.02, duration: 0.25 }}
-                                className="flex items-center justify-between px-5 py-3 gap-4"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[13px] font-medium">{p.hpo_term}</p>
-                                  <p className="text-[11px] font-mono text-muted-foreground">{p.hpo_id}</p>
-                                </div>
-                                <FreqBadge label={p.frequency_label} />
-                              </motion.div>
-                            ))}
-                        </div>
-                      </div>
-                    )}
                   </TabsContent>
 
                   {/* Genes */}

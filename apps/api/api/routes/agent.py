@@ -65,6 +65,8 @@ Yours sincerely,
 Rules:
 - Use ONLY plain text. No #, ##, ###, **, *, or backticks.
 - Disease names stay in English even if letter is in {lang_name}.
+- Use the supplied referral metadata when present: patient date of birth, referring physician and clinic, recipient specialist and hospital, and urgency level.
+- If urgency is urgent or emergency, reflect that in the recommendation tone and prioritization.
 - Be concise — under 350 words total.
 - Sound like a real clinician wrote this, not an AI."""
 
@@ -87,6 +89,34 @@ class LetterRequest(BaseModel):
     evidence: dict
     patient_context: dict
     lang: str = "en"
+
+
+def _first_present(context: dict, *keys: str) -> str:
+    for key in keys:
+        value = context.get(key)
+        if value not in (None, ""):
+            return str(value).strip()
+    return ""
+
+
+def _format_referral_metadata(context: dict) -> str:
+    fields = [
+        ("Patient name", _first_present(context, "patientName", "patient_name")),
+        ("Patient DOB", _first_present(context, "dateOfBirth", "patientDob", "patient_dob", "dob")),
+        (
+            "Referring physician",
+            _first_present(context, "referringPhysicianName", "referring_physician_name"),
+        ),
+        ("Referring clinic", _first_present(context, "referringClinic", "referring_clinic")),
+        (
+            "Recipient specialist",
+            _first_present(context, "recipientSpecialist", "recipient_specialist"),
+        ),
+        ("Recipient hospital", _first_present(context, "recipientHospital", "recipient_hospital")),
+        ("Urgency", _first_present(context, "urgency")),
+    ]
+    lines = [f"- {label}: {value}" for label, value in fields if value]
+    return "\n".join(lines) if lines else "- None provided"
 
 
 @router.post("/next", response_model=AgentSuggestion)
@@ -143,8 +173,10 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
         f"- ORPHA:{r.orpha_code} {r.name} (confidence {r.confidence:.1f}%, contributing: {', '.join(r.contributing_terms[:3])})"
         for r in body.top5
     )
+    metadata_text = _format_referral_metadata(body.patient_context)
     user_msg = (
-        f"Patient context:\n{json.dumps(body.patient_context, indent=2)}\n\n"
+        f"Referral metadata:\n{metadata_text}\n\n"
+        f"Patient context JSON:\n{json.dumps(body.patient_context, indent=2)}\n\n"
         f"Top diagnoses:\n{top5_text}\n\n"
         f"Evidence summary:\n{json.dumps(body.evidence, indent=2)}"
     )

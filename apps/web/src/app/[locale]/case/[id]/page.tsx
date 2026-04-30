@@ -7,13 +7,42 @@ import { toast } from "sonner";
 import { useTranslations, useLocale } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
-import { getCaseById, getAgentSuggestion, streamLetter } from "@/lib/api";
+import { getCaseById, getAgentSuggestion, streamLetter, updateCaseInStorage } from "@/lib/api";
 import type { AgentSuggestion } from "@/lib/api";
-import type { CaseData, RankResult } from "@/types/lumina";
+import type { CaseData, HPOTerm, RankResult, RankTermContext } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 const CONFIDENCE_CAPS: Record<number, number> = { 1: 40, 2: 55, 3: 65, 4: 80 };
+const CLOSE_CONFIDENCE_GAP = 10;
+
+function isAbsentTerm(term: Pick<HPOTerm, "assertion" | "confidence">) {
+  return term.assertion === "absent" || term.confidence < 0;
+}
+
+function formatHpoLabel(term: Pick<RankTermContext, "hpo_id" | "label">) {
+  return term.label?.trim() ? `${term.label} (${term.hpo_id})` : term.hpo_id;
+}
+
+function getTermDetails(
+  result: RankResult,
+  kind: "contributing" | "missing" | "distinguishing",
+): RankTermContext[] {
+  const detailMap = {
+    contributing: result.contributing_term_details,
+    missing: result.missing_term_details,
+    distinguishing: result.distinguishing_term_details,
+  } as const;
+  const idMap = {
+    contributing: result.contributing_terms,
+    missing: result.missing_terms,
+    distinguishing: result.distinguishing_terms,
+  } as const;
+
+  const details = detailMap[kind];
+  if (details?.length) return details;
+  return (idMap[kind] ?? []).map((hpoId) => ({ hpo_id: hpoId, label: "" }));
+}
 
 function ConfidenceTooltip({ confidence, modalities, children }: { confidence: number; modalities: number; children: React.ReactNode }) {
   const [visible, setVisible] = useState(false);
@@ -26,6 +55,54 @@ function ConfidenceTooltip({ confidence, modalities, children }: { confidence: n
           <span className="font-semibold">{confidence.toFixed(0)}%</span> is a relative phenotypic overlap score, not a probability. The ceiling for {modalities} modality{modalities !== 1 ? " inputs" : ""} is {cap}%. Adding more modalities raises the ceiling.
           <span className="absolute top-full left-4 border-4 border-transparent border-t-foreground" />
         </span>
+      )}
+    </span>
+  );
+}
+
+function HPOChip({ term }: { term: HPOTerm }) {
+  const t = useTranslations("case");
+
+  return (
+    <motion.span
+      key={`${term.hpo_id}-${term.source}-${term.assertion ?? "present"}`}
+      initial={{ opacity: 0, scale: 0.85 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="relative group text-[11px] px-2 py-0.5 rounded-full border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground font-mono cursor-default hover:border-[oklch(0.52_0.21_255/0.3)] hover:bg-[oklch(0.52_0.21_255/0.04)] transition-colors"
+    >
+      {term.hpo_id}
+      {term.source && (
+        <span className="absolute bottom-full left-0 mb-1.5 w-52 bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none whitespace-normal font-sans">
+          <span className="font-semibold">{t("fromLabel")}</span> {term.source}
+          <span className="absolute top-full left-3 border-4 border-transparent border-t-foreground" />
+        </span>
+      )}
+    </motion.span>
+  );
+}
+
+function RankTermChip({
+  term,
+  tone = "default",
+}: {
+  term: Pick<RankTermContext, "hpo_id" | "label">;
+  tone?: "default" | "missing" | "distinguishing";
+}) {
+  const toneClasses = {
+    default: "border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground",
+    missing: "border border-dashed border-black/[0.12] text-muted-foreground/80",
+    distinguishing: "bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.2)] text-[oklch(0.38_0.21_255)]",
+  } as const;
+
+  return (
+    <span className={`text-[11px] px-2 py-1 rounded-lg ${toneClasses[tone]}`}>
+      {term.label?.trim() ? (
+        <>
+          <span className="font-medium">{term.label}</span>{" "}
+          <span className="font-mono text-[10px] opacity-75">{term.hpo_id}</span>
+        </>
+      ) : (
+        <span className="font-mono">{term.hpo_id}</span>
       )}
     </span>
   );
@@ -62,6 +139,9 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
   ];
   const color = colors[rank - 1] ?? colors[4];
   const isTop = rank === 1;
+  const contributingTerms = getTermDetails(result, "contributing").slice(0, 5);
+  const missingTerms = getTermDetails(result, "missing").slice(0, 4);
+  const distinguishingTerms = getTermDetails(result, "distinguishing").slice(0, 3);
 
   return (
     <motion.div
@@ -96,13 +176,35 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
             ORPHA:{result.orpha_code} ↗
           </Link>
           <ConfidenceBar value={result.confidence} color={color} delay={delay + 0.2} />
-          {result.contributing_terms.length > 0 && (
+          {contributingTerms.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3">
-              {result.contributing_terms.slice(0, 5).map((t) => (
-                <span key={t} className="text-[11px] px-2 py-0.5 rounded-full border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground font-mono">
-                  {t}
-                </span>
+              {contributingTerms.map((term) => (
+                <RankTermChip key={`${result.orpha_code}-contrib-${term.hpo_id}`} term={term} />
               ))}
+            </div>
+          )}
+          {missingTerms.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-black/[0.04]">
+              <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+                {t("missingFindings")}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {missingTerms.map((term) => (
+                  <RankTermChip key={`${result.orpha_code}-missing-${term.hpo_id}`} term={term} tone="missing" />
+                ))}
+              </div>
+            </div>
+          )}
+          {distinguishingTerms.length > 0 && (
+            <div className="mt-2">
+              <p className="text-[10px] font-semibold text-[oklch(0.52_0.21_255/0.7)] uppercase tracking-wider mb-1.5">
+                {t("distinguishingFeatures")}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {distinguishingTerms.map((term) => (
+                  <RankTermChip key={`${result.orpha_code}-dist-${term.hpo_id}`} term={term} tone="distinguishing" />
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -116,9 +218,11 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
 function AgentBanner({
   suggestion,
   onDismiss,
+  caseId,
 }: {
   suggestion: AgentSuggestion;
   onDismiss: () => void;
+  caseId: string;
 }) {
   const t = useTranslations("case");
   const modalityNextLabel: Record<string, string> = {
@@ -148,7 +252,7 @@ function AgentBanner({
         </p>
         <p className="text-[12px] text-muted-foreground leading-relaxed">{suggestion.reasoning}</p>
         <div className="flex items-center gap-2 mt-3">
-          <Link href="/intake">
+          <Link href={`/intake?addTo=${caseId}`}>
             <button className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[oklch(0.52_0.21_255)] text-white hover:bg-[oklch(0.46_0.21_255)] transition-colors">
               {t("addNow")}
             </button>
@@ -209,7 +313,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
       <div className="divide-y divide-black/[0.04]">
         {terms.map((hpoId, i) => {
           const term = hpoMap.get(hpoId);
-          const src = term?.source ?? "unknown";
+          const src = term?.source_type ?? "unknown";
           const color = modalityColor[src] ?? "oklch(0.46 0 0)";
           const bg = modalityBg[src] ?? "oklch(0.46 0 0 / 0.08)";
           return (
@@ -248,6 +352,108 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
         <p className="px-5 py-4 text-[13px] text-muted-foreground">{t("noContributing")}</p>
       )}
     </motion.div>
+  );
+}
+
+function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
+  const t = useTranslations("case");
+  const [first, second] = rankings;
+
+  if (!first || !second) return null;
+
+  const gap = Math.abs(first.confidence - second.confidence);
+  if (gap > CLOSE_CONFIDENCE_GAP) return null;
+
+  const firstHighlights = getTermDetails(first, "distinguishing").slice(0, 3);
+  const secondHighlights = getTermDetails(second, "distinguishing").slice(0, 3);
+  const firstQuestions = (firstHighlights.length ? firstHighlights : getTermDetails(first, "missing")).slice(0, 2);
+  const secondQuestions = (secondHighlights.length ? secondHighlights : getTermDetails(second, "missing")).slice(0, 2);
+  const questions = [
+    ...firstQuestions.map((term) => ({ disease: first.name, term })),
+    ...secondQuestions.map((term) => ({ disease: second.name, term })),
+  ];
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease, delay: 0.18 }}
+      className="bg-white rounded-2xl border border-black/[0.06] p-5"
+    >
+      <div className="mb-4">
+        <h2 className="text-[14px] font-semibold">{t("compareTopCandidates")}</h2>
+        <p className="text-[12px] text-muted-foreground mt-1">
+          {t("compareTopCandidatesSub", { gap: gap.toFixed(0) })}
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {[first, second].map((result, index) => {
+          const highlights = getTermDetails(result, "distinguishing").slice(0, 3);
+          const missing = getTermDetails(result, "missing").slice(0, 2);
+          return (
+            <div key={result.orpha_code} className="rounded-xl border border-black/[0.06] bg-[oklch(0.99_0_0)] p-4">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    #{index + 1}
+                  </p>
+                  <h3 className="text-[14px] font-semibold leading-tight">{result.name}</h3>
+                </div>
+                <span className="text-[12px] font-semibold text-muted-foreground">
+                  {result.confidence.toFixed(0)}%
+                </span>
+              </div>
+
+              {highlights.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-[10px] font-semibold text-[oklch(0.52_0.21_255/0.7)] uppercase tracking-wider mb-1.5">
+                    {t("distinguishingFeatures")}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {highlights.map((term) => (
+                      <RankTermChip key={`${result.orpha_code}-compare-dist-${term.hpo_id}`} term={term} tone="distinguishing" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {missing.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+                    {t("missingFindings")}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {missing.map((term) => (
+                      <RankTermChip key={`${result.orpha_code}-compare-missing-${term.hpo_id}`} term={term} tone="missing" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {highlights.length === 0 && missing.length === 0 && (
+                <p className="text-[12px] text-muted-foreground">{t("noComparisonDetails")}</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {questions.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-black/[0.06]">
+          <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+            {t("nextClinicalQuestions")}
+          </h3>
+          <div className="space-y-2">
+            {questions.map(({ disease, term }) => (
+              <p key={`${disease}-${term.hpo_id}`} className="text-[12px] text-foreground leading-relaxed">
+                {t("askAboutFinding", { feature: formatHpoLabel(term), disease })}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.section>
   );
 }
 
@@ -351,9 +557,21 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
 
 // ── Letter view ───────────────────────────────────────────────────────────────
 
-function LetterView({ letter, streaming }: { letter: string; streaming: boolean }) {
+function LetterView({
+  letter,
+  streaming,
+  onChangeLetter,
+}: {
+  letter: string;
+  streaming: boolean;
+  onChangeLetter: (value: string) => void;
+}) {
   const t = useTranslations("case");
+  const letterT = useTranslations("letter");
   const endRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
+  const isEditing = editing && !streaming && Boolean(letter);
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [letter]);
@@ -369,23 +587,42 @@ function LetterView({ letter, streaming }: { letter: string; streaming: boolean 
           </span>
         )}
         {!streaming && letter && (
-          <button
-            onClick={() => { navigator.clipboard.writeText(letter); toast.success(t("copiedToClipboard")); }}
-            className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
-              <rect x="2" y="5" width="9" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-              <path d="M5 5V3.5A1.5 1.5 0 016.5 2h6A1.5 1.5 0 0114 3.5v9A1.5 1.5 0 0112.5 14H11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-            </svg>
-            {t("copy")}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditing((current) => !current)}
+              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isEditing ? letterT("doneEditing") : letterT("edit")}
+            </button>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(letter);
+                toast.success(t("copiedToClipboard"));
+              }}
+              className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+                <rect x="2" y="5" width="9" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+                <path d="M5 5V3.5A1.5 1.5 0 016.5 2h6A1.5 1.5 0 0114 3.5v9A1.5 1.5 0 0112.5 14H11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              {letterT("copy")}
+            </button>
+          </div>
         )}
       </div>
       <div className="p-6 max-h-[500px] overflow-y-auto">
-        <div className="prose prose-sm max-w-none text-[14px] leading-relaxed text-foreground whitespace-pre-wrap font-sans">
-          {letter}
-          {streaming && <span className="cursor-blink" />}
-        </div>
+        {isEditing ? (
+          <textarea
+            value={letter}
+            onChange={(e) => onChangeLetter(e.target.value)}
+            className="w-full min-h-[420px] rounded-xl border border-black/[0.06] bg-[oklch(0.99_0_0)] px-4 py-3 text-[14px] leading-relaxed font-serif resize-none outline-none"
+          />
+        ) : (
+          <div className="prose prose-sm max-w-none text-[14px] leading-relaxed text-foreground whitespace-pre-wrap font-sans">
+            {letter}
+            {streaming && <span className="cursor-blink" />}
+          </div>
+        )}
         <div ref={endRef} />
       </div>
     </div>
@@ -404,6 +641,13 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   const [letterStarted, setLetterStarted] = useState(false);
   const [agentSuggestion, setAgentSuggestion] = useState<AgentSuggestion | null>(null);
   const [agentDismissed, setAgentDismissed] = useState(false);
+  const [letterDob, setLetterDob] = useState(() => caseData?.patientContext?.dateOfBirth ?? "");
+  const [referringPhysicianName, setReferringPhysicianName] = useState(() => caseData?.patientContext?.referringPhysicianName ?? "");
+  const [referringClinic, setReferringClinic] = useState(() => caseData?.patientContext?.referringClinic ?? "");
+  const [recipientSpecialist, setRecipientSpecialist] = useState(() => caseData?.patientContext?.recipientSpecialist ?? "");
+  const [recipientHospital, setRecipientHospital] = useState(() => caseData?.patientContext?.recipientHospital ?? "");
+  const [letterUrgency, setLetterUrgency] = useState(() => caseData?.patientContext?.urgency ?? "routine");
+  const [showLetterForm, setShowLetterForm] = useState(false);
 
   useEffect(() => {
     if (!caseData) return;
@@ -415,15 +659,26 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
         .then((s) => { if (s.modality) setAgentSuggestion(s); })
         .catch(() => {});
     }
-  }, [caseData]);
+  }, [caseData, locale]);
 
   const handleGenerateLetter = async () => {
     if (!caseData) return;
+    const patientContext = {
+      ...(caseData.patientContext ?? {}),
+      ...(letterDob.trim() ? { dateOfBirth: letterDob.trim() } : {}),
+      ...(referringPhysicianName.trim() ? { referringPhysicianName: referringPhysicianName.trim() } : {}),
+      ...(referringClinic.trim() ? { referringClinic: referringClinic.trim() } : {}),
+      ...(recipientSpecialist.trim() ? { recipientSpecialist: recipientSpecialist.trim() } : {}),
+      ...(recipientHospital.trim() ? { recipientHospital: recipientHospital.trim() } : {}),
+      urgency: letterUrgency,
+    };
+    const updatedCase = { ...caseData, patientContext };
+    updateCaseInStorage(caseData.id, updatedCase);
     setLetterStarted(true);
     setLetter("");
     setStreaming(true);
     try {
-      for await (const chunk of streamLetter(caseData, locale)) {
+      for await (const chunk of streamLetter(updatedCase, locale)) {
         setLetter((prev) => prev + chunk);
       }
     } catch {
@@ -491,7 +746,18 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   }
 
   const topRank = caseData.rankings[0];
+  const presentTerms = caseData.hpoTerms
+    .filter((term) => !isAbsentTerm(term))
+    .sort((a, b) => Math.abs(b.confidence) - Math.abs(a.confidence));
+  const absentTerms = caseData.hpoTerms
+    .filter((term) => isAbsentTerm(term))
+    .sort((a, b) => Math.abs(b.confidence) - Math.abs(a.confidence));
   const topColor = "oklch(0.52 0.21 255)";
+  const analysisTimestamp = new Date(caseData.timestamp);
+  const formattedAnalysisTimestamp = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(analysisTimestamp);
   const modalityLabel: Record<string, string> = {
     notes: t("modalityNotes"),
     photo: t("modalityPhoto"),
@@ -550,6 +816,13 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   </span>
                 ))}
               </div>
+              <div className="mt-3 flex items-center gap-2 flex-wrap text-[12px] text-muted-foreground">
+                <time dateTime={analysisTimestamp.toISOString()}>{formattedAnalysisTimestamp}</time>
+                <span className="text-muted-foreground/40">•</span>
+                <span className="inline-flex items-center rounded-full border border-black/[0.06] bg-[oklch(0.97_0_0)] px-2 py-0.5 font-medium text-foreground">
+                  {t("deterministicBadge")}
+                </span>
+              </div>
             </>
           ) : (
             <h1 className="serif text-[28px] tracking-tight">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
@@ -562,6 +835,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             <AgentBanner
               suggestion={agentSuggestion}
               onDismiss={() => setAgentDismissed(true)}
+              caseId={id}
             />
           )}
         </AnimatePresence>
@@ -586,6 +860,8 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               </div>
             </section>
 
+            <CandidateComparisonPanel rankings={caseData.rankings.slice(0, 2)} />
+
             {/* Explainability — why the top diagnosis? */}
             {topRank && topRank.contributing_terms.length > 0 && (
               <section>
@@ -599,24 +875,105 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                   {t("clinicalLetter")}
                 </h2>
-                {!letterStarted && (
-                  <Button
-                    onClick={handleGenerateLetter}
-                    disabled={streaming}
-                    className="rounded-full bg-foreground text-background h-8 px-4 text-[13px]"
-                  >
-                    {t("generateLetter")}
-                  </Button>
-                )}
               </div>
-              {letterStarted ? (
-                <LetterView letter={letter} streaming={streaming} />
-              ) : (
+              {!letterStarted && (
+                <div className="mb-3">
+                  <button
+                    onClick={() => setShowLetterForm((s) => !s)}
+                    className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors mb-2"
+                  >
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      viewBox="0 0 12 12"
+                    >
+                      <path
+                        d={showLetterForm ? "M2 4l4 4 4-4" : "M4 2l4 4-4 4"}
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    {t("customiseLetter")}
+                  </button>
+                  {showLetterForm && (
+                    <div className="grid gap-3 p-3 rounded-xl bg-[oklch(0.975_0_0)] border border-black/[0.06] sm:grid-cols-2">
+                      <label className="grid gap-1.5">
+                        <span className="text-[11px] font-medium text-muted-foreground">{t("patientDob")}</span>
+                        <input
+                          type="date"
+                          value={letterDob}
+                          onChange={(e) => setLetterDob(e.target.value)}
+                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                        />
+                      </label>
+                      <label className="grid gap-1.5">
+                        <span className="text-[11px] font-medium text-muted-foreground">{t("referringPhysicianName")}</span>
+                        <input
+                          value={referringPhysicianName}
+                          onChange={(e) => setReferringPhysicianName(e.target.value)}
+                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                        />
+                      </label>
+                      <label className="grid gap-1.5">
+                        <span className="text-[11px] font-medium text-muted-foreground">{t("referringClinic")}</span>
+                        <input
+                          value={referringClinic}
+                          onChange={(e) => setReferringClinic(e.target.value)}
+                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                        />
+                      </label>
+                      <label className="grid gap-1.5">
+                        <span className="text-[11px] font-medium text-muted-foreground">{t("recipientSpecialist")}</span>
+                        <input
+                          value={recipientSpecialist}
+                          onChange={(e) => setRecipientSpecialist(e.target.value)}
+                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                        />
+                      </label>
+                      <label className="grid gap-1.5 sm:col-span-2">
+                        <span className="text-[11px] font-medium text-muted-foreground">{t("recipientHospital")}</span>
+                        <input
+                          value={recipientHospital}
+                          onChange={(e) => setRecipientHospital(e.target.value)}
+                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                        />
+                      </label>
+                      <label className="grid gap-1.5 sm:col-span-2">
+                        <span className="text-[11px] font-medium text-muted-foreground">{t("urgency")}</span>
+                        <select
+                          value={letterUrgency}
+                          onChange={(e) => setLetterUrgency(e.target.value)}
+                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                        >
+                          <option value="routine">{t("urgencyRoutine")}</option>
+                          <option value="urgent">{t("urgencyUrgent")}</option>
+                          <option value="emergency">{t("urgencyEmergency")}</option>
+                        </select>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              )}
+              {!letterStarted && (
+                <Button
+                  onClick={handleGenerateLetter}
+                  disabled={streaming}
+                  className="rounded-full bg-foreground text-background h-8 px-4 text-[13px]"
+                >
+                  {t("generateLetter")}
+                </Button>
+              )}
+              {letterStarted && (
+                <LetterView letter={letter} streaming={streaming} onChangeLetter={setLetter} />
+              )}
+              {!letterStarted && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="bg-white rounded-2xl border border-dashed border-black/10 p-10 text-center"
+                  className="bg-white rounded-2xl border border-dashed border-black/10 p-10 text-center mt-3"
                 >
                   <div className="w-12 h-12 rounded-full bg-[oklch(0.97_0_0)] flex items-center justify-center mx-auto mb-3 float">
                     <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24">
@@ -643,21 +1000,34 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 {t("hpoPhenotypes")} ({caseData.hpoTerms.length})
               </h3>
-              <div className="flex flex-wrap gap-1.5 max-h-[260px] overflow-y-auto">
-                {caseData.hpoTerms
-                  .sort((a, b) => b.confidence - a.confidence)
-                  .map((t, i) => (
-                    <motion.span
-                      key={t.hpo_id}
-                      initial={{ opacity: 0, scale: 0.85 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.025, duration: 0.2 }}
-                      className="text-[11px] px-2 py-0.5 rounded-full border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground font-mono hover:border-[oklch(0.52_0.21_255/0.3)] hover:bg-[oklch(0.52_0.21_255/0.04)] transition-colors"
-                      title={`${t.source} (${(t.confidence * 100).toFixed(0)}%)`}
-                    >
-                      {t.hpo_id}
-                    </motion.span>
-                  ))}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+                    {t("presentFindings")} ({presentTerms.length})
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 max-h-[180px] overflow-y-auto">
+                    {presentTerms.map((term, i) => (
+                      <motion.div key={`${term.hpo_id}-present`} transition={{ delay: i * 0.025, duration: 0.2 }}>
+                        <HPOChip term={term} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {absentTerms.length > 0 && (
+                  <div className="pt-3 border-t border-black/[0.06]">
+                    <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+                      {t("excludedFindings")} ({absentTerms.length})
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto">
+                      {absentTerms.map((term, i) => (
+                        <motion.div key={`${term.hpo_id}-absent`} transition={{ delay: i * 0.025, duration: 0.2 }}>
+                          <HPOChip term={term} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
 

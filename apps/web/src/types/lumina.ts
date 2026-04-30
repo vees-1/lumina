@@ -2,6 +2,31 @@ export interface HPOTerm {
   hpo_id: string;
   confidence: number;
   source: string;
+  assertion?: "present" | "absent";
+  source_type?: "notes" | "lab" | "photo" | "vcf" | "text_panel" | "unknown";
+}
+
+export interface RankTermContext {
+  hpo_id: string;
+  label: string;
+  frequency?: number | null;
+  patient_confidence?: number | null;
+  source?: string | null;
+  assertion?: "present" | "absent" | null;
+  matched_hpo_id?: string | null;
+  matched_label?: string | null;
+}
+
+export interface PatientContext {
+  patientName?: string;
+  age?: string;
+  sex?: string;
+  dateOfBirth?: string;
+  referringPhysicianName?: string;
+  referringClinic?: string;
+  recipientSpecialist?: string;
+  recipientHospital?: string;
+  urgency?: string;
 }
 
 export interface RankResult {
@@ -10,6 +35,11 @@ export interface RankResult {
   score: number;
   confidence: number;
   contributing_terms: string[];
+  missing_terms: string[];
+  distinguishing_terms: string[];
+  contributing_term_details?: RankTermContext[];
+  missing_term_details?: RankTermContext[];
+  distinguishing_term_details?: RankTermContext[];
 }
 
 export interface CaseData {
@@ -19,8 +49,11 @@ export interface CaseData {
   modalities: string[];
   hpoTerms: HPOTerm[];
   rankings: RankResult[];
-  patientContext?: { patientName?: string; age?: string; sex?: string };
+  patientContext?: PatientContext;
+  outcome?: CaseOutcome;
 }
+
+export type CaseOutcome = "confirmed" | "ruled_out" | "pending";
 
 export interface CaseSummary {
   id: string;
@@ -30,4 +63,5 @@ export interface CaseSummary {
   modalities: string[];
   hpoCount: number;
   patientName?: string;
+  status?: CaseOutcome;
 }

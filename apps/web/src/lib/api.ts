@@ -1,6 +1,23 @@
-import type { CaseData, CaseSummary, HPOTerm, RankResult } from "@/types/lumina";
+import type { CaseData, CaseOutcome, CaseSummary, HPOTerm, PatientContext, RankResult } from "@/types/lumina";
 
 const API = "/api";
+type StoredCaseSummary = CaseSummary & { status: CaseOutcome };
+
+export interface ApiHealth {
+  status: string;
+  version?: string;
+  db?: string;
+}
+
+export async function getApiHealth(signal?: AbortSignal): Promise<ApiHealth> {
+  const res = await fetch(`${API}/health`, {
+    method: "GET",
+    cache: "no-store",
+    signal,
+  });
+  if (!res.ok) throw new Error("Health check failed");
+  return res.json();
+}
 
 export async function submitNotes(notes: string): Promise<HPOTerm[]> {
   const res = await fetch(`${API}/intake/text`, {
@@ -67,14 +84,18 @@ export async function getAgentSuggestion(
   return res.json();
 }
 
-export async function* streamLetter(caseData: CaseData, lang = "en"): AsyncGenerator<string> {
+export async function* streamLetter(
+  caseData: CaseData,
+  lang = "en",
+  options?: Partial<PatientContext> & { to?: string; from?: string }
+): AsyncGenerator<string> {
   const res = await fetch(`${API}/agent/letter`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       top5: caseData.rankings.slice(0, 5),
       evidence: { hpo_terms: caseData.hpoTerms, modalities: caseData.modalities },
-      patient_context: caseData.patientContext ?? {},
+      patient_context: { ...(caseData.patientContext ?? {}), ...options },
       lang,
     }),
   });
@@ -100,24 +121,33 @@ export async function* streamLetter(caseData: CaseData, lang = "en"): AsyncGener
 }
 
 export function saveCaseToStorage(caseData: CaseData): void {
-  localStorage.setItem(`lumina_case_${caseData.id}`, JSON.stringify(caseData));
+  const normalizedCase: CaseData = {
+    ...caseData,
+    outcome: caseData.outcome ?? "pending",
+  };
+  localStorage.setItem(`lumina_case_${caseData.id}`, JSON.stringify(normalizedCase));
   const summaries = getCaseSummaries();
-  const summary = {
-    id: caseData.id,
-    timestamp: caseData.timestamp,
-    topDiagnosis: caseData.rankings[0]?.name ?? "Unknown",
-    confidence: caseData.rankings[0]?.confidence ?? 0,
-    modalities: caseData.modalities,
-    hpoCount: caseData.hpoTerms.length,
-    patientName: caseData.patientContext?.patientName,
+  const summary: StoredCaseSummary = {
+    id: normalizedCase.id,
+    timestamp: normalizedCase.timestamp,
+    topDiagnosis: normalizedCase.rankings[0]?.name ?? "Unknown",
+    confidence: normalizedCase.rankings[0]?.confidence ?? 0,
+    modalities: normalizedCase.modalities,
+    hpoCount: normalizedCase.hpoTerms.length,
+    patientName: normalizedCase.patientContext?.patientName,
+    status: normalizedCase.outcome ?? "pending",
   };
   summaries.unshift(summary);
   localStorage.setItem("lumina_cases", JSON.stringify(summaries.slice(0, 50)));
 }
 
-export function getCaseSummaries() {
+export function getCaseSummaries(): StoredCaseSummary[] {
   try {
-    return JSON.parse(localStorage.getItem("lumina_cases") ?? "[]");
+    const summaries = JSON.parse(localStorage.getItem("lumina_cases") ?? "[]") as StoredCaseSummary[];
+    return summaries.map((summary) => ({
+      ...summary,
+      status: normalizeCaseOutcome(summary.status),
+    }));
   } catch {
     return [];
   }
@@ -132,19 +162,53 @@ export function getCaseById(id: string): CaseData | null {
 }
 
 export function updateCaseInStorage(caseId: string, updated: CaseData): void {
-  localStorage.setItem(`lumina_case_${caseId}`, JSON.stringify(updated));
   const summaries = getCaseSummaries();
+  const existingStatus = summaries.find((s: CaseSummary) => s.id === caseId)?.status;
+  const normalizedCase: CaseData = {
+    ...updated,
+    outcome: normalizeCaseOutcome(updated.outcome ?? existingStatus),
+  };
+  localStorage.setItem(`lumina_case_${caseId}`, JSON.stringify(normalizedCase));
   const idx = summaries.findIndex((s: CaseSummary) => s.id === caseId);
-  const summary: CaseSummary = {
-    id: updated.id,
-    timestamp: updated.timestamp,
-    topDiagnosis: updated.rankings[0]?.name ?? "Unknown",
-    confidence: updated.rankings[0]?.confidence ?? 0,
-    modalities: updated.modalities,
-    hpoCount: updated.hpoTerms.length,
-    patientName: updated.patientContext?.patientName,
+  const summary: StoredCaseSummary = {
+    id: normalizedCase.id,
+    timestamp: normalizedCase.timestamp,
+    topDiagnosis: normalizedCase.rankings[0]?.name ?? "Unknown",
+    confidence: normalizedCase.rankings[0]?.confidence ?? 0,
+    modalities: normalizedCase.modalities,
+    hpoCount: normalizedCase.hpoTerms.length,
+    patientName: normalizedCase.patientContext?.patientName,
+    status: normalizedCase.outcome ?? "pending",
   };
   if (idx >= 0) summaries[idx] = summary;
   else summaries.unshift(summary);
   localStorage.setItem("lumina_cases", JSON.stringify(summaries.slice(0, 50)));
+}
+
+export function exportAllCases(): void {
+  const summaries = getCaseSummaries();
+  const full = summaries.map((summary: StoredCaseSummary) => {
+    try {
+      const caseData = JSON.parse(localStorage.getItem(`lumina_case_${summary.id}`) ?? "null") as CaseData | null;
+      if (!caseData) return summary;
+      return {
+        ...caseData,
+        outcome: normalizeCaseOutcome(caseData.outcome ?? summary.status),
+      };
+    } catch {
+      return summary;
+    }
+  }).filter(Boolean);
+  const blob = new Blob([JSON.stringify(full, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `lumina_cases_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function normalizeCaseOutcome(outcome?: string | null): CaseOutcome {
+  if (outcome === "confirmed" || outcome === "ruled_out" || outcome === "pending") return outcome;
+  return "pending";
 }
