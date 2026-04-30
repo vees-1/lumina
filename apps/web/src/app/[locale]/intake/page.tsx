@@ -265,7 +265,7 @@ export default function IntakePage() {
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
       <DashboardNav />
 
-      <main className="max-w-3xl mx-auto px-6 pt-20 pb-16">
+      <main className="max-w-5xl mx-auto px-8 pt-20 pb-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -273,11 +273,11 @@ export default function IntakePage() {
           transition={{ duration: 0.5, ease }}
           className="pt-6 mb-8"
         >
-          <h1 className="serif text-[28px] tracking-tight">{t("title")}</h1>
+          <h1 className="serif text-[30px] tracking-tight">{t("title")}</h1>
           <p className="text-[14px] text-muted-foreground mt-1">{t("subtitle")}</p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-[1fr_220px] gap-6">
+        <div className="grid lg:grid-cols-[1fr_300px] gap-8">
           <div className="space-y-4">
 
             {/* Patient context */}
@@ -502,56 +502,67 @@ export default function IntakePage() {
 
           {/* Sidebar */}
           <div className="space-y-4">
-            {/* Modality checklist */}
+            {/* Modality checklist + confidence ceiling */}
             <motion.div
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4, ease, delay: 0.2 }}
-              className="bg-white rounded-2xl border border-black/[0.06] p-4"
+              className="bg-white rounded-2xl border border-black/[0.06] p-5"
             >
               <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("sidebarInputs")}</h3>
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {[
-                  { id: "notes", label: t("sidebarNotes"), active: !!notes.trim() },
-                  { id: "photo", label: t("sidebarPhoto"), active: !!photo },
-                  { id: "lab",   label: t("sidebarLab"),   active: !!lab },
-                  { id: "vcf",   label: t("sidebarVcf"),   active: !!vcf },
+                  { id: "notes", label: t("sidebarNotes"), active: !!notes.trim(), icon: TAB_ICONS.notes },
+                  { id: "photo", label: t("sidebarPhoto"), active: !!photo,        icon: TAB_ICONS.photo },
+                  { id: "lab",   label: t("sidebarLab"),   active: !!lab,           icon: TAB_ICONS.lab   },
+                  { id: "vcf",   label: t("sidebarVcf"),   active: !!vcf,           icon: TAB_ICONS.vcf   },
                 ].map((item) => (
-                  <div key={item.id} className="flex items-center gap-2">
-                    <div className={`w-4 h-4 rounded flex items-center justify-center transition-all duration-300 ${item.active ? "bg-[oklch(0.52_0.19_160)]" : "border border-black/15"}`}>
-                      {item.active && (
-                        <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
-                          <path d="M2 5l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <div key={item.id} className="flex items-center gap-2.5">
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-300 flex-shrink-0 ${item.active ? "bg-[oklch(0.52_0.19_160)]" : "border border-black/15 bg-[oklch(0.98_0_0)]"}`}>
+                      {item.active ? (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
+                          <path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
+                      ) : (
+                        <span className="text-muted-foreground/50">{item.icon}</span>
                       )}
                     </div>
                     <span className={`text-[13px] transition-colors ${item.active ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                       {item.label}
                     </span>
+                    {item.active && <span className="ml-auto text-[10px] text-[oklch(0.52_0.19_160)] font-medium">✓</span>}
                   </div>
                 ))}
               </div>
 
-              {/* Confidence ceiling preview */}
-              {activeModalities > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  className="mt-3 pt-3 border-t border-black/[0.06]"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] text-muted-foreground">{t("confidenceCeiling")}</span>
-                    <span className="text-[12px] font-semibold text-[oklch(0.52_0.21_255)]">{confidenceCap}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-black/[0.05] overflow-hidden">
-                    <motion.div
-                      animate={{ width: `${confidenceCap}%` }}
-                      transition={{ duration: 0.5, ease }}
-                      className="h-full rounded-full bg-[oklch(0.52_0.21_255)]"
-                    />
-                  </div>
-                </motion.div>
-              )}
+              {/* Confidence ceiling — always visible */}
+              <div className="mt-4 pt-4 border-t border-black/[0.06]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[12px] text-muted-foreground">{t("confidenceCeiling")}</span>
+                  <motion.span
+                    key={confidenceCap}
+                    initial={{ scale: 0.85, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className={`text-[14px] font-bold tabular-nums ${activeModalities > 0 ? "text-[oklch(0.52_0.21_255)]" : "text-muted-foreground"}`}
+                  >
+                    {activeModalities > 0 ? `${confidenceCap}%` : "—"}
+                  </motion.span>
+                </div>
+                <div className="h-2 rounded-full bg-black/[0.05] overflow-hidden">
+                  <motion.div
+                    animate={{ width: activeModalities > 0 ? `${confidenceCap}%` : "0%" }}
+                    transition={{ duration: 0.5, ease }}
+                    className="h-full rounded-full bg-[oklch(0.52_0.21_255)]"
+                  />
+                </div>
+                <div className="flex justify-between mt-1.5">
+                  {[40, 55, 65, 80].map((cap, i) => (
+                    <span key={cap} className={`text-[10px] tabular-nums transition-colors ${activeModalities > i ? "text-[oklch(0.52_0.21_255)] font-medium" : "text-muted-foreground/50"}`}>
+                      {cap}%
+                    </span>
+                  ))}
+                </div>
+              </div>
             </motion.div>
 
             {/* Analysis progress */}
