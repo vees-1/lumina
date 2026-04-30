@@ -18,6 +18,11 @@ RUN git clone --depth=1 https://github.com/vees-1/lumina.git /tmp/lumina && \
 WORKDIR /app/apps/api
 COPY . .
 
+# Database — committed via git LFS at data/orpha.sqlite in Space root
+# Path resolves to ../../data from WORKDIR = /app/data/orpha.sqlite
+RUN mkdir -p /app/data
+COPY data/orpha.sqlite /app/data/orpha.sqlite
+
 # Install dependencies — local packages resolve via ../../packages = /app/packages
 RUN uv sync --frozen --no-dev
 
