@@ -21,6 +21,117 @@ _LANG_NAMES: dict[str, str] = {
     "ja": "Japanese",
 }
 
+_REFERRAL_FIELD_LABELS: dict[str, dict[str, str]] = {
+    "en": {
+        "patient_name": "Patient name",
+        "patient_dob": "Patient DOB",
+        "referring_physician": "Referring physician",
+        "referring_clinic": "Referring clinic",
+        "recipient_specialist": "Recipient specialist",
+        "recipient_hospital": "Recipient hospital",
+        "urgency": "Urgency",
+        "none": "None provided",
+        "metadata_header": "Referral metadata",
+        "context_header": "Patient context JSON",
+        "diagnoses_header": "Top diagnoses",
+        "evidence_header": "Evidence summary",
+    },
+    "de": {
+        "patient_name": "Patientenname",
+        "patient_dob": "Geburtsdatum",
+        "referring_physician": "Überweisende/r Arzt/Ärztin",
+        "referring_clinic": "Überweisende Einrichtung",
+        "recipient_specialist": "Empfangende/r Facharzt/Fachärztin",
+        "recipient_hospital": "Empfangende Klinik",
+        "urgency": "Dringlichkeit",
+        "none": "Keine Angaben",
+        "metadata_header": "Überweisungsangaben",
+        "context_header": "Patientenkontext (JSON)",
+        "diagnoses_header": "Top-Diagnosen",
+        "evidence_header": "Evidenzzusammenfassung",
+    },
+    "es": {
+        "patient_name": "Nombre del paciente",
+        "patient_dob": "Fecha de nacimiento",
+        "referring_physician": "Médico remitente",
+        "referring_clinic": "Clínica remitente",
+        "recipient_specialist": "Especialista receptor",
+        "recipient_hospital": "Hospital receptor",
+        "urgency": "Urgencia",
+        "none": "Sin datos",
+        "metadata_header": "Metadatos de derivación",
+        "context_header": "Contexto del paciente (JSON)",
+        "diagnoses_header": "Diagnósticos principales",
+        "evidence_header": "Resumen de evidencia",
+    },
+    "fr": {
+        "patient_name": "Nom du patient",
+        "patient_dob": "Date de naissance",
+        "referring_physician": "Médecin adresseur",
+        "referring_clinic": "Clinique adresseuse",
+        "recipient_specialist": "Spécialiste destinataire",
+        "recipient_hospital": "Hôpital destinataire",
+        "urgency": "Urgence",
+        "none": "Aucune donnée",
+        "metadata_header": "Métadonnées d'adressage",
+        "context_header": "Contexte patient (JSON)",
+        "diagnoses_header": "Diagnostics principaux",
+        "evidence_header": "Résumé des preuves",
+    },
+    "hi": {
+        "patient_name": "रोगी का नाम",
+        "patient_dob": "जन्म तिथि",
+        "referring_physician": "रेफर करने वाले चिकित्सक",
+        "referring_clinic": "रेफर करने वाला क्लिनिक",
+        "recipient_specialist": "प्राप्तकर्ता विशेषज्ञ",
+        "recipient_hospital": "प्राप्तकर्ता अस्पताल",
+        "urgency": "अग्रता",
+        "none": "कोई जानकारी उपलब्ध नहीं",
+        "metadata_header": "रेफरल मेटाडेटा",
+        "context_header": "रोगी संदर्भ (JSON)",
+        "diagnoses_header": "शीर्ष निदान",
+        "evidence_header": "प्रमाण सारांश",
+    },
+    "ja": {
+        "patient_name": "患者氏名",
+        "patient_dob": "生年月日",
+        "referring_physician": "紹介元医師",
+        "referring_clinic": "紹介元クリニック",
+        "recipient_specialist": "紹介先専門医",
+        "recipient_hospital": "紹介先病院",
+        "urgency": "緊急度",
+        "none": "情報なし",
+        "metadata_header": "紹介メタデータ",
+        "context_header": "患者コンテキスト (JSON)",
+        "diagnoses_header": "主要診断",
+        "evidence_header": "根拠サマリー",
+    },
+    "zh": {
+        "patient_name": "患者姓名",
+        "patient_dob": "出生日期",
+        "referring_physician": "转诊医生",
+        "referring_clinic": "转诊机构",
+        "recipient_specialist": "接收专科医生",
+        "recipient_hospital": "接收医院",
+        "urgency": "紧急程度",
+        "none": "未提供",
+        "metadata_header": "转诊元数据",
+        "context_header": "患者上下文 (JSON)",
+        "diagnoses_header": "主要诊断",
+        "evidence_header": "证据摘要",
+    },
+}
+
+_URGENCY_TEXT: dict[str, dict[str, str]] = {
+    "en": {"routine": "Routine", "urgent": "Urgent", "emergency": "Emergency"},
+    "de": {"routine": "Routine", "urgent": "Dringend", "emergency": "Notfall"},
+    "es": {"routine": "Rutinaria", "urgent": "Urgente", "emergency": "Emergencia"},
+    "fr": {"routine": "Routinière", "urgent": "Urgente", "emergency": "Urgence vitale"},
+    "hi": {"routine": "सामान्य", "urgent": "अत्यावश्यक", "emergency": "आपातकाल"},
+    "ja": {"routine": "通常", "urgent": "緊急", "emergency": "救急"},
+    "zh": {"routine": "常规", "urgent": "紧急", "emergency": "急诊"},
+}
+
 _LETTER_TEMPLATES: dict[str, dict[str, str]] = {
     "en": {
         "title": "CLINICAL REFERRAL LETTER",
@@ -201,24 +312,38 @@ def _first_present(context: dict, *keys: str) -> str:
     return ""
 
 
-def _format_referral_metadata(context: dict) -> str:
+def _format_referral_metadata(context: dict, lang: str) -> str:
+    labels = _REFERRAL_FIELD_LABELS.get(lang, _REFERRAL_FIELD_LABELS["en"])
+    urgency_map = _URGENCY_TEXT.get(lang, _URGENCY_TEXT["en"])
+    urgency_value = _first_present(context, "urgency").lower()
+    urgency_text = urgency_map.get(urgency_value, _first_present(context, "urgency"))
+
     fields = [
-        ("Patient name", _first_present(context, "patientName", "patient_name")),
-        ("Patient DOB", _first_present(context, "dateOfBirth", "patientDob", "patient_dob", "dob")),
+        (labels["patient_name"], _first_present(context, "patientName", "patient_name")),
         (
-            "Referring physician",
+            labels["patient_dob"],
+            _first_present(context, "dateOfBirth", "patientDob", "patient_dob", "dob"),
+        ),
+        (
+            labels["referring_physician"],
             _first_present(context, "referringPhysicianName", "referring_physician_name"),
         ),
-        ("Referring clinic", _first_present(context, "referringClinic", "referring_clinic")),
         (
-            "Recipient specialist",
+            labels["referring_clinic"],
+            _first_present(context, "referringClinic", "referring_clinic"),
+        ),
+        (
+            labels["recipient_specialist"],
             _first_present(context, "recipientSpecialist", "recipient_specialist"),
         ),
-        ("Recipient hospital", _first_present(context, "recipientHospital", "recipient_hospital")),
-        ("Urgency", _first_present(context, "urgency")),
+        (
+            labels["recipient_hospital"],
+            _first_present(context, "recipientHospital", "recipient_hospital"),
+        ),
+        (labels["urgency"], urgency_text),
     ]
     lines = [f"- {label}: {value}" for label, value in fields if value]
-    return "\n".join(lines) if lines else "- None provided"
+    return "\n".join(lines) if lines else f"- {labels['none']}"
 
 
 def _letter_system(lang: str) -> str:
@@ -277,16 +402,17 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
 
     client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
 
+    labels = _REFERRAL_FIELD_LABELS.get(body.lang, _REFERRAL_FIELD_LABELS["en"])
     top5_text = "\n".join(
-        f"- ORPHA:{r.orpha_code} {r.name} (confidence {r.confidence:.1f}%, contributing: {', '.join(r.contributing_terms[:3])})"
+        f"- ORPHA:{r.orpha_code} {r.name} | {r.confidence:.1f}% | {', '.join(r.contributing_terms[:3])}"
         for r in body.top5
     )
-    metadata_text = _format_referral_metadata(body.patient_context)
+    metadata_text = _format_referral_metadata(body.patient_context, body.lang)
     user_msg = (
-        f"Referral metadata:\n{metadata_text}\n\n"
-        f"Patient context JSON:\n{json.dumps(body.patient_context, indent=2)}\n\n"
-        f"Top diagnoses:\n{top5_text}\n\n"
-        f"Evidence summary:\n{json.dumps(body.evidence, indent=2)}"
+        f"{labels['metadata_header']}:\n{metadata_text}\n\n"
+        f"{labels['context_header']}:\n{json.dumps(body.patient_context, ensure_ascii=False, indent=2)}\n\n"
+        f"{labels['diagnoses_header']}:\n{top5_text}\n\n"
+        f"{labels['evidence_header']}:\n{json.dumps(body.evidence, ensure_ascii=False, indent=2)}"
     )
 
     async def stream_letter():

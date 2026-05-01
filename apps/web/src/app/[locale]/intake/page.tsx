@@ -255,7 +255,6 @@ export default function IntakePage() {
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState<string[]>([]);
   const [activeStep, setActiveStep] = useState("");
-  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   const TABS: { id: Tab; label: string; hint: string }[] = [
     { id: "notes", label: t("tabNotesLabel"), hint: t("tabNotesHint") },
@@ -282,6 +281,15 @@ export default function IntakePage() {
     setProgress([]);
     const allTerms: HPOTerm[] = [];
     const modalities: string[] = [];
+    const trimmedNotes = notes.trim();
+    const analysisTimestamp = new Date().valueOf();
+    const intakeSnapshot = {
+      timestamp: analysisTimestamp,
+      notes: trimmedNotes || undefined,
+      photo: photo ? { fileName: photo.name, isFacial } : undefined,
+      lab: lab ? { fileName: lab.name } : undefined,
+      vcf: vcf ? { fileName: vcf.name } : undefined,
+    };
 
     const warmupToast = setTimeout(() => {
       toast.info(t("warmingUp"), { duration: 8000 });
@@ -290,9 +298,9 @@ export default function IntakePage() {
     try {
       const calls: Promise<void>[] = [];
 
-      if (notes.trim()) {
+      if (trimmedNotes) {
         calls.push(
-          submitNotes(notes.trim()).then((terms) => {
+          submitNotes(trimmedNotes).then((terms) => {
             allTerms.push(...terms);
             modalities.push("notes");
             addProgress(t("progressNotes"));
@@ -362,12 +370,15 @@ export default function IntakePage() {
       addProgress(t("progressRanking"));
 
       if (addToId && existingCase) {
+        const mergedNotes = [existingCase.notes?.trim(), trimmedNotes].filter(Boolean).join("\n\n");
         updateCaseInStorage(addToId, {
           ...existingCase,
-          timestamp: Date.now(),
+          timestamp: analysisTimestamp,
+          notes: mergedNotes || existingCase.notes,
           modalities: mergedModalities,
           hpoTerms: dedupedTerms,
           rankings,
+          inputHistory: [...(existingCase.inputHistory ?? []), intakeSnapshot],
           patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
         });
         router.push(`/case/${addToId}`);
@@ -375,8 +386,9 @@ export default function IntakePage() {
         const caseId = uuid();
         saveCaseToStorage({
           id: caseId,
-          timestamp: Date.now(),
-          notes: notes.trim() || undefined,
+          timestamp: analysisTimestamp,
+          notes: trimmedNotes || undefined,
+          inputHistory: [intakeSnapshot],
           modalities,
           hpoTerms: dedupedTerms,
           rankings,
@@ -409,10 +421,6 @@ export default function IntakePage() {
       return nextLines.join("\n");
     });
 
-    requestAnimationFrame(() => {
-      notesRef.current?.focus();
-      notesRef.current?.setSelectionRange(notesRef.current.value.length, notesRef.current.value.length);
-    });
   }
 
   function symptomState(categoryLabel: string, symptom: string) {
@@ -448,12 +456,30 @@ export default function IntakePage() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease }}
-            className="bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.2)] rounded-xl px-4 py-3 mb-6 flex items-center gap-3"
+            className="bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.2)] rounded-xl px-4 py-3 mb-6"
           >
-            <svg className="w-4 h-4 text-[oklch(0.52_0.21_255)] flex-shrink-0" fill="none" viewBox="0 0 16 16">
-              <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            <span className="text-[13px] text-[oklch(0.52_0.21_255)]">{t("addingToCase")}</span>
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 text-[oklch(0.52_0.21_255)] flex-shrink-0" fill="none" viewBox="0 0 16 16">
+                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              <span className="text-[13px] text-[oklch(0.52_0.21_255)]">{t("addingToCase")}</span>
+            </div>
+            <div className="mt-2.5 space-y-1 text-[12px] text-foreground/80">
+              {existingCase.notes && (
+                <p className="line-clamp-3 whitespace-pre-wrap">
+                  {existingCase.notes}
+                </p>
+              )}
+              {!!existingCase.inputHistory?.length && (
+                <p className="text-muted-foreground">
+                  {existingCase.inputHistory
+                    .slice(-1)
+                    .map((snapshot) => [snapshot.photo?.fileName, snapshot.lab?.fileName, snapshot.vcf?.fileName].filter(Boolean).join(" · "))
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              )}
+            </div>
           </motion.div>
         )}
 
@@ -646,7 +672,6 @@ export default function IntakePage() {
                         </div>
                         <p className="text-[12px] text-muted-foreground mb-3">{t("notesDesc")}</p>
                         <textarea
-                          ref={notesRef}
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
                           placeholder={t("notesPlaceholder")}

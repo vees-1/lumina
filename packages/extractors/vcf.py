@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import os
 import re
 import tempfile
@@ -20,6 +21,18 @@ def _parse_clnsig(info: dict) -> set[str]:
     if isinstance(raw, (list, tuple)):
         raw = raw[0] if raw else ""
     return {s.strip().lower().replace(" ", "_") for s in re.split(r"[,|;&]", str(raw)) if s.strip()}
+
+
+def _parse_clnsigconf(info: dict) -> set[str]:
+    raw = info.get("CLNSIGCONF", "")
+    if isinstance(raw, (list, tuple)):
+        raw = raw[0] if raw else ""
+    normalized = str(raw).replace("(", "|").replace(")", "|")
+    return {
+        s.strip().lower().replace(" ", "_")
+        for s in re.split(r"[,|;&/]", normalized)
+        if s.strip()
+    }
 
 
 def _parse_gene_symbols(info: dict) -> list[str]:
@@ -50,6 +63,9 @@ def _has_pathogenic_signal(info: dict) -> bool:
     clnsig = _parse_clnsig(info)
     if _PATHOGENIC & clnsig:
         return True
+    clnsigconf = _parse_clnsigconf(info)
+    if {"pathogenic", "likely_pathogenic"} & clnsigconf:
+        return True
     raw_impact = " ".join(str(info.get(key, "")) for key in ("IMPACT", "ANN", "CSQ"))
     return bool(re.search(r"\b(HIGH|MODERATE|pathogenic|likely_pathogenic)\b", raw_impact, re.I))
 
@@ -65,18 +81,26 @@ def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
     except ImportError:
         return []
 
-    genes_found: set[str] = set()
+    raw_vcf = vcf_bytes
+    if raw_vcf.startswith(b"\x1f\x8b"):
+        try:
+            raw_vcf = gzip.decompress(raw_vcf)
+        except Exception:
+            raw_vcf = vcf_bytes
 
     with tempfile.NamedTemporaryFile(suffix=".vcf", delete=False) as tmp:
-        tmp.write(vcf_bytes)
+        tmp.write(raw_vcf)
         tmp_path = tmp.name
 
+    genes_found: set[str] = set()
     try:
         vcf = cyvcf2.VCF(tmp_path)
         for variant in vcf:
             info = dict(variant.INFO)
             if _has_pathogenic_signal(info):
                 genes_found.update(_parse_gene_symbols(info))
+    except Exception:
+        return []
     finally:
         os.unlink(tmp_path)
 

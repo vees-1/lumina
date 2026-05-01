@@ -9,7 +9,7 @@ import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { getCaseById, getAgentSuggestion, streamLetter, updateCaseInStorage } from "@/lib/api";
 import type { AgentSuggestion } from "@/lib/api";
-import type { CaseData, HPOTerm, RankResult, RankTermContext } from "@/types/lumina";
+import type { CaseData, HPOTerm, InputSnapshot, RankResult, RankTermContext } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -72,9 +72,9 @@ function HPOChip({ term }: { term: HPOTerm }) {
     >
       {term.hpo_id}
       {term.source && (
-        <span className="absolute bottom-full left-0 mb-1.5 w-52 bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none whitespace-normal font-sans">
+        <span className="absolute bottom-full left-1/2 mb-2 w-60 max-w-[calc(100vw-2rem)] -translate-x-1/2 bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-[100] pointer-events-none whitespace-normal font-sans shadow-xl">
           <span className="font-semibold">{t("fromLabel")}</span> {term.source}
-          <span className="absolute top-full left-3 border-4 border-transparent border-t-foreground" />
+          <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
         </span>
       )}
     </motion.span>
@@ -764,6 +764,27 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
     lab: t("modalityLab"),
     vcf: t("modalityVcf"),
   };
+  const originalNotes = caseData.notes?.trim();
+  const inputHistory = caseData.inputHistory ?? [];
+  const modalityMetadataSummary = inputHistory.reduce<Record<string, Set<string>>>((acc, snapshot) => {
+    if (snapshot.photo?.fileName) {
+      acc.photo ??= new Set();
+      acc.photo.add(snapshot.photo.isFacial ? `${snapshot.photo.fileName} (${t("facialAnalysis")})` : snapshot.photo.fileName);
+    }
+    if (snapshot.lab?.fileName) {
+      acc.lab ??= new Set();
+      acc.lab.add(snapshot.lab.fileName);
+    }
+    if (snapshot.vcf?.fileName) {
+      acc.vcf ??= new Set();
+      acc.vcf.add(snapshot.vcf.fileName);
+    }
+    return acc;
+  }, {});
+  const formatSnapshotTime = (snapshot: InputSnapshot) => new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(snapshot.timestamp));
 
   return (
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
@@ -843,6 +864,53 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
         <div className="grid lg:grid-cols-[1fr_300px] gap-6">
           {/* Main column */}
           <div className="space-y-6">
+            {(originalNotes || inputHistory.length > 0) && (
+              <section className="bg-white rounded-2xl border border-black/[0.06] p-4">
+                <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                  {t("originalInput")}
+                </h2>
+                {originalNotes && (
+                  <div className="mb-3">
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                      {t("originalNotes")}
+                    </p>
+                    <p className="text-[12px] text-foreground/85 whitespace-pre-wrap rounded-lg border border-black/[0.06] bg-[oklch(0.985_0_0)] px-3 py-2">
+                      {originalNotes}
+                    </p>
+                  </div>
+                )}
+                {!!Object.keys(modalityMetadataSummary).length && (
+                  <div className="space-y-2">
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      {t("inputMetadata")}
+                    </p>
+                    {Object.entries(modalityMetadataSummary).map(([modality, values]) => (
+                      <div key={modality} className="flex items-start justify-between gap-3">
+                        <span className="text-[12px] text-muted-foreground">
+                          {modalityLabel[modality] ?? modality}
+                        </span>
+                        <span className="text-[12px] text-right text-foreground/80">
+                          {Array.from(values).join(" · ")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {inputHistory.length > 1 && (
+                  <div className="mt-3 pt-3 border-t border-black/[0.06] space-y-1">
+                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      {t("additions")}
+                    </p>
+                    {inputHistory.map((snapshot, idx) => (
+                      <div key={`${snapshot.timestamp}-${idx}`} className="text-[12px] text-muted-foreground">
+                        {formatSnapshotTime(snapshot)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
             {/* Disease rankings */}
             <section>
               <motion.h2
@@ -1005,7 +1073,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
                     {t("presentFindings")} ({presentTerms.length})
                   </p>
-                  <div className="flex flex-wrap gap-1.5 max-h-[180px] overflow-y-auto">
+                  <div className="flex flex-wrap gap-1.5 overflow-visible">
                     {presentTerms.map((term, i) => (
                       <motion.div key={`${term.hpo_id}-present`} transition={{ delay: i * 0.025, duration: 0.2 }}>
                         <HPOChip term={term} />
@@ -1019,7 +1087,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                     <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
                       {t("excludedFindings")} ({absentTerms.length})
                     </p>
-                    <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto">
+                    <div className="flex flex-wrap gap-1.5 overflow-visible">
                       {absentTerms.map((term, i) => (
                         <motion.div key={`${term.hpo_id}-absent`} transition={{ delay: i * 0.025, duration: 0.2 }}>
                           <HPOChip term={term} />

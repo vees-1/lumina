@@ -12,7 +12,7 @@
 
 ---
 
-Lumina converts clinical data (notes, images, labs, genomics) into **HPO terms** and ranks **11,456 rare diseases** by phenotypic overlap. It acts as a decision support system — helping clinicians explore the full rare disease space in seconds, not years.
+Lumina converts clinical data (notes, images, labs, genomics) into **HPO terms** and ranks **11,456 rare diseases** by phenotypic overlap. It is a clinical decision-support system for rare disease triage.
 
 ---
 
@@ -49,6 +49,14 @@ Lumina converts clinical data (notes, images, labs, genomics) into **HPO terms**
     │               Next modality suggestion  (Groq)                   │
     │               Referral letter generation (Groq, streaming SSE)   │
     └──────────────────────────────────────────────────────────────────┘
+
+---
+
+## Deployment Split
+
+- Frontend (`apps/web`): deployed on **Vercel**
+- API (`apps/api`): deployed on **Hugging Face Spaces** only
+- Frontend calls the API through configured `NEXT_PUBLIC_API_BASE`/proxy routing
 
 ---
 
@@ -90,7 +98,7 @@ AI is used **only for extraction**, not decision-making.
 | Ranking | Phenotype overlap with evidence |
 | Agent | Suggests next best modality |
 | Export | FHIR (R4), referral letter |
-| Languages | 7 supported |
+| Languages | 7 UI locales + localized referral letters |
 | Privacy | Local-only (no server PHI) |
 
 ---
@@ -120,7 +128,7 @@ No. Decision support only — not a replacement for clinicians.
 | Scoring | Lin similarity |
 | AI | Groq (Llama models) |
 | DB | SQLite (Orphanet + HPO) |
-| Deploy | Vercel + HuggingFace Spaces |
+| Deploy | Frontend: Vercel · API: Hugging Face Spaces |
 
 ---
 

@@ -153,7 +153,7 @@ async def extract_photo(
         try:
             items = json.loads(raw)
         except json.JSONDecodeError:
-            return []
+            return ocr_terms
 
         results = []
         for item in items:

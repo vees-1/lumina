@@ -63,5 +63,10 @@ async def intake_lab(request: Request, file: UploadFile = File(...)) -> list[HPO
 
 @router.post("/vcf", response_model=list[HPOTerm])
 async def intake_vcf(request: Request, file: UploadFile = File(...)) -> list[HPOTerm]:
-    terms = extract_vcf(await file.read(), request.app.state.db_engine)
-    return validate_terms(terms, {}, request.app.state.hpo_names)
+    try:
+        terms = extract_vcf(await file.read(), request.app.state.db_engine)
+        return validate_terms(terms, {}, request.app.state.hpo_names)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
+        )

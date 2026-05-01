@@ -46,11 +46,27 @@ export interface CaseData {
   id: string;
   timestamp: number;
   notes?: string;
+  inputHistory?: InputSnapshot[];
   modalities: string[];
   hpoTerms: HPOTerm[];
   rankings: RankResult[];
   patientContext?: PatientContext;
   outcome?: CaseOutcome;
+}
+
+export interface InputSnapshot {
+  timestamp: number;
+  notes?: string;
+  photo?: {
+    fileName?: string;
+    isFacial?: boolean;
+  };
+  lab?: {
+    fileName?: string;
+  };
+  vcf?: {
+    fileName?: string;
+  };
 }
 
 export type CaseOutcome = "confirmed" | "ruled_out" | "pending";
