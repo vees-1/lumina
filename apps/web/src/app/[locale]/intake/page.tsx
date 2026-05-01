@@ -297,6 +297,7 @@ export default function IntakePage() {
 
     try {
       const calls: Promise<void>[] = [];
+      let extractionHadError = false;
 
       if (trimmedNotes) {
         calls.push(
@@ -318,20 +319,32 @@ export default function IntakePage() {
       }
       if (lab) {
         calls.push(
-          submitLab(lab).then((terms) => {
-            allTerms.push(...terms);
-            modalities.push("lab");
-            addProgress(t("progressLab"));
-          })
+          submitLab(lab)
+            .then((terms) => {
+              allTerms.push(...terms);
+              modalities.push("lab");
+              addProgress(t("progressLab"));
+            })
+            .catch((err) => {
+              extractionHadError = true;
+              console.warn(err);
+              toast.error(t("errorLabFailed"));
+            })
         );
       }
       if (vcf) {
         calls.push(
-          submitVcf(vcf).then((terms) => {
-            allTerms.push(...terms);
-            modalities.push("vcf");
-            addProgress(t("progressVcf"));
-          })
+          submitVcf(vcf)
+            .then((terms) => {
+              allTerms.push(...terms);
+              modalities.push("vcf");
+              addProgress(t("progressVcf"));
+            })
+            .catch((err) => {
+              extractionHadError = true;
+              console.warn(err);
+              toast.error(t("errorVcfFailed"));
+            })
         );
       }
 
@@ -339,7 +352,7 @@ export default function IntakePage() {
       clearTimeout(warmupToast);
 
       if (allTerms.length === 0) {
-        toast.error(t("errorNoHpo"));
+        toast.error(extractionHadError ? t("errorAllModalitiesFailed") : t("errorNoHpo"));
         setAnalyzing(false);
         return;
       }

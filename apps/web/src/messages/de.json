@@ -41,7 +41,7 @@
     "ruledOut": "Ausgeschlossen",
     "statusPending": "Ausstehend / unbekannt",
     "outcomeLabel": "Ergebnis",
-    "exportJson": "JSON exportieren",
+    "exportJson": "Backup abrufen",
     "noMatches": "Keine passenden Fälle",
     "noMatchesDesc": "Versuchen Sie einen anderen Patienten, eine andere Diagnose, ein anderes Datum oder gespeicherten Falltext.",
     "exportAll": "Alle exportieren"
@@ -100,6 +100,9 @@
     "progressRanking": "Ranking abgeschlossen",
     "errorNoInput": "Mindestens eine Eingabe zur Analyse hinzufügen",
     "errorNoHpo": "Keine HPO-Phänotypen extrahiert — versuchen Sie, mehr Details hinzuzufügen",
+    "errorLabFailed": "Laborbericht-Text konnte nicht gelesen oder abnormalen Laborbefunden zugeordnet werden.",
+    "errorVcfFailed": "VCF wurde gelesen, aber keine pathogene Gen-zu-Phänotyp-Zuordnung gefunden.",
+    "errorAllModalitiesFailed": "Aus den hochgeladenen Dateien wurden keine HPO-Phänotypen extrahiert. Prüfen Sie Dateiqualität oder Annotationen.",
     "errorApiFailed": "Analyse fehlgeschlagen — läuft die API?",
     "confidenceCeiling": "Max. Konfidenz",
     "warmingUp": "API wird gestartet — erste Anfrage kann 15–30s dauern…",

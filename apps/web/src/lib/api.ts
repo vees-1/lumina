@@ -9,6 +9,16 @@ export interface ApiHealth {
   db?: string;
 }
 
+async function extractionError(res: Response, fallback: string): Promise<Error> {
+  try {
+    const body = await res.json();
+    if (typeof body?.detail === "string" && body.detail.trim()) {
+      return new Error(body.detail);
+    }
+  } catch {}
+  return new Error(fallback);
+}
+
 export async function getApiHealth(signal?: AbortSignal): Promise<ApiHealth> {
   const res = await fetch(`${API}/health`, {
     method: "GET",
@@ -41,7 +51,7 @@ export async function submitLab(file: File): Promise<HPOTerm[]> {
   const form = new FormData();
   form.append("file", file);
   const res = await fetch(`${API}/intake/lab`, { method: "POST", body: form });
-  if (!res.ok) throw new Error("Lab extraction failed");
+  if (!res.ok) throw await extractionError(res, "Lab extraction failed");
   return res.json();
 }
 
@@ -49,7 +59,7 @@ export async function submitVcf(file: File): Promise<HPOTerm[]> {
   const form = new FormData();
   form.append("file", file);
   const res = await fetch(`${API}/intake/vcf`, { method: "POST", body: form });
-  if (!res.ok) throw new Error("VCF extraction failed");
+  if (!res.ok) throw await extractionError(res, "VCF extraction failed");
   return res.json();
 }
 

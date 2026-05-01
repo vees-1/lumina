@@ -41,7 +41,7 @@
     "ruledOut": "Descartado",
     "statusPending": "Pendiente / desconocido",
     "outcomeLabel": "Resultado",
-    "exportJson": "Exportar JSON",
+    "exportJson": "Obtener copia",
     "noMatches": "No hay casos coincidentes",
     "noMatchesDesc": "Prueba con otro paciente, diagnóstico, fecha o texto guardado del caso.",
     "exportAll": "Exportar todo"
@@ -100,6 +100,9 @@
     "progressRanking": "Clasificación completa",
     "errorNoInput": "Añade al menos una entrada para analizar",
     "errorNoHpo": "No se extrajeron fenotipos HPO — intenta añadir más detalles",
+    "errorLabFailed": "No se pudo leer el texto del informe de laboratorio ni mapear hallazgos anormales.",
+    "errorVcfFailed": "El VCF se leyó, pero no se encontró mapeo de gen patogénico a fenotipo.",
+    "errorAllModalitiesFailed": "No se extrajeron fenotipos HPO de los archivos subidos. Revisa la calidad o las anotaciones.",
     "errorApiFailed": "Análisis fallido — ¿está la API en funcionamiento?",
     "confidenceCeiling": "Límite de confianza",
     "warmingUp": "API iniciando — la primera solicitud puede tardar 15–30s…",

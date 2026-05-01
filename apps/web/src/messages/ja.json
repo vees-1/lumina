@@ -41,7 +41,7 @@
     "ruledOut": "除外済み",
     "statusPending": "保留 / 不明",
     "outcomeLabel": "結果",
-    "exportJson": "JSONを書き出す",
+    "exportJson": "バックアップ取得",
     "noMatches": "一致するケースがありません",
     "noMatchesDesc": "別の患者名、診断、日付、または保存済みケースのテキストを試してください。",
     "exportAll": "全てエクスポート"
@@ -100,6 +100,9 @@
     "progressRanking": "ランキング完了",
     "errorNoInput": "分析するには少なくとも1つの入力を追加してください",
     "errorNoHpo": "HPO 表現型が抽出されませんでした — 詳細を追加してみてください",
+    "errorLabFailed": "検査レポートのテキストを読めないか、異常検査所見をマッピングできませんでした。",
+    "errorVcfFailed": "VCF は読めましたが、病原性遺伝子から表現型へのマッピングが見つかりませんでした。",
+    "errorAllModalitiesFailed": "アップロードファイルから HPO 表現型を抽出できませんでした。ファイル品質またはアノテーションを確認してください。",
     "errorApiFailed": "分析に失敗しました — API は実行中ですか？",
     "confidenceCeiling": "信頼度上限",
     "warmingUp": "API起動中 — 初回リクエストは15〜30秒かかる場合があります…",

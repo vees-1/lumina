@@ -41,7 +41,7 @@
     "ruledOut": "Ruled out",
     "statusPending": "Pending / unknown",
     "outcomeLabel": "Outcome",
-    "exportJson": "Export JSON",
+    "exportJson": "Get backup",
     "noMatches": "No matching cases",
     "noMatchesDesc": "Try a different patient name, diagnosis, date, or stored case text.",
     "exportAll": "Export all"
@@ -100,6 +100,9 @@
     "progressRanking": "Ranking complete",
     "errorNoInput": "Add at least one input to analyze",
     "errorNoHpo": "No HPO phenotypes extracted — try adding more detail",
+    "errorLabFailed": "Could not read lab report text or map abnormal lab findings.",
+    "errorVcfFailed": "VCF parsed, but no pathogenic gene-to-phenotype mapping was found.",
+    "errorAllModalitiesFailed": "No HPO phenotypes extracted from the uploaded files. Check the file quality or annotations.",
     "errorApiFailed": "Analysis failed — is the API running?",
     "confidenceCeiling": "Confidence ceiling",
     "warmingUp": "API warming up — first request may take 15–30s…",

@@ -41,7 +41,7 @@
     "ruledOut": "Écarté",
     "statusPending": "En attente / inconnu",
     "outcomeLabel": "Résultat",
-    "exportJson": "Exporter en JSON",
+    "exportJson": "Obtenir sauvegarde",
     "noMatches": "Aucun dossier correspondant",
     "noMatchesDesc": "Essayez un autre patient, diagnostic, date ou texte enregistré du dossier.",
     "exportAll": "Tout exporter"
@@ -100,6 +100,9 @@
     "progressRanking": "Classement terminé",
     "errorNoInput": "Ajoutez au moins une entrée à analyser",
     "errorNoHpo": "Aucun phénotype HPO extrait — essayez d'ajouter plus de détails",
+    "errorLabFailed": "Impossible de lire le texte du rapport de laboratoire ou de mapper des anomalies.",
+    "errorVcfFailed": "VCF lu, mais aucun mapping gène pathogène-phénotype trouvé.",
+    "errorAllModalitiesFailed": "Aucun phénotype HPO extrait des fichiers téléversés. Vérifiez la qualité ou les annotations.",
     "errorApiFailed": "Analyse échouée — l'API est-elle en cours d'exécution ?",
     "confidenceCeiling": "Plafond de confiance",
     "warmingUp": "API en démarrage — la première requête peut prendre 15–30s…",

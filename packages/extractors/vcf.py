@@ -16,6 +16,10 @@ _PATHOGENIC = {"pathogenic", "likely_pathogenic", "pathogenic/likely_pathogenic"
 _HIGH_CONFIDENCE = 0.9
 
 
+class VcfExtractionError(ValueError):
+    """Raised when a VCF is readable but cannot produce HPO terms."""
+
+
 def _parse_clnsig(info: dict) -> set[str]:
     raw = info.get("CLNSIG", "")
     if isinstance(raw, (list, tuple)):
@@ -29,9 +33,7 @@ def _parse_clnsigconf(info: dict) -> set[str]:
         raw = raw[0] if raw else ""
     normalized = str(raw).replace("(", "|").replace(")", "|")
     return {
-        s.strip().lower().replace(" ", "_")
-        for s in re.split(r"[,|;&/]", normalized)
-        if s.strip()
+        s.strip().lower().replace(" ", "_") for s in re.split(r"[,|;&/]", normalized) if s.strip()
     }
 
 
@@ -99,13 +101,13 @@ def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
             info = dict(variant.INFO)
             if _has_pathogenic_signal(info):
                 genes_found.update(_parse_gene_symbols(info))
-    except Exception:
-        return []
+    except Exception as exc:
+        raise VcfExtractionError("Could not parse this VCF file.") from exc
     finally:
         os.unlink(tmp_path)
 
     if not genes_found:
-        return []
+        raise VcfExtractionError("VCF parsed, but no pathogenic gene annotations were found.")
 
     with Session(db_engine) as session:
         # gene → diseases from ClinVar
@@ -128,7 +130,9 @@ def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
                 orpha_codes.add(dg.orpha_code)
 
         if not orpha_codes:
-            return []
+            raise VcfExtractionError(
+                "VCF parsed, but no pathogenic gene-to-disease mapping was found."
+            )
 
         # Get HPO phenotypes for all matched diseases
         seen: dict[str, HPOTerm] = {}
@@ -147,4 +151,9 @@ def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
                         source_type="vcf",
                     )
 
-    return list(seen.values())
+    results = list(seen.values())
+    if not results:
+        raise VcfExtractionError(
+            "VCF parsed, but no disease phenotypes were mapped from its pathogenic genes."
+        )
+    return results

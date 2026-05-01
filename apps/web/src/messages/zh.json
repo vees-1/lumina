@@ -41,7 +41,7 @@
     "ruledOut": "已排除",
     "statusPending": "待定 / 未知",
     "outcomeLabel": "结果",
-    "exportJson": "导出 JSON",
+    "exportJson": "获取备份",
     "noMatches": "没有匹配的病例",
     "noMatchesDesc": "请尝试其他患者姓名、诊断、日期或已保存病例文本。",
     "exportAll": "导出全部"
@@ -100,6 +100,9 @@
     "progressRanking": "排名完成",
     "errorNoInput": "请至少添加一项输入进行分析",
     "errorNoHpo": "未提取到 HPO 表型 — 请尝试添加更多详细信息",
+    "errorLabFailed": "无法读取实验室报告文本，或无法映射异常实验室发现。",
+    "errorVcfFailed": "VCF 已读取，但未找到致病基因到表型的映射。",
+    "errorAllModalitiesFailed": "未从上传文件中提取到 HPO 表型。请检查文件质量或注释。",
     "errorApiFailed": "分析失败 — API 是否正在运行？",
     "confidenceCeiling": "置信度上限",
     "warmingUp": "API 启动中 — 首次请求可能需要 15–30 秒…",

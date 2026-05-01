@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import io
 import json
 import os
@@ -12,6 +13,7 @@ from PIL import Image
 from extractors.models import HPOTerm
 
 _GROQ_MODEL = "llama-3.3-70b-versatile"
+_GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 _PROMPT_VOCAB_LIMIT = 5000
 
 _SYSTEM = """You are a clinical laboratory analyst for rare disease diagnosis.
@@ -136,25 +138,54 @@ _LAB_FINDING_ALIASES: tuple[tuple[str, str, str], ...] = (
 )
 
 
+class LabExtractionError(ValueError):
+    """Raised when a lab report cannot be read or mapped."""
+
+
 def _ocr(image_bytes: bytes) -> str:
     if image_bytes.lstrip().startswith(b"%PDF"):
         try:
             from pypdf import PdfReader
 
             reader = PdfReader(io.BytesIO(image_bytes))
-            return "\n".join(page.extract_text() or "" for page in reader.pages)
-        except Exception:
-            return ""
+            text = "\n".join(page.extract_text() or "" for page in reader.pages)
+            if text.strip():
+                return text
+
+            image_text: list[str] = []
+            try:
+                import pytesseract
+
+                for page in reader.pages:
+                    for image_file in page.images:
+                        image_text.append(pytesseract.image_to_string(image_file.image))
+            except ImportError as exc:
+                raise LabExtractionError(
+                    "OCR is not available for image-based PDF lab reports."
+                ) from exc
+            except Exception as exc:
+                if type(exc).__name__ == "TesseractNotFoundError":
+                    raise LabExtractionError(
+                        "OCR engine is not installed for image-based PDF lab reports."
+                    ) from exc
+                raise LabExtractionError("Could not OCR this image-based PDF lab report.") from exc
+            return "\n".join(image_text)
+        except LabExtractionError:
+            raise
+        except Exception as exc:
+            raise LabExtractionError("Could not read text from this PDF lab report.") from exc
 
     try:
         import pytesseract
 
         img = Image.open(io.BytesIO(image_bytes))
         return pytesseract.image_to_string(img)
-    except ImportError:
-        return ""
-    except Exception:
-        return ""
+    except ImportError as exc:
+        raise LabExtractionError("OCR is not available for image lab reports.") from exc
+    except Exception as exc:
+        if type(exc).__name__ == "TesseractNotFoundError":
+            raise LabExtractionError("OCR engine is not installed for image lab reports.") from exc
+        raise LabExtractionError("Could not read text from this lab report image.") from exc
 
 
 def _keyword_match_lab(text: str) -> list[HPOTerm]:
@@ -178,16 +209,121 @@ def _keyword_match_lab(text: str) -> list[HPOTerm]:
     return list(results.values())
 
 
-async def extract_lab(
-    image_bytes: bytes, hpo_vocab: list[tuple[str, str]] | None = None
+def _parse_lab_items(raw: str) -> list[HPOTerm]:
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    raw = raw.strip()
+    start = raw.find("[")
+    end = raw.rfind("]") + 1
+    if start >= 0 and end > start:
+        raw = raw[start:end]
+    items = json.loads(raw)
+    results = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        hpo_id = item.get("hpo_id", "")
+        if not hpo_id.startswith("HP:"):
+            continue
+        results.append(
+            HPOTerm(
+                hpo_id=hpo_id,
+                confidence=max(0.0, min(1.0, float(item.get("confidence", 0.7)))),
+                source=str(item.get("source", "")),
+                assertion="present",
+                source_type="lab",
+            )
+        )
+    return results
+
+
+async def _extract_image_lab_with_vision(
+    image_bytes: bytes,
+    media_type: str,
+    hpo_vocab: list[tuple[str, str]] | None,
 ) -> list[HPOTerm]:
-    ocr_text = _ocr(image_bytes)
-    if not ocr_text.strip():
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
         return []
+
+    try:
+        from groq import AsyncGroq
+    except ImportError:
+        return []
+
+    vocab_block = ""
+    if hpo_vocab:
+        vocab_block = "\n\nHPO vocabulary:\n" + "\n".join(
+            f"{hid}: {name}" for hid, name in hpo_vocab[:_PROMPT_VOCAB_LIMIT]
+        )
+    prompt = (
+        _SYSTEM
+        + vocab_block
+        + "\n\nRead the lab report image directly. Identify abnormal lab values and return only the JSON array."
+    )
+    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+    try:
+        client = AsyncGroq(api_key=api_key)
+        response = await client.chat.completions.create(
+            model=_GROQ_VISION_MODEL,
+            max_tokens=1024,
+            temperature=0.0,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:{media_type};base64,{image_b64}"},
+                        },
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ],
+        )
+        return _parse_lab_items(response.choices[0].message.content.strip())
+    except Exception:
+        return []
+
+
+async def extract_lab(
+    image_bytes: bytes,
+    hpo_vocab: list[tuple[str, str]] | None = None,
+    media_type: str = "image/png",
+) -> list[HPOTerm]:
+    is_pdf = image_bytes.lstrip().startswith(b"%PDF")
+    try:
+        ocr_text = _ocr(image_bytes)
+    except LabExtractionError:
+        if is_pdf:
+            raise
+        vision_results = await _extract_image_lab_with_vision(image_bytes, media_type, hpo_vocab)
+        if vision_results:
+            return vision_results
+        raise LabExtractionError(
+            "Could not read lab report text. Upload a clearer image or a text-based PDF."
+        )
+
+    if not ocr_text.strip():
+        if not is_pdf:
+            vision_results = await _extract_image_lab_with_vision(
+                image_bytes, media_type, hpo_vocab
+            )
+            if vision_results:
+                return vision_results
+        raise LabExtractionError(
+            "Could not read lab report text. Upload a clearer image or a text-based PDF."
+        )
 
     fallback_results = _keyword_match_lab(ocr_text)
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
+        if not fallback_results:
+            raise LabExtractionError(
+                "Lab report text was read, but no abnormal mappable lab findings were found."
+            )
         return fallback_results
 
     try:
@@ -208,34 +344,21 @@ async def extract_lab(
                 {"role": "user", "content": f"Lab report text:\n\n{ocr_text}"},
             ],
         )
-        raw = response.choices[0].message.content.strip()
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        raw = raw.strip()
-        items = json.loads(raw)
-        results = []
-        for item in items:
-            if not isinstance(item, dict):
-                continue
-            hpo_id = item.get("hpo_id", "")
-            if not hpo_id.startswith("HP:"):
-                continue
-            results.append(
-                HPOTerm(
-                    hpo_id=hpo_id,
-                    confidence=max(0.0, min(1.0, float(item.get("confidence", 0.7)))),
-                    source=str(item.get("source", "")),
-                    assertion="present",
-                    source_type="lab",
-                )
-            )
+        results = _parse_lab_items(response.choices[0].message.content.strip())
         merged = {term.hpo_id: term for term in fallback_results}
         for term in results:
             existing = merged.get(term.hpo_id)
             if existing is None or term.confidence > existing.confidence:
                 merged[term.hpo_id] = term
-        return list(merged.values())
+        merged_results = list(merged.values())
+        if not merged_results:
+            raise LabExtractionError(
+                "Lab report text was read, but no abnormal mappable lab findings were found."
+            )
+        return merged_results
     except Exception:
-        return fallback_results
+        if fallback_results:
+            return fallback_results
+        raise LabExtractionError(
+            "Lab report text was read, but no abnormal mappable lab findings were found."
+        )
