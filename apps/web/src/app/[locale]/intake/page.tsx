@@ -836,31 +836,31 @@ export default function IntakePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease, delay: 0.15 }}
             >
-              <div className="grid sm:grid-cols-2 gap-3">
-              <Button
-                onClick={handleSuggest}
-                disabled={!hasAnyInput || analyzing}
-                className="w-full h-12 rounded-xl bg-foreground text-background text-[15px] font-medium hover:bg-foreground/85 disabled:opacity-40 transition-all shadow-sm"
-              >
-                {analyzing ? (
-                  <span className="flex items-center gap-2.5">
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
-                    </svg>
-                    {t("analyzing")}
-                  </span>
-                ) : (
-                  t("suggestFindings")
-                )}
-              </Button>
-              <Button
-                onClick={handleAnalyze}
-                disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
-                className="w-full h-12 rounded-xl bg-[oklch(0.52_0.21_255)] text-white text-[15px] font-medium hover:bg-[oklch(0.46_0.21_255)] disabled:opacity-40 transition-all shadow-sm"
-              >
-                {t("runDifferential")}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  onClick={handleSuggest}
+                  disabled={!hasAnyInput || analyzing}
+                  className="h-8 rounded-full bg-foreground px-4 text-[13px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
+                >
+                  {analyzing ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
+                      </svg>
+                      {t("analyzing")}
+                    </span>
+                  ) : (
+                    t("suggestFindings")
+                  )}
+                </Button>
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
+                  className="h-8 rounded-full bg-foreground px-4 text-[13px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
+                >
+                  {t("runDifferential")}
+                </Button>
               </div>
             </motion.div>
           </div>
