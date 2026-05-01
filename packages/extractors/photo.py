@@ -9,6 +9,7 @@ import os
 from extractors.models import HPOTerm
 
 _MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
+_PROMPT_VOCAB_LIMIT = 5000
 
 _SYSTEM_BASE = """You are a clinical image analyst specialising in rare disease phenotyping.
 
@@ -78,7 +79,9 @@ async def extract_photo(
 
         system = _SYSTEM_BASE
         if hpo_vocab:
-            merged_vocab = list(dict.fromkeys([*hpo_vocab[:2000], *_VISUAL_HPO_VOCAB]))
+            merged_vocab = list(
+                dict.fromkeys([*hpo_vocab[:_PROMPT_VOCAB_LIMIT], *_VISUAL_HPO_VOCAB])
+            )
             vocab_block = "\n".join(
                 f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(merged_vocab)
             )

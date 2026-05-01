@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 import tempfile
 
 from ingest.models import ClinVarGeneDisease, DiseasePhenotype
@@ -10,7 +11,7 @@ from sqlmodel import Session, select
 
 from extractors.models import HPOTerm
 
-_PATHOGENIC = {"Pathogenic", "Likely_pathogenic", "Pathogenic/Likely_pathogenic"}
+_PATHOGENIC = {"pathogenic", "likely_pathogenic", "pathogenic/likely_pathogenic"}
 _HIGH_CONFIDENCE = 0.9
 
 
@@ -18,7 +19,7 @@ def _parse_clnsig(info: dict) -> set[str]:
     raw = info.get("CLNSIG", "")
     if isinstance(raw, (list, tuple)):
         raw = raw[0] if raw else ""
-    return {s.strip() for s in str(raw).replace("|", ",").split(",")}
+    return {s.strip().lower().replace(" ", "_") for s in re.split(r"[,|;&]", str(raw)) if s.strip()}
 
 
 def _parse_gene_symbols(info: dict) -> list[str]:
@@ -77,10 +78,9 @@ def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
         # Map ClinVar disease names to orpha codes via disease table
         # (ClinVar doesn't have orpha codes directly — use gene→disease_gene→orpha)
         from ingest.models import DiseaseGene
+
         for gene in genes_found:
-            dg_rows = session.exec(
-                select(DiseaseGene).where(DiseaseGene.gene_symbol == gene)
-            ).all()
+            dg_rows = session.exec(select(DiseaseGene).where(DiseaseGene.gene_symbol == gene)).all()
             for dg in dg_rows:
                 orpha_codes.add(dg.orpha_code)
 
@@ -100,6 +100,8 @@ def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
                         hpo_id=dp.hpo_id,
                         confidence=_HIGH_CONFIDENCE * dp.frequency_weight,
                         source=gene_source,
+                        assertion="present",
+                        source_type="vcf",
                     )
 
     return list(seen.values())

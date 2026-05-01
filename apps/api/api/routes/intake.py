@@ -53,7 +53,7 @@ async def intake_photo(
 @router.post("/lab", response_model=list[HPOTerm])
 async def intake_lab(request: Request, file: UploadFile = File(...)) -> list[HPOTerm]:
     try:
-        terms = await extract_lab(await file.read())
+        terms = await extract_lab(await file.read(), request.app.state.hpo_vocab)
         return validate_terms(terms, {}, request.app.state.hpo_names)
     except Exception as exc:
         raise HTTPException(

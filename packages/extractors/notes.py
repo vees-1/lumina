@@ -9,6 +9,7 @@ import re
 from extractors.models import HPOTerm
 
 _GROQ_MODEL = "llama-3.3-70b-versatile"
+_PROMPT_VOCAB_LIMIT = 5000
 
 _SYSTEM = """You are a clinical NLP assistant for rare disease diagnosis.
 Extract all observable clinical findings from the given notes and map each to an HPO term.
@@ -178,7 +179,7 @@ async def _extract_via_groq(text: str, hpo_vocab: list[tuple[str, str]]) -> list
         from groq import AsyncGroq
 
         client = AsyncGroq(api_key=api_key)
-        vocab_block = "\n".join(f"{hid}: {name}" for hid, name in hpo_vocab[:2000])
+        vocab_block = "\n".join(f"{hid}: {name}" for hid, name in hpo_vocab[:_PROMPT_VOCAB_LIMIT])
         system = f"{_SYSTEM}\n\nHPO vocabulary:\n{vocab_block}"
         response = await client.chat.completions.create(
             model=_GROQ_MODEL,
