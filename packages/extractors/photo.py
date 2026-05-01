@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import base64
+import io
 import json
 import os
+
+from PIL import Image
 
 from extractors.models import HPOTerm
 
 _MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
-_PROMPT_VOCAB_LIMIT = 5000
+_PROMPT_VOCAB_LIMIT = 1200
 
 _SYSTEM_BASE = """You are a clinical image analyst specialising in rare disease phenotyping.
 
@@ -60,6 +63,16 @@ _VISUAL_HPO_VOCAB = (
 )
 
 
+def _ocr_text(image_bytes: bytes) -> str:
+    try:
+        import pytesseract
+
+        img = Image.open(io.BytesIO(image_bytes))
+        return pytesseract.image_to_string(img)
+    except Exception:
+        return ""
+
+
 async def extract_photo(
     image_bytes: bytes,
     media_type: str = "image/jpeg",
@@ -68,9 +81,19 @@ async def extract_photo(
     hpo_vocab: list[tuple[str, str]] | None = None,
 ) -> list[HPOTerm]:
     """Extract HPO terms from a clinical photograph using Groq Vision."""
+    ocr_terms: list[HPOTerm] = []
+    ocr_text = _ocr_text(image_bytes)
+    if ocr_text.strip() and hpo_vocab:
+        from extractors.notes import extract_notes
+
+        ocr_terms = [
+            term.model_copy(update={"source_type": "photo"})
+            for term in await extract_notes(ocr_text, hpo_vocab)
+        ]
+
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
-        return []
+        return ocr_terms
 
     try:
         from groq import AsyncGroq
@@ -80,7 +103,7 @@ async def extract_photo(
         system = _SYSTEM_BASE
         if hpo_vocab:
             merged_vocab = list(
-                dict.fromkeys([*hpo_vocab[:_PROMPT_VOCAB_LIMIT], *_VISUAL_HPO_VOCAB])
+                dict.fromkeys([*_VISUAL_HPO_VOCAB, *hpo_vocab[:_PROMPT_VOCAB_LIMIT]])
             )
             vocab_block = "\n".join(
                 f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(merged_vocab)
@@ -147,6 +170,11 @@ async def extract_photo(
                     source_type="photo",
                 )
             )
-        return results
+        merged = {term.hpo_id: term for term in ocr_terms}
+        for term in results:
+            existing = merged.get(term.hpo_id)
+            if existing is None or term.confidence > existing.confidence:
+                merged[term.hpo_id] = term
+        return list(merged.values())
     except Exception:
-        return []
+        return ocr_terms

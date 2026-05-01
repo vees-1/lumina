@@ -138,8 +138,8 @@ function CaseCard({
 
   const statusLabels: Record<CaseOutcome, string> = {
     pending: t("statusPending"),
-    confirmed: t("statusConfirmed"),
-    ruled_out: t("statusRuledOut"),
+    confirmed: t("confirmed"),
+    ruled_out: t("ruledOut"),
   };
 
   return (

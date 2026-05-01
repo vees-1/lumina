@@ -21,6 +21,107 @@ _LANG_NAMES: dict[str, str] = {
     "ja": "Japanese",
 }
 
+_LETTER_TEMPLATES: dict[str, dict[str, str]] = {
+    "en": {
+        "title": "CLINICAL REFERRAL LETTER",
+        "date": "Date",
+        "re": "Re",
+        "dear": "Dear Colleague,",
+        "history": "PRESENTING HISTORY",
+        "findings": "CLINICAL FINDINGS",
+        "impression": "DIAGNOSTIC IMPRESSION",
+        "investigations": "RECOMMENDED INVESTIGATIONS",
+        "closing": "I would be grateful for your assessment and any further management recommendations.",
+        "signoff": "Yours sincerely,",
+        "clinician": "Referring Clinician",
+        "unknown_patient": "The patient",
+    },
+    "de": {
+        "title": "KLINISCHES ÜBERWEISUNGSSCHREIBEN",
+        "date": "Datum",
+        "re": "Betreff",
+        "dear": "Sehr geehrte Kollegin, sehr geehrter Kollege,",
+        "history": "VORSTELLUNGSANAMNESE",
+        "findings": "KLINISCHE BEFUNDE",
+        "impression": "DIAGNOSTISCHE EINSCHÄTZUNG",
+        "investigations": "EMPFOHLENE UNTERSUCHUNGEN",
+        "closing": "Ich wäre Ihnen für Ihre Beurteilung und weitere Therapieempfehlungen dankbar.",
+        "signoff": "Mit freundlichen Grüßen",
+        "clinician": "Überweisende Ärztin / überweisender Arzt",
+        "unknown_patient": "Die Patientin / der Patient",
+    },
+    "es": {
+        "title": "CARTA CLÍNICA DE DERIVACIÓN",
+        "date": "Fecha",
+        "re": "Asunto",
+        "dear": "Estimado/a colega:",
+        "history": "HISTORIA CLÍNICA",
+        "findings": "HALLAZGOS CLÍNICOS",
+        "impression": "IMPRESIÓN DIAGNÓSTICA",
+        "investigations": "INVESTIGACIONES RECOMENDADAS",
+        "closing": "Agradecería su valoración y cualquier recomendación adicional de manejo.",
+        "signoff": "Atentamente,",
+        "clinician": "Médico remitente",
+        "unknown_patient": "El/la paciente",
+    },
+    "fr": {
+        "title": "LETTRE CLINIQUE D'ADRESSAGE",
+        "date": "Date",
+        "re": "Objet",
+        "dear": "Chère consœur, cher confrère,",
+        "history": "HISTOIRE CLINIQUE",
+        "findings": "SIGNES CLINIQUES",
+        "impression": "IMPRESSION DIAGNOSTIQUE",
+        "investigations": "EXAMENS RECOMMANDÉS",
+        "closing": "Je vous remercie par avance pour votre évaluation et vos recommandations de prise en charge.",
+        "signoff": "Bien cordialement,",
+        "clinician": "Médecin adresseur",
+        "unknown_patient": "Le/la patient(e)",
+    },
+    "hi": {
+        "title": "नैदानिक रेफरल पत्र",
+        "date": "तारीख",
+        "re": "विषय",
+        "dear": "आदरणीय सहकर्मी,",
+        "history": "प्रस्तुत बीमारी का इतिहास",
+        "findings": "नैदानिक निष्कर्ष",
+        "impression": "नैदानिक आकलन",
+        "investigations": "अनुशंसित जांचें",
+        "closing": "कृपया अपना मूल्यांकन और आगे के प्रबंधन संबंधी सुझाव प्रदान करें।",
+        "signoff": "सादर,",
+        "clinician": "रेफर करने वाले चिकित्सक",
+        "unknown_patient": "रोगी",
+    },
+    "ja": {
+        "title": "臨床紹介状",
+        "date": "日付",
+        "re": "件名",
+        "dear": "ご担当先生",
+        "history": "現病歴",
+        "findings": "臨床所見",
+        "impression": "診断的印象",
+        "investigations": "推奨される検査",
+        "closing": "ご評価および今後の管理についてご助言いただけますと幸いです。",
+        "signoff": "敬具",
+        "clinician": "紹介元医師",
+        "unknown_patient": "患者",
+    },
+    "zh": {
+        "title": "临床转诊信",
+        "date": "日期",
+        "re": "事由",
+        "dear": "尊敬的同事：",
+        "history": "现病史",
+        "findings": "临床表现",
+        "impression": "诊断印象",
+        "investigations": "建议检查",
+        "closing": "恳请您评估并提供进一步诊疗建议。",
+        "signoff": "此致",
+        "clinician": "转诊医生",
+        "unknown_patient": "患者",
+    },
+}
+
 _NEXT_SYSTEM = """You are a clinical reasoning assistant for rare disease diagnosis.
 Given a ranked disease list and the modalities already used, suggest which modality to try next.
 
@@ -33,38 +134,39 @@ Write the "reasoning" value in {lang_name}. Keep all JSON keys in English."""
 
 _LETTER_SYSTEM = """You are a specialist physician writing a formal clinical referral letter.
 
-Write in formal medical prose in {lang_name}. Structure exactly as follows — use these exact section headers as plain text (no markdown symbols):
+Write the entire letter in {lang_name}. Do not mix English into the prose, headings, salutation, closing, field labels, or recommendations.
+Use the following localized fixed text exactly. Structure exactly as follows — use these exact section headers as plain text (no markdown symbols):
 
-CLINICAL REFERRAL LETTER
+{title}
 
-Date: [today's date]
-Re: [Patient name if known, otherwise "The patient"]
+{date}: [today's date]
+{re}: [Patient name if known, otherwise "{unknown_patient}"]
 
-Dear Colleague,
+{dear}
 
 [Opening paragraph: reason for referral, 2-3 sentences. Be direct and clinical.]
 
-PRESENTING HISTORY
+{history}
 [2-3 sentences on the key presenting complaint and timeline.]
 
-CLINICAL FINDINGS
+{findings}
 [Bullet list of the most relevant findings, written as plain clinical prose. No markdown bullets — use a dash and space: "- Finding"]
 
-DIAGNOSTIC IMPRESSION
+{impression}
 [The top 1-2 differential diagnoses with brief reasoning. Mention the phenotypic overlap score as supporting evidence. 3-4 sentences.]
 
-RECOMMENDED INVESTIGATIONS
+{investigations}
 [Specific actionable next steps: genetic panels, specialist consultations, imaging. Use "- " for each.]
 
-I would be grateful for your assessment and any further management recommendations.
+{closing}
 
-Yours sincerely,
-[Referring Clinician]
+{signoff}
+[{clinician}]
 
 ---
 Rules:
 - Use ONLY plain text. No #, ##, ###, **, *, or backticks.
-- Disease names stay in English even if letter is in {lang_name}.
+- Disease names, gene symbols, HPO IDs, ORPHA IDs, and test/panel names may remain in their standard medical form. Everything else must be in {lang_name}.
 - Use the supplied referral metadata when present: patient date of birth, referring physician and clinic, recipient specialist and hospital, and urgency level.
 - If urgency is urgent or emergency, reflect that in the recommendation tone and prioritization.
 - Be concise — under 350 words total.
@@ -117,6 +219,12 @@ def _format_referral_metadata(context: dict) -> str:
     ]
     lines = [f"- {label}: {value}" for label, value in fields if value]
     return "\n".join(lines) if lines else "- None provided"
+
+
+def _letter_system(lang: str) -> str:
+    lang_name = _LANG_NAMES.get(lang, "English")
+    template = _LETTER_TEMPLATES.get(lang, _LETTER_TEMPLATES["en"])
+    return _LETTER_SYSTEM.format(lang_name=lang_name, **template)
 
 
 @router.post("/next", response_model=AgentSuggestion)
@@ -181,8 +289,6 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
         f"Evidence summary:\n{json.dumps(body.evidence, indent=2)}"
     )
 
-    lang_name = _LANG_NAMES.get(body.lang, "English")
-
     async def stream_letter():
         try:
             stream = await client.chat.completions.create(
@@ -191,7 +297,7 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
                 temperature=0.3,
                 stream=True,
                 messages=[
-                    {"role": "system", "content": _LETTER_SYSTEM.format(lang_name=lang_name)},
+                    {"role": "system", "content": _letter_system(body.lang)},
                     {"role": "user", "content": user_msg},
                 ],
             )

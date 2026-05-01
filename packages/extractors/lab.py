@@ -137,6 +137,15 @@ _LAB_FINDING_ALIASES: tuple[tuple[str, str, str], ...] = (
 
 
 def _ocr(image_bytes: bytes) -> str:
+    if image_bytes.lstrip().startswith(b"%PDF"):
+        try:
+            from pypdf import PdfReader
+
+            reader = PdfReader(io.BytesIO(image_bytes))
+            return "\n".join(page.extract_text() or "" for page in reader.pages)
+        except Exception:
+            return ""
+
     try:
         import pytesseract
 

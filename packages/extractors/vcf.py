@@ -24,15 +24,34 @@ def _parse_clnsig(info: dict) -> set[str]:
 
 def _parse_gene_symbols(info: dict) -> list[str]:
     """Extract gene symbols from GENEINFO field: 'GENE1:1234|GENE2:5678'."""
-    raw = info.get("GENEINFO", "")
-    if isinstance(raw, (list, tuple)):
-        raw = raw[0] if raw else ""
-    symbols = []
-    for part in str(raw).split("|"):
-        gene = part.split(":")[0].strip()
-        if gene:
-            symbols.append(gene)
-    return symbols
+    symbols: set[str] = set()
+    for key in ("GENEINFO", "SYMBOL", "GENE", "Gene.refGene"):
+        raw = info.get(key, "")
+        if isinstance(raw, (list, tuple)):
+            raw = raw[0] if raw else ""
+        for part in str(raw).replace(",", "|").split("|"):
+            gene = part.split(":")[0].strip()
+            if gene and gene not in {".", "NA"}:
+                symbols.add(gene)
+
+    for key in ("ANN", "CSQ"):
+        raw = info.get(key, "")
+        if isinstance(raw, (list, tuple)):
+            raw = ",".join(str(item) for item in raw)
+        for annotation in str(raw).split(","):
+            fields = annotation.split("|")
+            for idx in (3, 4):
+                if len(fields) > idx and re.fullmatch(r"[A-Za-z0-9.-]{2,20}", fields[idx]):
+                    symbols.add(fields[idx])
+    return sorted(symbols)
+
+
+def _has_pathogenic_signal(info: dict) -> bool:
+    clnsig = _parse_clnsig(info)
+    if _PATHOGENIC & clnsig:
+        return True
+    raw_impact = " ".join(str(info.get(key, "")) for key in ("IMPACT", "ANN", "CSQ"))
+    return bool(re.search(r"\b(HIGH|MODERATE|pathogenic|likely_pathogenic)\b", raw_impact, re.I))
 
 
 def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
@@ -55,9 +74,9 @@ def extract_vcf(vcf_bytes: bytes, db_engine) -> list[HPOTerm]:
     try:
         vcf = cyvcf2.VCF(tmp_path)
         for variant in vcf:
-            clnsig = _parse_clnsig(dict(variant.INFO))
-            if _PATHOGENIC & clnsig:
-                genes_found.update(_parse_gene_symbols(dict(variant.INFO)))
+            info = dict(variant.INFO)
+            if _has_pathogenic_signal(info):
+                genes_found.update(_parse_gene_symbols(info))
     finally:
         os.unlink(tmp_path)
 

@@ -3,6 +3,7 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ function formatLetter(text: string): React.ReactNode {
 
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations("letter");
+  const locale = useLocale();
   const { id } = use(params);
   const [caseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
@@ -115,7 +117,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     (async () => {
       setStreaming(true);
       try {
-        for await (const chunk of streamLetter(caseData)) {
+        for await (const chunk of streamLetter(caseData, locale)) {
           setLetter((prev) => prev + chunk);
         }
         setDone(true);
@@ -125,7 +127,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         setStreaming(false);
       }
     })();
-  }, [caseData]);
+  }, [caseData, locale]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(letter);
