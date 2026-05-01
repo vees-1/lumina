@@ -20,15 +20,18 @@ from api.routes.score import router as score_router  # noqa: E402
 from api.routes.search import router as search_router  # noqa: E402
 
 
-def _load_hpo_vocab(engine, n: int = 10000) -> list[tuple[str, str]]:
+def _load_hpo_vocab(engine) -> list[tuple[str, str]]:
     with Session(engine) as s:
         terms = s.exec(
-            select(HPOTermModel)
-            .where(HPOTermModel.ic.isnot(None))
-            .order_by(HPOTermModel.ic.desc())
-            .limit(n)
+            select(HPOTermModel).where(HPOTermModel.ic.isnot(None)).order_by(HPOTermModel.ic.desc())
         ).all()
     return [(t.hpo_id, t.name) for t in terms]
+
+
+def _load_hpo_definitions(engine) -> dict[str, str | None]:
+    with Session(engine) as s:
+        terms = s.exec(select(HPOTermModel)).all()
+    return {t.hpo_id: t.definition for t in terms}
 
 
 def _load_hpo_names(engine) -> dict[str, str]:
@@ -59,6 +62,7 @@ async def lifespan(app: FastAPI):
     app.state.scoring_index = ScoringIndex.load()
     app.state.hpo_vocab = _load_hpo_vocab(engine)
     app.state.hpo_names = _load_hpo_names(engine)
+    app.state.hpo_definitions = _load_hpo_definitions(engine)
     app.state.facial_vocab = _load_facial_vocab(engine)
     from scoring.embeddings import _embedder
 

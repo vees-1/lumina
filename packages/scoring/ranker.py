@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from ingest.db import get_engine
-from ingest.models import Disease, DiseasePhenotype, HPOAncestor, HPOTerm
+from ingest.models import Disease, DiseaseGene, DiseasePhenotype, HPOAncestor, HPOTerm
 from pydantic import BaseModel, Field
 from sqlmodel import Session, select
 
@@ -45,6 +45,12 @@ class RankResult(BaseModel):
     contributing_term_details: list[RankTermContext] = Field(default_factory=list)
     missing_term_details: list[RankTermContext] = Field(default_factory=list)
     distinguishing_term_details: list[RankTermContext] = Field(default_factory=list)
+    phenotype_match: float = 0.0
+    genetic_support: str = "none"
+    genetic_support_score: float = 0.0
+    discordant_absent_terms: list[str] = Field(default_factory=list)
+    discordant_absent_term_details: list[RankTermContext] = Field(default_factory=list)
+    evidence_strength: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -53,6 +59,16 @@ class QueryTermContext:
     confidence: float
     source: str = ""
     assertion: Literal["present", "absent"] = "present"
+    review_status: Literal["pending", "accepted", "rejected"] | None = None
+
+
+class GeneticEvidence(BaseModel):
+    gene_symbol: str
+    variant: str | None = None
+    classification: str = "unknown"
+    zygosity: str | None = None
+    inheritance: str | None = None
+    source: str | None = None
 
 
 @dataclass
@@ -62,6 +78,7 @@ class ScoringIndex:
     disease_phenotypes: dict[int, list[tuple[str, float]]]
     disease_names: dict[int, str]
     hpo_names: dict[str, str]
+    disease_genes: dict[int, set[str]]
 
     @classmethod
     def load(cls, db_path=None) -> ScoringIndex:
@@ -79,8 +96,7 @@ class ScoringIndex:
             for row in session.exec(select(HPOAncestor)):
                 raw_ancestors.setdefault(row.hpo_id, []).append(row.ancestor_id)
             ancestors: dict[str, frozenset[str]] = {
-                hpo_id: frozenset(ancs + [hpo_id])
-                for hpo_id, ancs in raw_ancestors.items()
+                hpo_id: frozenset(ancs + [hpo_id]) for hpo_id, ancs in raw_ancestors.items()
             }
             for hpo_id in hpo_names:
                 ancestors.setdefault(hpo_id, frozenset([hpo_id]))
@@ -96,6 +112,9 @@ class ScoringIndex:
             disease_names: dict[int, str] = {
                 d.orpha_code: d.name for d in session.exec(select(Disease))
             }
+            disease_genes: dict[int, set[str]] = {}
+            for dg in session.exec(select(DiseaseGene)):
+                disease_genes.setdefault(dg.orpha_code, set()).add(dg.gene_symbol.upper())
 
         return cls(
             ic=ic,
@@ -103,6 +122,7 @@ class ScoringIndex:
             disease_phenotypes=disease_phenotypes,
             disease_names=disease_names,
             hpo_names=hpo_names,
+            disease_genes=disease_genes,
         )
 
     def _term_score(
@@ -134,9 +154,7 @@ class ScoringIndex:
             if isinstance(item, tuple):
                 hpo_id, confidence = item
                 source = ""
-                assertion: Literal["present", "absent"] = (
-                    "absent" if confidence < 0 else "present"
-                )
+                assertion: Literal["present", "absent"] = "absent" if confidence < 0 else "present"
             else:
                 hpo_id = getattr(item, "hpo_id", "")
                 confidence = float(getattr(item, "confidence", 0.0))
@@ -144,6 +162,7 @@ class ScoringIndex:
                 assertion = getattr(item, "assertion", None) or (
                     "absent" if confidence < 0 else "present"
                 )
+                review_status = getattr(item, "review_status", None)
             if hpo_id:
                 contexts.append(
                     QueryTermContext(
@@ -151,9 +170,37 @@ class ScoringIndex:
                         confidence=confidence,
                         source=source,
                         assertion=assertion,
+                        review_status=review_status,
                     )
                 )
         return contexts
+
+    def _genetic_support_score(
+        self,
+        orpha_code: int,
+        genetic_evidence: Sequence[GeneticEvidence] | None,
+    ) -> tuple[float, str]:
+        if not genetic_evidence:
+            return 0.0, "none"
+        disease_genes = self.disease_genes.get(orpha_code, set())
+        best = 0.0
+        best_label = "none"
+        for evidence in genetic_evidence:
+            gene = evidence.gene_symbol.strip().upper()
+            if not gene or gene not in disease_genes:
+                continue
+            classification = evidence.classification.lower().replace(" ", "_")
+            if classification in {"pathogenic", "likely_pathogenic"}:
+                score, label = (0.55, "strong")
+            elif classification == "vus":
+                score, label = (0.12, "weak")
+            elif classification in {"benign", "likely_benign"}:
+                score, label = (0.0, "none")
+            else:
+                score, label = (0.08, "limited")
+            if score > best:
+                best, best_label = score, label
+        return best, best_label
 
     def _best_query_match(
         self,
@@ -202,13 +249,18 @@ class ScoringIndex:
         self,
         query: Sequence[tuple[str, float] | object],
         top_k: int = 5,
+        genetic_evidence: Sequence[GeneticEvidence] | None = None,
     ) -> list[RankResult]:
         if not query:
             return []
 
+        raw_query_terms = self._query_term_contexts(query)
+        has_reviewed_terms = any(term.review_status is not None for term in raw_query_terms)
         query_terms = [
-            term for term in self._query_term_contexts(query)
+            term
+            for term in raw_query_terms
             if term.hpo_id in self.ancestors
+            and (not has_reviewed_terms or term.review_status == "accepted")
         ]
         if not query_terms:
             return []
@@ -218,7 +270,7 @@ class ScoringIndex:
             return []
 
         positive_ids = {term.hpo_id for term in positive_query}
-        scores: list[tuple[int, float, list[str], list[RankTermContext]]] = []
+        scores: list[tuple[int, float, float, str, list[str], list[RankTermContext]]] = []
 
         for orpha_code, disease_terms in self.disease_phenotypes.items():
             term_scores: list[tuple[float, str]] = []
@@ -237,7 +289,8 @@ class ScoringIndex:
             if not term_scores:
                 continue
 
-            raw_score = sum(score for score, _ in term_scores) / len(positive_query)
+            phenotype_score = sum(score for score, _ in term_scores) / len(positive_query)
+            raw_score = phenotype_score
 
             if any(term.confidence < 0 for term in query_terms):
                 penalty = 0.0
@@ -251,13 +304,24 @@ class ScoringIndex:
                         penalty += freq_weight * sim * 0.45
                 raw_score = max(0.0, raw_score - penalty / len(positive_query))
 
-            contributing = list(dict.fromkeys(match for _, match in sorted(term_scores, reverse=True) if match))[:5]
+            genetic_score, genetic_label = self._genetic_support_score(orpha_code, genetic_evidence)
+            evidence_score = min(1.0, raw_score + genetic_score)
+
+            contributing = list(
+                dict.fromkeys(match for _, match in sorted(term_scores, reverse=True) if match)
+            )[:5]
             scores.append(
                 (
                     orpha_code,
-                    raw_score,
+                    evidence_score,
+                    phenotype_score,
+                    genetic_label,
                     contributing,
-                    [contributing_details[hpo_id] for hpo_id in contributing if hpo_id in contributing_details],
+                    [
+                        contributing_details[hpo_id]
+                        for hpo_id in contributing
+                        if hpo_id in contributing_details
+                    ],
                 )
             )
 
@@ -266,13 +330,20 @@ class ScoringIndex:
         max_score = top[0][1] if top else 1.0
 
         all_top_phenos: dict[int, set[str]] = {}
-        for orpha_code, _, _, _ in top:
+        for orpha_code, _, _, _, _, _ in top:
             all_top_phenos[orpha_code] = {
                 pid for pid, fw in self.disease_phenotypes.get(orpha_code, []) if fw > 0.3
             }
 
         results = []
-        for orpha_code, raw_score, contributing, contributing_details in top:
+        for (
+            orpha_code,
+            raw_score,
+            phenotype_score,
+            genetic_label,
+            contributing,
+            contributing_details,
+        ) in top:
             disease_terms = self.disease_phenotypes.get(orpha_code, [])
             disease_sorted = sorted(disease_terms, key=lambda item: item[1], reverse=True)
 
@@ -294,6 +365,9 @@ class ScoringIndex:
                 if len(missing_details) >= 5:
                     break
             missing_terms = [detail.hpo_id for detail in missing_details]
+            discordant_details = [
+                detail for detail in missing_details if detail.assertion == "absent"
+            ]
 
             other_phenos: set[str] = set()
             for other_orpha, other_set in all_top_phenos.items():
@@ -318,6 +392,15 @@ class ScoringIndex:
                     contributing_term_details=contributing_details,
                     missing_term_details=missing_details,
                     distinguishing_term_details=distinguishing_details,
+                    phenotype_match=round(phenotype_score * 100, 1),
+                    genetic_support=genetic_label,
+                    genetic_support_score=round(
+                        self._genetic_support_score(orpha_code, genetic_evidence)[0] * 100,
+                        1,
+                    ),
+                    discordant_absent_terms=[d.hpo_id for d in discordant_details],
+                    discordant_absent_term_details=discordant_details,
+                    evidence_strength=round(raw_score * 100, 1),
                 )
             )
         return results

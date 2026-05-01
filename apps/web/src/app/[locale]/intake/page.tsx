@@ -8,8 +8,8 @@ import { v4 as uuid } from "uuid";
 import { useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
-import { getCaseById, saveCaseToStorage, scoreCase, submitLab, submitNotes, submitPhoto, submitVcf, updateCaseInStorage } from "@/lib/api";
-import type { HPOTerm } from "@/types/lumina";
+import { getCaseById, saveCaseToStorage, scoreCase, suggestLab, suggestNotes, suggestPhoto, updateCaseInStorage } from "@/lib/api";
+import type { GeneticEvidence, HPOTerm } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -108,7 +108,7 @@ const SYMPTOM_CATEGORIES = [
   },
 ] as const;
 
-type Tab = "notes" | "photo" | "lab" | "vcf";
+type Tab = "notes" | "photo" | "lab" | "genetic";
 
 const TAB_ICONS: Record<Tab, React.ReactNode> = {
   notes: (
@@ -132,7 +132,7 @@ const TAB_ICONS: Record<Tab, React.ReactNode> = {
       <circle cx="9.5" cy="12" r="0.8" fill="currentColor" />
     </svg>
   ),
-  vcf: (
+  genetic: (
     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
       <path d="M8 1c0 0-2 2.5-2 5s2 5 2 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
       <path d="M8 1c0 0 2 2.5 2 5s-2 5-2 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -240,38 +240,56 @@ export default function IntakePage() {
   const existingCase = addToId ? getCaseById(addToId) : null;
 
   const usedModalities = addToId && existingCase ? existingCase.modalities : [];
-  const firstUnused = (["notes", "photo", "lab", "vcf"] as Tab[]).find((m) => !usedModalities.includes(m)) ?? "notes";
+  const firstUnused = (["notes", "photo", "lab", "genetic"] as Tab[]).find((m) => !usedModalities.includes(m)) ?? "notes";
 
   const [tab, setTab] = useState<Tab>(firstUnused);
   const [showChecklist, setShowChecklist] = useState(false);
+  const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(["neurological"]));
   const [notes, setNotes] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [isFacial, setIsFacial] = useState(false);
   const [lab, setLab] = useState<File | null>(null);
-  const [vcf, setVcf] = useState<File | null>(null);
+  const [geneSymbol, setGeneSymbol] = useState("");
+  const [variant, setVariant] = useState("");
+  const [classification, setClassification] = useState("unknown");
+  const [zygosity, setZygosity] = useState("");
   const [patientName, setPatientName] = useState(existingCase?.patientContext?.patientName ?? "");
   const [age, setAge] = useState(existingCase?.patientContext?.age ?? "");
   const [sex, setSex] = useState(existingCase?.patientContext?.sex ?? "");
   const [analyzing, setAnalyzing] = useState(false);
   const [progress, setProgress] = useState<string[]>([]);
   const [activeStep, setActiveStep] = useState("");
+  const [suggestions, setSuggestions] = useState<HPOTerm[]>([]);
+  const [isListening, setIsListening] = useState(false);
 
   const TABS: { id: Tab; label: string; hint: string }[] = [
     { id: "notes", label: t("tabNotesLabel"), hint: t("tabNotesHint") },
     { id: "photo", label: t("tabPhotoLabel"), hint: t("tabPhotoHint") },
     { id: "lab",   label: t("tabLabLabel"),   hint: t("tabLabHint")   },
-    { id: "vcf",   label: t("tabVcfLabel"),   hint: t("tabVcfHint")   },
+    { id: "genetic", label: t("tabGeneticLabel"), hint: t("tabGeneticHint") },
   ];
 
-  const activeModalities = [!!notes.trim(), !!photo, !!lab, !!vcf].filter(Boolean).length;
+  const geneticEvidence: GeneticEvidence[] = geneSymbol.trim()
+    ? [{ gene_symbol: geneSymbol.trim().toUpperCase(), variant: variant.trim() || undefined, classification, zygosity: zygosity.trim() || undefined }]
+    : [];
+  const activeModalities = [!!notes.trim(), !!photo, !!lab, !!geneSymbol.trim()].filter(Boolean).length;
   const hasAnyInput = activeModalities > 0;
+  const acceptedTerms = suggestions.filter((term) => term.review_status === "accepted");
+  const pendingTerms = suggestions.filter((term) => term.review_status === "pending");
+  const rejectedTerms = suggestions.filter((term) => term.review_status === "rejected");
 
   const addProgress = (msg: string) => {
     setActiveStep(msg);
     setProgress((p) => [...p, msg]);
   };
 
-  const handleAnalyze = async () => {
+  const updateSuggestion = (hpoId: string, status: "accepted" | "rejected") => {
+    setSuggestions((items) =>
+      items.map((item) => item.hpo_id === hpoId ? { ...item, review_status: status } : item)
+    );
+  };
+
+  const handleSuggest = async () => {
     if (!hasAnyInput) {
       toast.error(t("errorNoInput"));
       return;
@@ -279,107 +297,97 @@ export default function IntakePage() {
 
     setAnalyzing(true);
     setProgress([]);
-    const allTerms: HPOTerm[] = [];
-    const modalities: string[] = [];
     const trimmedNotes = notes.trim();
+
+    try {
+      const allTerms: HPOTerm[] = [];
+
+      if (trimmedNotes) {
+        allTerms.push(...await suggestNotes(trimmedNotes));
+        addProgress(t("progressNotes"));
+      }
+      if (photo) {
+        allTerms.push(...await suggestPhoto(photo, isFacial));
+        addProgress(t("progressPhoto"));
+      }
+      if (lab) {
+        try {
+          allTerms.push(...await suggestLab(lab));
+          addProgress(t("progressLab"));
+        } catch (err) {
+          console.warn(err);
+          toast.error(t("errorLabFailed"));
+        }
+      }
+
+      if (allTerms.length === 0) {
+        toast.error(t("errorNoHpo"));
+        setAnalyzing(false);
+        return;
+      }
+
+      const termMap = new Map<string, HPOTerm>();
+      for (const term of [...suggestions, ...allTerms]) {
+        const existing = termMap.get(term.hpo_id);
+        if (!existing || Math.abs(term.confidence) > Math.abs(existing.confidence)) {
+          termMap.set(term.hpo_id, term);
+        }
+      }
+      setSuggestions(Array.from(termMap.values()));
+      toast.success(t("suggestionsReady"));
+    } catch (err) {
+      console.error(err);
+      toast.error(t("errorApiFailed"));
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleAnalyze = async () => {
+    if (!acceptedTerms.length && !geneticEvidence.length) {
+      toast.error(t("errorNoAcceptedFindings"));
+      return;
+    }
+
+    setAnalyzing(true);
+    setProgress([]);
+    const trimmedNotes = notes.trim();
+    const modalities = [
+      trimmedNotes ? "notes" : null,
+      photo ? "photo" : null,
+      lab ? "lab" : null,
+      geneticEvidence.length ? "genetic" : null,
+    ].filter(Boolean) as string[];
     const analysisTimestamp = new Date().valueOf();
     const intakeSnapshot = {
       timestamp: analysisTimestamp,
       notes: trimmedNotes || undefined,
       photo: photo ? { fileName: photo.name, isFacial } : undefined,
       lab: lab ? { fileName: lab.name } : undefined,
-      vcf: vcf ? { fileName: vcf.name } : undefined,
+      genetic: geneticEvidence[0],
     };
 
-    const warmupToast = setTimeout(() => {
-      toast.info(t("warmingUp"), { duration: 8000 });
-    }, 6000);
-
     try {
-      const calls: Promise<void>[] = [];
-      let extractionHadError = false;
-
-      if (trimmedNotes) {
-        calls.push(
-          submitNotes(trimmedNotes).then((terms) => {
-            allTerms.push(...terms);
-            modalities.push("notes");
-            addProgress(t("progressNotes"));
-          })
-        );
-      }
-      if (photo) {
-        calls.push(
-          submitPhoto(photo, isFacial).then((terms) => {
-            allTerms.push(...terms);
-            modalities.push("photo");
-            addProgress(t("progressPhoto"));
-          })
-        );
-      }
-      if (lab) {
-        calls.push(
-          submitLab(lab)
-            .then((terms) => {
-              allTerms.push(...terms);
-              modalities.push("lab");
-              addProgress(t("progressLab"));
-            })
-            .catch((err) => {
-              extractionHadError = true;
-              console.warn(err);
-              toast.error(t("errorLabFailed"));
-            })
-        );
-      }
-      if (vcf) {
-        calls.push(
-          submitVcf(vcf)
-            .then((terms) => {
-              allTerms.push(...terms);
-              modalities.push("vcf");
-              addProgress(t("progressVcf"));
-            })
-            .catch((err) => {
-              extractionHadError = true;
-              console.warn(err);
-              toast.error(t("errorVcfFailed"));
-            })
-        );
-      }
-
-      await Promise.all(calls);
-      clearTimeout(warmupToast);
-
-      if (allTerms.length === 0) {
-        toast.error(extractionHadError ? t("errorAllModalitiesFailed") : t("errorNoHpo"));
-        setAnalyzing(false);
-        return;
-      }
-
       addProgress(t("progressScoring"));
-
+      const termsForScoring = addToId && existingCase
+        ? [...existingCase.hpoTerms, ...acceptedTerms]
+        : acceptedTerms;
       const termMap = new Map<string, HPOTerm>();
-
-      // If merging into existing case, seed the map with existing HPO terms
-      if (addToId && existingCase) {
-        for (const term of existingCase.hpoTerms) {
-          termMap.set(term.hpo_id, term);
+      for (const term of termsForScoring) {
+        const existing = termMap.get(term.hpo_id);
+        if (!existing || Math.abs(term.confidence) > Math.abs(existing.confidence)) {
+          termMap.set(term.hpo_id, { ...term, review_status: "accepted" });
         }
       }
-
-      for (const term of allTerms) {
-        const existing = termMap.get(term.hpo_id);
-        if (!existing || term.confidence > existing.confidence) termMap.set(term.hpo_id, term);
-      }
       const dedupedTerms = Array.from(termMap.values());
-
-      // Merge modalities if in add mode
       const mergedModalities = addToId && existingCase
         ? [...new Set([...existingCase.modalities, ...modalities])]
         : modalities;
 
-      const rankings = await scoreCase(dedupedTerms, 10, mergedModalities.length);
+      const mergedGeneticEvidence = addToId && existingCase
+        ? [...(existingCase.geneticEvidence ?? []), ...geneticEvidence]
+        : geneticEvidence;
+      const rankings = await scoreCase(dedupedTerms, 10, mergedModalities.length, mergedGeneticEvidence);
       addProgress(t("progressRanking"));
 
       if (addToId && existingCase) {
@@ -392,6 +400,7 @@ export default function IntakePage() {
           hpoTerms: dedupedTerms,
           rankings,
           inputHistory: [...(existingCase.inputHistory ?? []), intakeSnapshot],
+          geneticEvidence: mergedGeneticEvidence,
           patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
         });
         router.push(`/case/${addToId}`);
@@ -405,12 +414,12 @@ export default function IntakePage() {
           modalities,
           hpoTerms: dedupedTerms,
           rankings,
+          geneticEvidence: mergedGeneticEvidence,
           patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
         });
         router.push(`/case/${caseId}`);
       }
     } catch (err) {
-      clearTimeout(warmupToast);
       console.error(err);
       toast.error(t("errorApiFailed"));
       setAnalyzing(false);
@@ -445,6 +454,53 @@ export default function IntakePage() {
       return "absent";
     }
     return null;
+  }
+
+  function toggleCategory(id: string) {
+    setOpenCategories((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function startVoiceInput() {
+    type SpeechRecognitionCtor = new () => {
+      lang: string;
+      interimResults: boolean;
+      onstart: (() => void) | null;
+      onend: (() => void) | null;
+      onerror: (() => void) | null;
+      onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+      start: () => void;
+    };
+    const speechWindow = window as typeof window & {
+      webkitSpeechRecognition?: SpeechRecognitionCtor;
+      SpeechRecognition?: SpeechRecognitionCtor;
+    };
+    const SpeechRecognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error(t("voiceUnsupported"));
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => {
+      setIsListening(false);
+      toast.error(t("voiceStopped"));
+    };
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0]?.transcript ?? "")
+        .join(" ")
+        .trim();
+      if (transcript) setNotes((prev) => [prev.trim(), transcript].filter(Boolean).join("\n"));
+    };
+    recognition.start();
   }
 
   return (
@@ -487,7 +543,7 @@ export default function IntakePage() {
                 <p className="text-muted-foreground">
                   {existingCase.inputHistory
                     .slice(-1)
-                    .map((snapshot) => [snapshot.photo?.fileName, snapshot.lab?.fileName, snapshot.vcf?.fileName].filter(Boolean).join(" · "))
+                    .map((snapshot) => [snapshot.photo?.fileName, snapshot.lab?.fileName, snapshot.genetic?.gene_symbol].filter(Boolean).join(" · "))
                     .filter(Boolean)
                     .join(" · ")}
                 </p>
@@ -572,7 +628,7 @@ export default function IntakePage() {
                     tabItem.id === "notes" ? !!notes.trim() :
                     tabItem.id === "photo" ? !!photo :
                     tabItem.id === "lab" ? !!lab :
-                    !!vcf;
+                    !!geneSymbol.trim();
                   return (
                     <button
                       key={tabItem.id}
@@ -639,9 +695,15 @@ export default function IntakePage() {
                               </div>
                               {SYMPTOM_CATEGORIES.map((category) => (
                                 <div key={category.id}>
-                                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                                    {t(category.i18nKey)}
-                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleCategory(category.id)}
+                                    className="w-full flex items-center justify-between text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2"
+                                  >
+                                    <span>{t(category.i18nKey)}</span>
+                                    <span className={`transition-transform ${openCategories.has(category.id) ? "rotate-90" : ""}`}>›</span>
+                                  </button>
+                                  {openCategories.has(category.id) && (
                                   <div className="space-y-1.5">
                                     {category.symptoms.map((symptom) => {
                                       const state = symptomState(category.canonicalLabel, symptom.canonical);
@@ -678,12 +740,22 @@ export default function IntakePage() {
                                       );
                                     })}
                                   </div>
+                                  )}
                                 </div>
                               ))}
                             </motion.div>
                           )}
                         </div>
-                        <p className="text-[12px] text-muted-foreground mb-3">{t("notesDesc")}</p>
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <p className="text-[12px] text-muted-foreground">{t("notesDesc")}</p>
+                          <button
+                            type="button"
+                            onClick={startVoiceInput}
+                            className="rounded-full border border-black/10 px-3 py-1 text-[12px] hover:border-black/20"
+                          >
+                            {isListening ? t("voiceListening") : t("voice")}
+                          </button>
+                        </div>
                         <textarea
                           value={notes}
                           onChange={(e) => setNotes(e.target.value)}
@@ -736,18 +808,21 @@ export default function IntakePage() {
                       </div>
                     )}
 
-                    {tab === "vcf" && (
+                    {tab === "genetic" && (
                       <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">{t("vcfDesc")}</p>
-                        <DropZone
-                          accept=".vcf,.vcf.gz"
-                          label={t("vcfDropLabel")}
-                          hint={t("vcfDropHint")}
-                          file={vcf}
-                          onFile={setVcf}
-                          onClear={() => setVcf(null)}
-                        />
-                        <p className="text-[12px] text-muted-foreground mt-3">{t("vcfNote")}</p>
+                        <p className="text-[12px] text-muted-foreground mb-3">{t("geneticDesc")}</p>
+                        <div className="grid grid-cols-2 gap-3">
+                          <input value={geneSymbol} onChange={(e) => setGeneSymbol(e.target.value)} placeholder={t("genePlaceholder")} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none" />
+                          <input value={variant} onChange={(e) => setVariant(e.target.value)} placeholder={t("variantPlaceholder")} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none" />
+                          <select value={classification} onChange={(e) => setClassification(e.target.value)} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none bg-white">
+                            <option value="unknown">{t("classificationUnknown")}</option>
+                            <option value="pathogenic">{t("classificationPathogenic")}</option>
+                            <option value="likely_pathogenic">{t("classificationLikelyPathogenic")}</option>
+                            <option value="vus">VUS</option>
+                            <option value="benign">{t("classificationBenign")}</option>
+                          </select>
+                          <input value={zygosity} onChange={(e) => setZygosity(e.target.value)} placeholder={t("zygosityPlaceholder")} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none" />
+                        </div>
                       </div>
                     )}
                   </motion.div>
@@ -761,8 +836,9 @@ export default function IntakePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease, delay: 0.15 }}
             >
+              <div className="grid sm:grid-cols-2 gap-3">
               <Button
-                onClick={handleAnalyze}
+                onClick={handleSuggest}
                 disabled={!hasAnyInput || analyzing}
                 className="w-full h-12 rounded-xl bg-foreground text-background text-[15px] font-medium hover:bg-foreground/85 disabled:opacity-40 transition-all shadow-sm"
               >
@@ -775,9 +851,17 @@ export default function IntakePage() {
                     {t("analyzing")}
                   </span>
                 ) : (
-                  t("analyseButton")
+                  t("suggestFindings")
                 )}
               </Button>
+              <Button
+                onClick={handleAnalyze}
+                disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
+                className="w-full h-12 rounded-xl bg-[oklch(0.52_0.21_255)] text-white text-[15px] font-medium hover:bg-[oklch(0.46_0.21_255)] disabled:opacity-40 transition-all shadow-sm"
+              >
+                {t("runDifferential")}
+              </Button>
+              </div>
             </motion.div>
           </div>
 
@@ -796,7 +880,7 @@ export default function IntakePage() {
                   { id: "notes", label: t("sidebarNotes"), active: !!notes.trim(), icon: TAB_ICONS.notes },
                   { id: "photo", label: t("sidebarPhoto"), active: !!photo,        icon: TAB_ICONS.photo },
                   { id: "lab",   label: t("sidebarLab"),   active: !!lab,           icon: TAB_ICONS.lab   },
-                  { id: "vcf",   label: t("sidebarVcf"),   active: !!vcf,           icon: TAB_ICONS.vcf   },
+                  { id: "genetic", label: t("sidebarGenetic"), active: !!geneSymbol.trim(), icon: TAB_ICONS.genetic },
                 ].map((item) => (
                   <div key={item.id} className="flex items-center gap-2.5">
                     <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-300 flex-shrink-0 ${item.active ? "bg-[oklch(0.52_0.19_160)]" : "border border-black/15 bg-[oklch(0.98_0_0)]"}`}>
@@ -816,6 +900,54 @@ export default function IntakePage() {
                 ))}
               </div>
 
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, ease, delay: 0.24 }}
+              className="bg-white rounded-2xl border border-black/[0.06] p-5"
+            >
+              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("reviewFindings")}</h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-2">{t("pendingSuggestions")} ({pendingTerms.length})</p>
+                  <div className="space-y-2 max-h-64 overflow-auto pr-1">
+                    {pendingTerms.length === 0 && <p className="text-[12px] text-muted-foreground">{t("noPendingSuggestions")}</p>}
+                    {pendingTerms.map((term) => (
+                      <div key={term.hpo_id} className="rounded-lg border border-black/10 p-2">
+                        <p className="text-[12px] font-medium" title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`}>
+                          {term.label || term.hpo_id}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground truncate">{term.source}</p>
+                        <div className="flex gap-1.5 mt-2">
+                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "accepted")} className="rounded-full bg-emerald-600 text-white px-2.5 py-1 text-[11px]">{t("accept")}</button>
+                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "rejected")} className="rounded-full border border-black/10 px-2.5 py-1 text-[11px]">{t("reject")}</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-2">{t("acceptedFindings")} ({acceptedTerms.length})</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {acceptedTerms.map((term) => (
+                      <span key={term.hpo_id} title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`} className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-1 text-[11px] text-emerald-800">
+                        {term.label || term.hpo_id}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-2">{t("rejectedFindings")} ({rejectedTerms.length})</p>
+                </div>
+                {geneticEvidence.length > 0 && (
+                  <div className="rounded-lg bg-[oklch(0.97_0_0)] p-3 text-[12px]">
+                    <p className="font-medium">{geneticEvidence[0].gene_symbol} · {geneticEvidence[0].classification}</p>
+                    {geneticEvidence[0].variant && <p className="text-muted-foreground">{geneticEvidence[0].variant}</p>}
+                  </div>
+                )}
+              </div>
             </motion.div>
 
             {/* Analysis progress */}

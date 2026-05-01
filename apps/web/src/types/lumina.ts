@@ -4,6 +4,18 @@ export interface HPOTerm {
   source: string;
   assertion?: "present" | "absent";
   source_type?: "notes" | "lab" | "photo" | "vcf" | "text_panel" | "unknown";
+  label?: string;
+  definition?: string | null;
+  review_status?: "pending" | "accepted" | "rejected" | null;
+}
+
+export interface GeneticEvidence {
+  gene_symbol: string;
+  variant?: string;
+  classification: string;
+  zygosity?: string;
+  inheritance?: string;
+  source?: string;
 }
 
 export interface RankTermContext {
@@ -51,6 +63,7 @@ export interface CaseData {
   hpoTerms: HPOTerm[];
   rankings: RankResult[];
   patientContext?: PatientContext;
+  geneticEvidence?: GeneticEvidence[];
   outcome?: CaseOutcome;
 }
 
@@ -67,6 +80,7 @@ export interface InputSnapshot {
   vcf?: {
     fileName?: string;
   };
+  genetic?: GeneticEvidence;
 }
 
 export type CaseOutcome = "confirmed" | "ruled_out" | "pending";

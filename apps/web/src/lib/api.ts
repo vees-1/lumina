@@ -1,4 +1,4 @@
-import type { CaseData, CaseOutcome, CaseSummary, HPOTerm, PatientContext, RankResult } from "@/types/lumina";
+import type { CaseData, CaseOutcome, CaseSummary, GeneticEvidence, HPOTerm, PatientContext, RankResult } from "@/types/lumina";
 
 const API = "/api";
 type StoredCaseSummary = CaseSummary & { status: CaseOutcome };
@@ -39,11 +39,29 @@ export async function submitNotes(notes: string): Promise<HPOTerm[]> {
   return res.json();
 }
 
+export async function suggestNotes(notes: string): Promise<HPOTerm[]> {
+  const res = await fetch(`${API}/intake/text/suggest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notes }),
+  });
+  if (!res.ok) throw new Error("Notes suggestion failed");
+  return res.json();
+}
+
 export async function submitPhoto(file: File, facial = false): Promise<HPOTerm[]> {
   const form = new FormData();
   form.append("file", file);
   const res = await fetch(`${API}/intake/photo?facial=${facial}`, { method: "POST", body: form });
   if (!res.ok) throw new Error("Photo extraction failed");
+  return res.json();
+}
+
+export async function suggestPhoto(file: File, facial = false): Promise<HPOTerm[]> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${API}/intake/photo/suggest?facial=${facial}`, { method: "POST", body: form });
+  if (!res.ok) throw new Error("Photo suggestion failed");
   return res.json();
 }
 
@@ -55,6 +73,14 @@ export async function submitLab(file: File): Promise<HPOTerm[]> {
   return res.json();
 }
 
+export async function suggestLab(file: File): Promise<HPOTerm[]> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${API}/intake/lab/suggest`, { method: "POST", body: form });
+  if (!res.ok) throw await extractionError(res, "Lab suggestion failed");
+  return res.json();
+}
+
 export async function submitVcf(file: File): Promise<HPOTerm[]> {
   const form = new FormData();
   form.append("file", file);
@@ -63,11 +89,11 @@ export async function submitVcf(file: File): Promise<HPOTerm[]> {
   return res.json();
 }
 
-export async function scoreCase(terms: HPOTerm[], topK = 10, modalities = 1): Promise<RankResult[]> {
+export async function scoreCase(terms: HPOTerm[], topK = 10, modalities = 1, geneticEvidence: GeneticEvidence[] = []): Promise<RankResult[]> {
   const res = await fetch(`${API}/score`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ terms, top_k: topK, modalities }),
+    body: JSON.stringify({ terms, top_k: topK, modalities, genetic_evidence: geneticEvidence }),
   });
   if (!res.ok) throw new Error("Scoring failed");
   return res.json();
