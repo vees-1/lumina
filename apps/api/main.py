@@ -42,7 +42,7 @@ def _load_facial_vocab(engine) -> list[str]:
         for hid in hpo_ids:
             term = s.get(HT, hid)
             if term:
-                names.append(term.name)
+                names.append(f"{hid}: {term.name}")
     return names
 
 

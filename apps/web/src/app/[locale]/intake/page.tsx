@@ -17,86 +17,93 @@ const SYMPTOM_CATEGORIES = [
   {
     id: "growth",
     i18nKey: "catGrowth",
+    canonicalLabel: "Growth",
     symptoms: [
-      "Short stature",
-      "Failure to thrive",
-      "Microcephaly",
-      "Macrocephaly",
-      "Tall stature",
-      "Obesity",
+      { id: "shortStature", labelKey: "symptomShortStature", canonical: "Short stature" },
+      { id: "failureToThrive", labelKey: "symptomFailureToThrive", canonical: "Failure to thrive" },
+      { id: "microcephaly", labelKey: "symptomMicrocephaly", canonical: "Microcephaly" },
+      { id: "macrocephaly", labelKey: "symptomMacrocephaly", canonical: "Macrocephaly" },
+      { id: "tallStature", labelKey: "symptomTallStature", canonical: "Tall stature" },
+      { id: "obesity", labelKey: "symptomObesity", canonical: "Obesity" },
     ],
   },
   {
     id: "neurological",
     i18nKey: "catNeurological",
+    canonicalLabel: "Neurological",
     symptoms: [
-      "Seizures",
-      "Developmental delay",
-      "Intellectual disability",
-      "Hypotonia",
-      "Ataxia",
-      "Spasticity",
-      "Nystagmus",
+      { id: "seizures", labelKey: "symptomSeizures", canonical: "Seizures" },
+      { id: "developmentalDelay", labelKey: "symptomDevelopmentalDelay", canonical: "Developmental delay" },
+      { id: "intellectualDisability", labelKey: "symptomIntellectualDisability", canonical: "Intellectual disability" },
+      { id: "hypotonia", labelKey: "symptomHypotonia", canonical: "Hypotonia" },
+      { id: "ataxia", labelKey: "symptomAtaxia", canonical: "Ataxia" },
+      { id: "spasticity", labelKey: "symptomSpasticity", canonical: "Spasticity" },
+      { id: "nystagmus", labelKey: "symptomNystagmus", canonical: "Nystagmus" },
     ],
   },
   {
     id: "facial",
     i18nKey: "catFacial",
+    canonicalLabel: "Facial",
     symptoms: [
-      "Hypertelorism",
-      "Low-set ears",
-      "Epicanthal folds",
-      "Broad nasal bridge",
-      "Upslanted palpebral fissures",
-      "Downslanted palpebral fissures",
-      "Short philtrum",
-      "Micrognathia",
+      { id: "hypertelorism", labelKey: "symptomHypertelorism", canonical: "Hypertelorism" },
+      { id: "lowSetEars", labelKey: "symptomLowSetEars", canonical: "Low-set ears" },
+      { id: "epicanthalFolds", labelKey: "symptomEpicanthalFolds", canonical: "Epicanthal folds" },
+      { id: "broadNasalBridge", labelKey: "symptomBroadNasalBridge", canonical: "Broad nasal bridge" },
+      { id: "upslantedPalpebralFissures", labelKey: "symptomUpslantedPalpebralFissures", canonical: "Upslanted palpebral fissures" },
+      { id: "downslantedPalpebralFissures", labelKey: "symptomDownslantedPalpebralFissures", canonical: "Downslanted palpebral fissures" },
+      { id: "shortPhiltrum", labelKey: "symptomShortPhiltrum", canonical: "Short philtrum" },
+      { id: "micrognathia", labelKey: "symptomMicrognathia", canonical: "Micrognathia" },
     ],
   },
   {
     id: "skeletal",
     i18nKey: "catSkeletal",
+    canonicalLabel: "Skeletal",
     symptoms: [
-      "Clinodactyly",
-      "Brachydactyly",
-      "Scoliosis",
-      "Joint hypermobility",
-      "Polydactyly",
-      "Syndactyly",
+      { id: "clinodactyly", labelKey: "symptomClinodactyly", canonical: "Clinodactyly" },
+      { id: "brachydactyly", labelKey: "symptomBrachydactyly", canonical: "Brachydactyly" },
+      { id: "scoliosis", labelKey: "symptomScoliosis", canonical: "Scoliosis" },
+      { id: "jointHypermobility", labelKey: "symptomJointHypermobility", canonical: "Joint hypermobility" },
+      { id: "polydactyly", labelKey: "symptomPolydactyly", canonical: "Polydactyly" },
+      { id: "syndactyly", labelKey: "symptomSyndactyly", canonical: "Syndactyly" },
     ],
   },
   {
     id: "metabolic",
     i18nKey: "catMetabolic",
+    canonicalLabel: "Metabolic",
     symptoms: [
-      "Hypoglycemia",
-      "Lactic acidosis",
-      "Metabolic acidosis",
-      "Hyperammonemia",
-      "Developmental regression",
-      "Hepatomegaly",
+      { id: "hypoglycemia", labelKey: "symptomHypoglycemia", canonical: "Hypoglycemia" },
+      { id: "lacticAcidosis", labelKey: "symptomLacticAcidosis", canonical: "Lactic acidosis" },
+      { id: "metabolicAcidosis", labelKey: "symptomMetabolicAcidosis", canonical: "Metabolic acidosis" },
+      { id: "hyperammonemia", labelKey: "symptomHyperammonemia", canonical: "Hyperammonemia" },
+      { id: "developmentalRegression", labelKey: "symptomDevelopmentalRegression", canonical: "Developmental regression" },
+      { id: "hepatomegaly", labelKey: "symptomHepatomegaly", canonical: "Hepatomegaly" },
     ],
   },
   {
     id: "renalHearing",
     i18nKey: "catRenalHearing",
+    canonicalLabel: "Renal / Hearing",
     symptoms: [
-      "Renal anomaly",
-      "Hydronephrosis",
-      "Proteinuria",
-      "Hearing impairment",
-      "Sensorineural hearing loss",
+      { id: "renalAnomaly", labelKey: "symptomRenalAnomaly", canonical: "Renal anomaly" },
+      { id: "hydronephrosis", labelKey: "symptomHydronephrosis", canonical: "Hydronephrosis" },
+      { id: "proteinuria", labelKey: "symptomProteinuria", canonical: "Proteinuria" },
+      { id: "hearingImpairment", labelKey: "symptomHearingImpairment", canonical: "Hearing impairment" },
+      { id: "sensorineuralHearingLoss", labelKey: "symptomSensorineuralHearingLoss", canonical: "Sensorineural hearing loss" },
     ],
   },
   {
     id: "cardiac",
     i18nKey: "catCardiac",
+    canonicalLabel: "Cardiac",
     symptoms: [
-      "Ventricular septal defect",
-      "Atrial septal defect",
-      "Cardiomyopathy",
-      "Arrhythmia",
-      "Congenital heart disease",
+      { id: "ventricularSeptalDefect", labelKey: "symptomVentricularSeptalDefect", canonical: "Ventricular septal defect" },
+      { id: "atrialSeptalDefect", labelKey: "symptomAtrialSeptalDefect", canonical: "Atrial septal defect" },
+      { id: "cardiomyopathy", labelKey: "symptomCardiomyopathy", canonical: "Cardiomyopathy" },
+      { id: "arrhythmia", labelKey: "symptomArrhythmia", canonical: "Arrhythmia" },
+      { id: "congenitalHeartDisease", labelKey: "symptomCongenitalHeartDisease", canonical: "Congenital heart disease" },
     ],
   },
 ] as const;
@@ -598,16 +605,16 @@ export default function IntakePage() {
                                   </p>
                                   <div className="space-y-1.5">
                                     {category.symptoms.map((symptom) => {
-                                      const state = symptomState(t(category.i18nKey), symptom);
+                                      const state = symptomState(category.canonicalLabel, symptom.canonical);
                                       return (
-                                        <div key={symptom} className="flex flex-wrap items-center gap-2">
+                                        <div key={symptom.id} className="flex flex-wrap items-center gap-2">
                                           <span className="min-w-[180px] flex-1 text-[12px] text-foreground/85">
-                                            {symptom}
+                                            {t(symptom.labelKey)}
                                           </span>
                                           <div className="flex items-center gap-1">
                                             <button
                                               type="button"
-                                              onClick={() => appendSymptom(t(category.i18nKey), symptom, "present")}
+                                              onClick={() => appendSymptom(category.canonicalLabel, symptom.canonical, "present")}
                                               className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
                                                 state === "present"
                                                   ? "border-emerald-500/30 bg-emerald-500/12 text-emerald-700"
@@ -618,7 +625,7 @@ export default function IntakePage() {
                                             </button>
                                             <button
                                               type="button"
-                                              onClick={() => appendSymptom(t(category.i18nKey), symptom, "absent")}
+                                              onClick={() => appendSymptom(category.canonicalLabel, symptom.canonical, "absent")}
                                               className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
                                                 state === "absent"
                                                   ? "border-slate-400 bg-slate-100 text-slate-700"

@@ -38,6 +38,26 @@ dysmorphic facial features including but not limited to the following vocabulary
 
 Map each observable feature to its HPO term with high precision."""
 
+_VISUAL_HPO_VOCAB = (
+    ("HP:0000316", "Hypertelorism"),
+    ("HP:0000369", "Low-set ears"),
+    ("HP:0000286", "Epicanthus"),
+    ("HP:0000431", "Wide nasal bridge"),
+    ("HP:0000582", "Upslanted palpebral fissure"),
+    ("HP:0000494", "Downslanted palpebral fissures"),
+    ("HP:0000322", "Short philtrum"),
+    ("HP:0000347", "Micrognathia"),
+    ("HP:0000252", "Microcephaly"),
+    ("HP:0000256", "Macrocephaly"),
+    ("HP:0004322", "Short stature"),
+    ("HP:0030084", "Clinodactyly"),
+    ("HP:0001156", "Brachydactyly"),
+    ("HP:0002650", "Scoliosis"),
+    ("HP:0001382", "Joint hypermobility"),
+    ("HP:0010442", "Polydactyly"),
+    ("HP:0001159", "Syndactyly"),
+)
+
 
 async def extract_photo(
     image_bytes: bytes,
@@ -58,8 +78,9 @@ async def extract_photo(
 
         system = _SYSTEM_BASE
         if hpo_vocab:
+            merged_vocab = list(dict.fromkeys([*hpo_vocab[:2000], *_VISUAL_HPO_VOCAB]))
             vocab_block = "\n".join(
-                f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(hpo_vocab[:2000])
+                f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(merged_vocab)
             )
             system = system + _VOCAB_ADDENDUM.format(vocab=vocab_block)
         if facial and facial_vocab:
@@ -78,13 +99,12 @@ async def extract_photo(
                     "content": [
                         {
                             "type": "image_url",
-                            "image_url": {
-                                "url": f"data:{media_type};base64,{image_b64}"
-                            },
+                            "image_url": {"url": f"data:{media_type};base64,{image_b64}"},
                         },
                         {
                             "type": "text",
-                            "text": system + "\n\nIdentify all observable clinical findings and return the JSON array.",
+                            "text": system
+                            + "\n\nIdentify all observable clinical findings and return the JSON array.",
                         },
                     ],
                 }
@@ -121,6 +141,7 @@ async def extract_photo(
                     hpo_id=hpo_id,
                     confidence=max(0.0, min(1.0, float(item.get("confidence", 0.7)))),
                     source=str(item.get("source", "")),
+                    source_type="photo",
                 )
             )
         return results
