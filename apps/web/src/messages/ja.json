@@ -368,7 +368,10 @@
     "vcfFile": "遺伝学的エビデンス",
     "geneticEvidence": "遺伝学的エビデンス",
     "manualTag": "手入力",
-    "evidenceTag": "エビデンス"
+    "evidenceTag": "エビデンス",
+    "pipelineTagNer": "固有表現抽出",
+    "pipelineTagVision": "画像AI",
+    "pipelineTagOcrAi": "OCR + AI"
   },
   "common": {
     "loading": "読み込み中...",

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 
@@ -25,9 +25,33 @@ const staggerFast = {
   visible: { transition: { staggerChildren: 0.07 } },
 };
 
+const NUMBER_LOCALES: Record<string, string> = {
+  en: "en-US",
+  de: "de-DE",
+  es: "es-ES",
+  fr: "fr-FR",
+  hi: "hi-IN-u-nu-deva",
+  ja: "ja-JP",
+  zh: "zh-CN",
+};
+
+function getNumberLocale(locale: string) {
+  return NUMBER_LOCALES[locale] ?? locale;
+}
+
 /* ── Sub-components ───────────────────────────────────────────────────────── */
 
-function StatCard({ value, label, suffix = "" }: { value: number; label: string; suffix?: string }) {
+function StatCard({
+  value,
+  label,
+  locale,
+  suffix = "",
+}: {
+  value: number;
+  label: string;
+  locale: string;
+  suffix?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true });
   const [count, setCount] = useState(0);
@@ -50,7 +74,7 @@ function StatCard({ value, label, suffix = "" }: { value: number; label: string;
   return (
     <motion.div ref={ref} variants={fadeUp} className="text-center">
       <div className="serif text-5xl tracking-tight text-foreground">
-        {count.toLocaleString()}{suffix}
+        {count.toLocaleString(locale)}{suffix}
       </div>
       <div className="mt-2 text-[15px] text-muted-foreground">{label}</div>
     </motion.div>
@@ -119,6 +143,13 @@ function StepCard({ num, title, description }: { num: string; title: string; des
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 export default function HomePage() {
   const t = useTranslations("landing");
+  const locale = useLocale();
+  const numberLocale = getNumberLocale(locale);
+  const formatNumber = new Intl.NumberFormat(numberLocale);
+  const formatStepNumber = new Intl.NumberFormat(numberLocale, {
+    minimumIntegerDigits: 2,
+    useGrouping: false,
+  });
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
@@ -246,10 +277,10 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <StepCard num="01" title={t("step1Title")} description={t("step1Desc")} />
-              <StepCard num="02" title={t("step2Title")} description={t("step2Desc")} />
-              <StepCard num="03" title={t("step3Title")} description={t("step3Desc")} />
-              <StepCard num="04" title={t("step4Title")} description={t("step4Desc")} />
+              <StepCard num={formatStepNumber.format(1)} title={t("step1Title")} description={t("step1Desc")} />
+              <StepCard num={formatStepNumber.format(2)} title={t("step2Title")} description={t("step2Desc")} />
+              <StepCard num={formatStepNumber.format(3)} title={t("step3Title")} description={t("step3Desc")} />
+              <StepCard num={formatStepNumber.format(4)} title={t("step4Title")} description={t("step4Desc")} />
             </div>
 
             {/* Animated pipeline visual */}
@@ -262,9 +293,9 @@ export default function HomePage() {
             >
               <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-6 space-y-3">
                 {[
-                  { label: t("clinicalNotes"), tag: "NER", color: "oklch(0.52 0.21 255)", terms: 12 },
-                  { label: t("facialPhoto"), tag: "Vision", color: "oklch(0.65 0.18 200)", terms: 7 },
-                  { label: t("labReport"), tag: "OCR+AI", color: "oklch(0.60 0.20 285)", terms: 9 },
+                  { label: t("clinicalNotes"), tag: t("pipelineTagNer"), color: "oklch(0.52 0.21 255)", terms: 12 },
+                  { label: t("facialPhoto"), tag: t("pipelineTagVision"), color: "oklch(0.65 0.18 200)", terms: 7 },
+                  { label: t("labReport"), tag: t("pipelineTagOcrAi"), color: "oklch(0.60 0.20 285)", terms: 9 },
                   { label: t("geneticEvidence"), tag: t("manualTag"), color: "oklch(0.52 0.19 160)", terms: t("evidenceTag") },
                 ].map((item, i) => (
                   <motion.div
@@ -284,7 +315,7 @@ export default function HomePage() {
                       {item.tag}
                     </span>
                     <span className="text-[12px] font-semibold" style={{ color: item.color }}>
-                      {typeof item.terms === "number" ? `${item.terms} ${t("pipelineTerms")}` : item.terms}
+                      {typeof item.terms === "number" ? `${formatNumber.format(item.terms)} ${t("pipelineTerms")}` : item.terms}
                     </span>
                   </motion.div>
                 ))}
@@ -298,7 +329,7 @@ export default function HomePage() {
                       className="h-full rounded-full bg-gradient-to-r from-[oklch(0.52_0.21_255)] to-[oklch(0.65_0.18_200)]"
                     />
                   </div>
-                  <span className="text-[13px] font-bold text-[oklch(0.52_0.21_255)]">96%</span>
+                  <span className="text-[13px] font-bold text-[oklch(0.52_0.21_255)]">{formatNumber.format(96)}%</span>
                 </div>
               </div>
             </motion.div>
@@ -361,10 +392,10 @@ export default function HomePage() {
             variants={staggerFast}
             className="grid grid-cols-2 md:grid-cols-4 gap-8"
           >
-            <StatCard value={7000} label={t("statRareDiseases")} suffix="+" />
-            <StatCard value={30000} label={t("statHpoTerms")} suffix="+" />
-            <StatCard value={4} label={t("statModalities")} />
-            <StatCard value={100} label={t("statScoring")} />
+            <StatCard value={7000} label={t("statRareDiseases")} suffix="+" locale={numberLocale} />
+            <StatCard value={30000} label={t("statHpoTerms")} suffix="+" locale={numberLocale} />
+            <StatCard value={4} label={t("statModalities")} locale={numberLocale} />
+            <StatCard value={100} label={t("statScoring")} locale={numberLocale} />
           </motion.div>
 
           <motion.div
@@ -438,7 +469,7 @@ export default function HomePage() {
             <span className="text-[13px] font-medium">Lumina</span>
           </div>
           <p className="text-[12px] text-white/40">
-            &copy; {new Date().getFullYear()} Lumina. {t("footerTagline")}
+            &copy; {formatNumber.format(new Date().getFullYear())} Lumina. {t("footerTagline")}
           </p>
         </div>
       </footer>

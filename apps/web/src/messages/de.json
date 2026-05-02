@@ -368,7 +368,10 @@
     "vcfFile": "Genetische Evidenz",
     "geneticEvidence": "Genetische Evidenz",
     "manualTag": "Manuell",
-    "evidenceTag": "Evidenz"
+    "evidenceTag": "Evidenz",
+    "pipelineTagNer": "NER",
+    "pipelineTagVision": "Bild-KI",
+    "pipelineTagOcrAi": "OCR + KI"
   },
   "common": {
     "loading": "Lädt...",

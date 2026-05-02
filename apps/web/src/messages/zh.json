@@ -368,7 +368,10 @@
     "vcfFile": "遗传证据",
     "geneticEvidence": "遗传证据",
     "manualTag": "手动",
-    "evidenceTag": "证据"
+    "evidenceTag": "证据",
+    "pipelineTagNer": "实体识别",
+    "pipelineTagVision": "视觉",
+    "pipelineTagOcrAi": "OCR + AI"
   },
   "common": {
     "loading": "加载中……",

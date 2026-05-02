@@ -368,7 +368,10 @@
     "vcfFile": "Preuve génétique",
     "geneticEvidence": "Preuve génétique",
     "manualTag": "Manuel",
-    "evidenceTag": "preuve"
+    "evidenceTag": "preuve",
+    "pipelineTagNer": "NER",
+    "pipelineTagVision": "Vision",
+    "pipelineTagOcrAi": "OCR + IA"
   },
   "common": {
     "loading": "Chargement...",
