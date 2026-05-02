@@ -840,7 +840,7 @@ export default function IntakePage() {
                 <Button
                   onClick={handleSuggest}
                   disabled={!hasAnyInput || analyzing}
-                  className="h-8 rounded-full bg-foreground px-4 text-[13px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
+                  className="h-9 rounded-full bg-foreground px-5 text-[13px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
                 >
                   {analyzing ? (
                     <span className="flex items-center gap-2">
@@ -857,7 +857,7 @@ export default function IntakePage() {
                 <Button
                   onClick={handleAnalyze}
                   disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
-                  className="h-8 rounded-full bg-foreground px-4 text-[13px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
+                  className="h-9 rounded-full bg-foreground px-5 text-[13px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
                 >
                   {t("runDifferential")}
                 </Button>

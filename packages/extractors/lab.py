@@ -14,12 +14,11 @@ from extractors.models import HPOTerm
 
 _GROQ_MODEL = "llama-3.3-70b-versatile"
 _GROQ_VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
-_PROMPT_VOCAB_LIMIT = 5000
 
 _SYSTEM = """You are a clinical laboratory analyst for rare disease diagnosis.
 
 Given OCR-extracted text from a lab report, identify all abnormal values and map each to an HPO term.
-Only use HPO IDs from the provided vocabulary. Return a JSON array — nothing else.
+Use standard Human Phenotype Ontology terms and IDs. Return a JSON array — nothing else.
 
 Each item:
   {"hpo_id": "HP:XXXXXXX", "confidence": 0.0-1.0, "source": "test name and value, e.g. WBC 2.1 (low)"}
@@ -29,6 +28,7 @@ Rules:
 - confidence 0.85–0.95 for clearly abnormal values with reference ranges provided
 - confidence 0.6–0.8 for values where reference range is unclear
 - Map lab abnormalities to their HPO phenotype (e.g. low WBC → HP:0001882 Leukopenia)
+- do not invent non-existent HPO IDs; backend validation will discard invalid IDs
 - return [] if all values are within normal limits or no mappable findings"""
 
 _LAB_FINDING_ALIASES: tuple[tuple[str, str, str], ...] = (
@@ -253,14 +253,8 @@ async def _extract_image_lab_with_vision(
     except ImportError:
         return []
 
-    vocab_block = ""
-    if hpo_vocab:
-        vocab_block = "\n\nHPO vocabulary:\n" + "\n".join(
-            f"{hid}: {name}" for hid, name in hpo_vocab[:_PROMPT_VOCAB_LIMIT]
-        )
     prompt = (
         _SYSTEM
-        + vocab_block
         + "\n\nRead the lab report image directly. Identify abnormal lab values and return only the JSON array."
     )
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
@@ -330,17 +324,12 @@ async def extract_lab(
         from groq import AsyncGroq
 
         client = AsyncGroq(api_key=api_key)
-        vocab_block = ""
-        if hpo_vocab:
-            vocab_block = "\n\nHPO vocabulary:\n" + "\n".join(
-                f"{hid}: {name}" for hid, name in hpo_vocab[:_PROMPT_VOCAB_LIMIT]
-            )
         response = await client.chat.completions.create(
             model=_GROQ_MODEL,
             max_tokens=1024,
             temperature=0.0,
             messages=[
-                {"role": "system", "content": _SYSTEM + vocab_block},
+                {"role": "system", "content": _SYSTEM},
                 {"role": "user", "content": f"Lab report text:\n\n{ocr_text}"},
             ],
         )

@@ -12,7 +12,6 @@ from PIL import Image
 from extractors.models import HPOTerm
 
 _MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
-_PROMPT_VOCAB_LIMIT = 1200
 
 _SYSTEM_BASE = """You are a clinical image analyst specialising in rare disease phenotyping.
 
@@ -27,13 +26,9 @@ Rules:
 - confidence 0.85–0.95 for unambiguous findings
 - confidence 0.5–0.8 for subtle or uncertain findings
 - Do not infer systemic findings from a single photo
+- Use standard Human Phenotype Ontology terms and IDs
+- Do not invent non-existent HPO IDs; backend validation will discard invalid IDs
 - return [] if no clinically significant HPO-mappable findings are visible"""
-
-_VOCAB_ADDENDUM = """
-You MUST only use HPO IDs from the provided vocabulary list. Do not invent HP: IDs.
-
-HPO vocabulary:
-{vocab}"""
 
 _FACIAL_ADDENDUM = """
 This is a facial photograph. In addition to general findings, pay close attention to:
@@ -101,14 +96,8 @@ async def extract_photo(
         client = AsyncGroq(api_key=api_key)
 
         system = _SYSTEM_BASE
-        if hpo_vocab:
-            merged_vocab = list(
-                dict.fromkeys([*_VISUAL_HPO_VOCAB, *hpo_vocab[:_PROMPT_VOCAB_LIMIT]])
-            )
-            vocab_block = "\n".join(
-                f"{i + 1}. {hid} — {name}" for i, (hid, name) in enumerate(merged_vocab)
-            )
-            system = system + _VOCAB_ADDENDUM.format(vocab=vocab_block)
+        visual_vocab = "\n".join(f"- {hid}: {name}" for hid, name in _VISUAL_HPO_VOCAB)
+        system += f"\n\nCommon visible HPO examples:\n{visual_vocab}"
         if facial and facial_vocab:
             vocab_str = "\n".join(f"- {v}" for v in facial_vocab[:200])
             system = system + _FACIAL_ADDENDUM.format(vocab=vocab_str)
