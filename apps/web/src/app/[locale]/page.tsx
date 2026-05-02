@@ -265,7 +265,7 @@ export default function HomePage() {
                   { label: t("clinicalNotes"), tag: "NER", color: "oklch(0.52 0.21 255)", terms: 12 },
                   { label: t("facialPhoto"), tag: "Vision", color: "oklch(0.65 0.18 200)", terms: 7 },
                   { label: t("labReport"), tag: "OCR+AI", color: "oklch(0.60 0.20 285)", terms: 9 },
-                  { label: t("vcfFile"), tag: "Genomic", color: "oklch(0.52 0.19 160)", terms: 5 },
+                  { label: t("geneticEvidence"), tag: t("manualTag"), color: "oklch(0.52 0.19 160)", terms: t("evidenceTag") },
                 ].map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -284,7 +284,7 @@ export default function HomePage() {
                       {item.tag}
                     </span>
                     <span className="text-[12px] font-semibold" style={{ color: item.color }}>
-                      {item.terms} {t("pipelineTerms")}
+                      {typeof item.terms === "number" ? `${item.terms} ${t("pipelineTerms")}` : item.terms}
                     </span>
                   </motion.div>
                 ))}
@@ -332,7 +332,6 @@ export default function HomePage() {
             <ModalityCard delay={0.07} icon={<PhotoIcon />} title={t("modalityPhotoTitle")} description={t("modalityPhotoDesc")} />
             <ModalityCard delay={0.14} icon={<LabIcon />} title={t("modalityLabTitle")} description={t("modalityLabDesc")} />
             <ModalityCard delay={0.21} icon={<DnaIcon />} title={t("modalityDnaTitle")} description={t("modalityDnaDesc")} />
-            <ModalityCard delay={0.28} icon={<ChatIcon />} title={t("modalityChatTitle")} description={t("modalityChatDesc")} />
           </div>
         </div>
       </section>
@@ -364,7 +363,7 @@ export default function HomePage() {
           >
             <StatCard value={7000} label={t("statRareDiseases")} suffix="+" />
             <StatCard value={30000} label={t("statHpoTerms")} suffix="+" />
-            <StatCard value={5} label={t("statModalities")} />
+            <StatCard value={4} label={t("statModalities")} />
             <StatCard value={100} label={t("statScoring")} />
           </motion.div>
 
@@ -481,15 +480,6 @@ function DnaIcon() {
     <svg className="w-5 h-5 text-[oklch(0.52_0.19_160)]" fill="none" viewBox="0 0 20 20">
       <path d="M5 3c2 2 8 3 8 7S7 15 5 17M15 3c-2 2-8 3-8 7s6 5 8 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       <path d="M5.5 8h9M5.5 12h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg className="w-5 h-5 text-[oklch(0.50_0.18_320)]" fill="none" viewBox="0 0 20 20">
-      <path d="M2 4a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H6l-4 3V4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M6 8h8M6 11h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
