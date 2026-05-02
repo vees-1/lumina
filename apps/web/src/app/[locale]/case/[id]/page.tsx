@@ -15,6 +15,7 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 const CONFIDENCE_CAPS: Record<number, number> = { 1: 40, 2: 55, 3: 65, 4: 80 };
 const CLOSE_CONFIDENCE_GAP = 10;
+const RANK_COLOR = "oklch(0.60 0.20 285)";
 
 function isAbsentTerm(term: Pick<HPOTerm, "assertion" | "confidence">) {
   return term.assertion === "absent" || term.confidence < 0;
@@ -135,14 +136,7 @@ function ConfidenceBar({ value, color, delay }: { value: number; color: string; 
 
 function RankCard({ result, rank, delay }: { result: RankResult; rank: number; delay: number }) {
   const t = useTranslations("case");
-  const colors = [
-    "oklch(0.52 0.21 255)",
-    "oklch(0.65 0.18 200)",
-    "oklch(0.60 0.20 285)",
-    "oklch(0.52 0.19 160)",
-    "oklch(0.58 0.16 50)",
-  ];
-  const color = colors[rank - 1] ?? colors[4];
+  const color = RANK_COLOR;
   const isTop = rank === 1;
   const contributingTerms = getTermDetails(result, "contributing").slice(0, 5);
   const missingTerms = getTermDetails(result, "missing").slice(0, 4);
@@ -153,7 +147,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
       initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease, delay }}
-      className={`relative bg-white rounded-2xl border p-5 ${isTop ? "border-[oklch(0.52_0.21_255/0.3)] shadow-[0_4px_24px_oklch(0.52_0.21_255/0.1)]" : "border-black/[0.06]"}`}
+      className={`relative bg-white rounded-2xl border p-5 ${isTop ? "border-[oklch(0.60_0.20_285/0.3)] shadow-[0_4px_24px_oklch(0.60_0.20_285/0.1)]" : "border-black/[0.06]"}`}
     >
       {isTop && (
         <div className="absolute -top-2.5 left-4">
@@ -309,7 +303,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
     >
       <div className="px-5 py-3 border-b border-black/[0.06]">
         <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Why {result.name}?
+          {t("whyThis")}
         </h2>
         <p className="text-[12px] text-muted-foreground mt-0.5">
           {t("topDiscriminating")}
