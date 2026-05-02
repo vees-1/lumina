@@ -427,7 +427,10 @@ export default function IntakePage() {
   };
 
   function appendSymptom(categoryLabel: string, symptom: string, status: "present" | "absent") {
-    const nextLine = `${categoryLabel}: ${status === "present" ? symptom : `No ${symptom.toLowerCase()}`}.`;
+    const presentLabel = t("present");
+    const absentLabel = t("absent");
+    const statusLabel = status === "present" ? presentLabel : absentLabel;
+    const nextLine = `${categoryLabel}: ${statusLabel} - ${symptom}.`;
 
     setNotes((prev) => {
       const lines = prev
@@ -435,7 +438,7 @@ export default function IntakePage() {
         .map((line) => line.trim())
         .filter(Boolean);
       const symptomPattern = new RegExp(
-        `^${categoryLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}:\\s+(?:${symptom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}|No\\s+${symptom.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})\\.$`,
+        `^${categoryLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}:\\s+(?:${presentLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}|${absentLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})\\s+-\\s+${symptom.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\.$`,
         "i",
       );
       const nextLines = lines.filter((line) => !symptomPattern.test(line));
@@ -447,10 +450,10 @@ export default function IntakePage() {
 
   function symptomState(categoryLabel: string, symptom: string) {
     const normalized = notes.toLowerCase();
-    if (normalized.includes(`${categoryLabel.toLowerCase()}: ${symptom.toLowerCase()}.`)) {
+    if (normalized.includes(`${categoryLabel.toLowerCase()}: ${t("present").toLowerCase()} - ${symptom.toLowerCase()}.`)) {
       return "present";
     }
-    if (normalized.includes(`${categoryLabel.toLowerCase()}: no ${symptom.toLowerCase()}.`)) {
+    if (normalized.includes(`${categoryLabel.toLowerCase()}: ${t("absent").toLowerCase()} - ${symptom.toLowerCase()}.`)) {
       return "absent";
     }
     return null;
@@ -706,16 +709,18 @@ export default function IntakePage() {
                                   {openCategories.has(category.id) && (
                                   <div className="space-y-1.5">
                                     {category.symptoms.map((symptom) => {
-                                      const state = symptomState(category.canonicalLabel, symptom.canonical);
+                                      const categoryLabel = t(category.i18nKey);
+                                      const symptomLabel = t(symptom.labelKey);
+                                      const state = symptomState(categoryLabel, symptomLabel);
                                       return (
                                         <div key={symptom.id} className="flex flex-wrap items-center gap-2">
                                           <span className="min-w-[180px] flex-1 text-[12px] text-foreground/85">
-                                            {t(symptom.labelKey)}
+                                            {symptomLabel}
                                           </span>
                                           <div className="flex items-center gap-1">
                                             <button
                                               type="button"
-                                              onClick={() => appendSymptom(category.canonicalLabel, symptom.canonical, "present")}
+                                              onClick={() => appendSymptom(categoryLabel, symptomLabel, "present")}
                                               className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
                                                 state === "present"
                                                   ? "border-emerald-500/30 bg-emerald-500/12 text-emerald-700"
@@ -726,7 +731,7 @@ export default function IntakePage() {
                                             </button>
                                             <button
                                               type="button"
-                                              onClick={() => appendSymptom(category.canonicalLabel, symptom.canonical, "absent")}
+                                              onClick={() => appendSymptom(categoryLabel, symptomLabel, "absent")}
                                               className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
                                                 state === "absent"
                                                   ? "border-slate-400 bg-slate-100 text-slate-700"
