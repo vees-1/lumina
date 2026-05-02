@@ -70,15 +70,18 @@ function ConfidenceTooltip({ confidence, modalities, children }: { confidence: n
 
 function HPOChip({ term }: { term: HPOTerm }) {
   const t = useTranslations("case");
+  const messages = useMessages() as HpoLabelMessages;
+  const label = localizeHpoLabel(term.hpo_id, term.label, messages);
 
   return (
     <motion.span
       key={`${term.hpo_id}-${term.source}-${term.assertion ?? "present"}`}
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="relative group text-[11px] px-2 py-0.5 rounded-full border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground font-mono cursor-default hover:border-[oklch(0.52_0.21_255/0.3)] hover:bg-[oklch(0.52_0.21_255/0.04)] transition-colors"
+      className="relative group text-[11px] px-2 py-0.5 rounded-full border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground cursor-default hover:border-[oklch(0.52_0.21_255/0.3)] hover:bg-[oklch(0.52_0.21_255/0.04)] transition-colors"
     >
-      {term.hpo_id}
+      <span className="font-medium">{label}</span>{" "}
+      <span className="font-mono text-[10px] opacity-75">{term.hpo_id}</span>
       {term.source && (
         <span className="absolute bottom-full left-1/2 mb-2 w-60 max-w-[calc(100vw-2rem)] -translate-x-1/2 bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-[100] pointer-events-none whitespace-normal font-sans shadow-xl">
           <span className="font-semibold">{t("fromLabel")}</span> {term.source}

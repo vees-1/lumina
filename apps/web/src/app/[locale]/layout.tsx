@@ -13,8 +13,9 @@ export default async function LocaleLayout({
   const { locale } = await params;
   if (!routing.locales.includes(locale as (typeof routing.locales)[number])) notFound();
   const messages = (await import(`@/messages/${locale}.json`)).default;
+  const hpoLabels = (await import(`@/hpo-labels/${locale}.json`)).default;
   return (
-    <NextIntlClientProvider locale={locale} messages={messages} now={new Date()} timeZone="UTC">
+    <NextIntlClientProvider locale={locale} messages={{ ...messages, hpoLabels }} now={new Date()} timeZone="UTC">
       {children}
     </NextIntlClientProvider>
   );
