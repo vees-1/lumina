@@ -4,7 +4,7 @@ import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations, useLocale, useMessages } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { getCaseById, getAgentSuggestion, streamLetter, updateCaseInStorage } from "@/lib/api";
@@ -16,14 +16,36 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const CONFIDENCE_CAPS: Record<number, number> = { 1: 40, 2: 55, 3: 65, 4: 80 };
 const CLOSE_CONFIDENCE_GAP = 10;
 const RANK_COLOR = "oklch(0.60 0.20 285)";
+const HPO_LABEL_KEYS: Record<string, string> = {
+  "HP:0000202": "hpo_0000202",
+  "HP:0000316": "hpo_0000316",
+  "HP:0000369": "hpo_0000369",
+  "HP:0000444": "hpo_0000444",
+  "HP:0000494": "hpo_0000494",
+  "HP:0000506": "hpo_0000506",
+  "HP:0001156": "hpo_0001156",
+  "HP:0001249": "hpo_0001249",
+  "HP:0001252": "hpo_0001252",
+  "HP:0001263": "hpo_0001263",
+};
 
 function isAbsentTerm(term: Pick<HPOTerm, "assertion" | "confidence">) {
   return term.assertion === "absent" || term.confidence < 0;
 }
 
-function formatHpoLabel(term: Pick<RankTermContext, "hpo_id" | "label" | "matched_hpo_id" | "matched_label">) {
+function translatedHpoLabel(id: string, fallback: string, messages: Record<string, unknown>) {
+  const key = HPO_LABEL_KEYS[id];
+  const terms = messages.hpoTerms as Record<string, string> | undefined;
+  return key && terms?.[key] ? terms[key] : fallback;
+}
+
+function formatHpoLabel(
+  term: Pick<RankTermContext, "hpo_id" | "label" | "matched_hpo_id" | "matched_label">,
+  messages: Record<string, unknown>,
+) {
   const id = term.matched_hpo_id ?? term.hpo_id;
-  const label = term.matched_label?.trim() || term.label?.trim();
+  const fallback = term.matched_label?.trim() || term.label?.trim();
+  const label = fallback ? translatedHpoLabel(id, fallback, messages) : "";
   return label ? `${label} (${id})` : id;
 }
 
@@ -91,6 +113,7 @@ function RankTermChip({
   term: Pick<RankTermContext, "hpo_id" | "label" | "matched_hpo_id" | "matched_label">;
   tone?: "default" | "missing" | "distinguishing";
 }) {
+  const messages = useMessages() as Record<string, unknown>;
   const toneClasses = {
     default: "border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground",
     missing: "border border-dashed border-black/[0.12] text-muted-foreground/80",
@@ -98,7 +121,8 @@ function RankTermChip({
   } as const;
 
   const id = tone === "default" ? term.matched_hpo_id ?? term.hpo_id : term.hpo_id;
-  const label = tone === "default" ? term.matched_label?.trim() || term.label?.trim() : term.label?.trim();
+  const fallbackLabel = tone === "default" ? term.matched_label?.trim() || term.label?.trim() : term.label?.trim();
+  const label = fallbackLabel ? translatedHpoLabel(id, fallbackLabel, messages) : "";
 
   return (
     <span className={`text-[11px] px-2 py-1 rounded-lg ${toneClasses[tone]}`}>
@@ -272,6 +296,7 @@ function AgentBanner({
 
 function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseData: CaseData }) {
   const t = useTranslations("case");
+  const messages = useMessages() as Record<string, unknown>;
   const hpoMap = new Map(caseData.hpoTerms.map((t) => [t.hpo_id, t]));
   const modalityLabel: Record<string, string> = {
     notes: t("modalityNotes"),
@@ -325,7 +350,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
               className="flex items-center gap-3 px-5 py-3"
             >
               <span className="text-[12px] text-muted-foreground w-56 flex-shrink-0 truncate">
-                {formatHpoLabel(detail)}
+                {formatHpoLabel(detail, messages)}
               </span>
               <div className="flex-1 min-w-0">
                 <div className="h-1 bg-[oklch(0.95_0_0)] rounded-full overflow-hidden">
@@ -359,6 +384,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
 
 function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
   const t = useTranslations("case");
+  const messages = useMessages() as Record<string, unknown>;
   const [first, second] = rankings;
 
   if (!first || !second) return null;
@@ -449,7 +475,7 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
           <div className="space-y-2">
             {questions.map(({ disease, term }) => (
               <p key={`${disease}-${term.hpo_id}`} className="text-[12px] text-foreground leading-relaxed">
-                {t("askAboutFinding", { feature: formatHpoLabel(term), disease })}
+                {t("askAboutFinding", { feature: formatHpoLabel(term, messages), disease })}
               </p>
             ))}
           </div>

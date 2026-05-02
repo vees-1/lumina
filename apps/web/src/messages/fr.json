@@ -370,5 +370,17 @@
   "common": {
     "loading": "Chargement...",
     "error": "Une erreur est survenue"
+  },
+  "hpoTerms": {
+    "hpo_0000202": "Fente oro-faciale",
+    "hpo_0000316": "Hypertélorisme",
+    "hpo_0000369": "Oreilles bas implantées",
+    "hpo_0000444": "Racine nasale convexe",
+    "hpo_0000494": "Fentes palpébrales descendantes",
+    "hpo_0000506": "Télécanthus",
+    "hpo_0001156": "Brachydactylie",
+    "hpo_0001249": "Déficience intellectuelle",
+    "hpo_0001252": "Hypotonie",
+    "hpo_0001263": "Retard global du développement"
   }
 }
