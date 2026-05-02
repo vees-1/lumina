@@ -248,7 +248,7 @@ class ScoringIndex:
     def rank(
         self,
         query: Sequence[tuple[str, float] | object],
-        top_k: int = 5,
+        top_k: int = 10,
         genetic_evidence: Sequence[GeneticEvidence] | None = None,
     ) -> list[RankResult]:
         if not query:
@@ -327,7 +327,6 @@ class ScoringIndex:
 
         scores.sort(key=lambda item: item[1], reverse=True)
         top = scores[:top_k]
-        max_score = top[0][1] if top else 1.0
 
         all_top_phenos: dict[int, set[str]] = {}
         for orpha_code, _, _, _, _, _ in top:
@@ -379,13 +378,14 @@ class ScoringIndex:
                 if fw > 0.4 and pid not in other_phenos
             ][:3]
             distinguishing_terms = [detail.hpo_id for detail in distinguishing_details]
+            confidence = _evidence_confidence(raw_score, genetic_label)
 
             results.append(
                 RankResult(
                     orpha_code=orpha_code,
                     name=self.disease_names.get(orpha_code, "Unknown"),
                     score=round(raw_score, 4),
-                    confidence=round(_calibrate(raw_score, max_score), 1),
+                    confidence=confidence,
                     contributing_terms=contributing,
                     missing_terms=missing_terms,
                     distinguishing_terms=distinguishing_terms,
@@ -400,13 +400,16 @@ class ScoringIndex:
                     ),
                     discordant_absent_terms=[d.hpo_id for d in discordant_details],
                     discordant_absent_term_details=discordant_details,
-                    evidence_strength=round(raw_score * 100, 1),
+                    evidence_strength=confidence,
                 )
             )
         return results
 
 
-def _calibrate(raw: float, max_raw: float) -> float:
-    if max_raw == 0:
-        return 0.0
-    return min(100.0, (raw / max_raw) * 100.0)
+def _evidence_confidence(raw: float, genetic_label: str) -> float:
+    cap = 40.0
+    if genetic_label == "strong":
+        cap = 80.0
+    elif genetic_label in {"limited", "weak"}:
+        cap = 55.0
+    return round(min(cap, max(0.0, raw) * cap), 1)

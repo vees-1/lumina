@@ -20,8 +20,10 @@ function isAbsentTerm(term: Pick<HPOTerm, "assertion" | "confidence">) {
   return term.assertion === "absent" || term.confidence < 0;
 }
 
-function formatHpoLabel(term: Pick<RankTermContext, "hpo_id" | "label">) {
-  return term.label?.trim() ? `${term.label} (${term.hpo_id})` : term.hpo_id;
+function formatHpoLabel(term: Pick<RankTermContext, "hpo_id" | "label" | "matched_hpo_id" | "matched_label">) {
+  const id = term.matched_hpo_id ?? term.hpo_id;
+  const label = term.matched_label?.trim() || term.label?.trim();
+  return label ? `${label} (${id})` : id;
 }
 
 function getTermDetails(
@@ -85,7 +87,7 @@ function RankTermChip({
   term,
   tone = "default",
 }: {
-  term: Pick<RankTermContext, "hpo_id" | "label">;
+  term: Pick<RankTermContext, "hpo_id" | "label" | "matched_hpo_id" | "matched_label">;
   tone?: "default" | "missing" | "distinguishing";
 }) {
   const toneClasses = {
@@ -94,15 +96,18 @@ function RankTermChip({
     distinguishing: "bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.2)] text-[oklch(0.38_0.21_255)]",
   } as const;
 
+  const id = tone === "default" ? term.matched_hpo_id ?? term.hpo_id : term.hpo_id;
+  const label = tone === "default" ? term.matched_label?.trim() || term.label?.trim() : term.label?.trim();
+
   return (
     <span className={`text-[11px] px-2 py-1 rounded-lg ${toneClasses[tone]}`}>
-      {term.label?.trim() ? (
+      {label ? (
         <>
-          <span className="font-medium">{term.label}</span>{" "}
-          <span className="font-mono text-[10px] opacity-75">{term.hpo_id}</span>
+          <span className="font-medium">{label}</span>{" "}
+          <span className="font-mono text-[10px] opacity-75">{id}</span>
         </>
       ) : (
-        <span className="font-mono">{term.hpo_id}</span>
+        <span className="font-mono">{id}</span>
       )}
     </span>
   );
@@ -280,7 +285,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
     lab: t("modalityLab"),
     vcf: t("modalityVcf"),
   };
-  const terms = result.contributing_terms.slice(0, 5);
+  const terms = getTermDetails(result, "contributing").slice(0, 5);
 
   const modalityColor: Record<string, string> = {
     notes: "oklch(0.52 0.21 255)",
@@ -311,25 +316,28 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
         </p>
       </div>
       <div className="divide-y divide-black/[0.04]">
-        {terms.map((hpoId, i) => {
-          const term = hpoMap.get(hpoId);
+        {terms.map((detail, i) => {
+          const patientHpoId = detail.matched_hpo_id ?? detail.hpo_id;
+          const term = hpoMap.get(patientHpoId);
           const src = term?.source_type ?? "unknown";
           const color = modalityColor[src] ?? "oklch(0.46 0 0)";
           const bg = modalityBg[src] ?? "oklch(0.46 0 0 / 0.08)";
           return (
             <motion.div
-              key={hpoId}
+              key={`${result.orpha_code}-why-${patientHpoId}-${detail.hpo_id}`}
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 + i * 0.06, duration: 0.3 }}
               className="flex items-center gap-3 px-5 py-3"
             >
-              <span className="text-[12px] font-mono text-muted-foreground w-24 flex-shrink-0">{hpoId}</span>
+              <span className="text-[12px] text-muted-foreground w-56 flex-shrink-0 truncate">
+                {formatHpoLabel(detail)}
+              </span>
               <div className="flex-1 min-w-0">
                 <div className="h-1 bg-[oklch(0.95_0_0)] rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${(term?.confidence ?? 0.5) * 100}%` }}
+                    animate={{ width: `${Math.abs(term?.confidence ?? detail.patient_confidence ?? 0.5) * 100}%` }}
                     transition={{ duration: 0.8, ease, delay: 0.5 + i * 0.06 }}
                     className="h-full rounded-full"
                     style={{ background: color }}
@@ -922,7 +930,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 {t("differentialDiagnosis")}
               </motion.h2>
               <div className="space-y-3">
-                {caseData.rankings.slice(0, 5).map((r, i) => (
+                {caseData.rankings.slice(0, 10).map((r, i) => (
                   <RankCard key={r.orpha_code} result={r} rank={i + 1} delay={i * 0.08} />
                 ))}
               </div>
