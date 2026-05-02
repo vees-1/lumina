@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
-import { useTranslations } from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
+import { localizeHpoLabel, type HpoLabelMessages } from "@/lib/hpo";
 import { getCaseById, saveCaseToStorage, scoreCase, suggestLab, suggestNotes, suggestPhoto, updateCaseInStorage } from "@/lib/api";
 import type { GeneticEvidence, HPOTerm } from "@/types/lumina";
 
@@ -234,6 +235,7 @@ function ProgressStep({ label, active, done }: { label: string; active: boolean;
 
 export default function IntakePage() {
   const t = useTranslations("intake");
+  const messages = useMessages() as HpoLabelMessages;
   const router = useRouter();
   const searchParams = useSearchParams();
   const addToId = searchParams.get("addTo");
@@ -922,7 +924,7 @@ export default function IntakePage() {
                     {pendingTerms.map((term) => (
                       <div key={term.hpo_id} className="rounded-lg border border-black/10 p-2">
                         <p className="text-[12px] font-medium" title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`}>
-                          {term.label || term.hpo_id}
+                          {localizeHpoLabel(term.hpo_id, term.label, messages)}
                         </p>
                         <p className="text-[11px] text-muted-foreground truncate">{term.source}</p>
                         <div className="flex gap-1.5 mt-2">
@@ -938,7 +940,7 @@ export default function IntakePage() {
                   <div className="flex flex-wrap gap-1.5">
                     {acceptedTerms.map((term) => (
                       <span key={term.hpo_id} title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`} className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-1 text-[11px] text-emerald-800">
-                        {term.label || term.hpo_id}
+                        {localizeHpoLabel(term.hpo_id, term.label, messages)}
                       </span>
                     ))}
                   </div>

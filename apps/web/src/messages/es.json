@@ -370,17 +370,5 @@
   "common": {
     "loading": "Cargando...",
     "error": "Algo salió mal"
-  },
-  "hpoTerms": {
-    "hpo_0000202": "Hendidura orofacial",
-    "hpo_0000316": "Hipertelorismo",
-    "hpo_0000369": "Orejas de implantación baja",
-    "hpo_0000444": "Puente nasal convexo",
-    "hpo_0000494": "Fisuras palpebrales descendentes",
-    "hpo_0000506": "Telecanto",
-    "hpo_0001156": "Braquidactilia",
-    "hpo_0001249": "Discapacidad intelectual",
-    "hpo_0001252": "Hipotonía",
-    "hpo_0001263": "Retraso global del desarrollo"
   }
 }

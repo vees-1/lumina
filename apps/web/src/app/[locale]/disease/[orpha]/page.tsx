@@ -3,10 +3,11 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { localizeHpoLabel, type HpoLabelMessages } from "@/lib/hpo";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 const API = "/api";
@@ -118,6 +119,7 @@ function ErrorState({ orpha }: { orpha: string }) {
 
 export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha: string }> }) {
   const t = useTranslations("disease");
+  const messages = useMessages() as HpoLabelMessages;
   const { orpha } = use(params);
   const [disease, setDisease] = useState<DiseaseDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -327,7 +329,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                                 className="flex items-center justify-between px-5 py-3 gap-4"
                               >
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-[13px] font-medium">{p.hpo_term}</p>
+                                  <p className="text-[13px] font-medium">{localizeHpoLabel(p.hpo_id, p.hpo_term, messages)}</p>
                                   <p className="text-[11px] font-mono text-muted-foreground">{p.hpo_id}</p>
                                 </div>
                                 <FreqBadge label={p.frequency_label} />

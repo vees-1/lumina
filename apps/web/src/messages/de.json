@@ -370,17 +370,5 @@
   "common": {
     "loading": "Lädt...",
     "error": "Etwas ist schiefgelaufen"
-  },
-  "hpoTerms": {
-    "hpo_0000202": "Orofaziale Spalte",
-    "hpo_0000316": "Hypertelorismus",
-    "hpo_0000369": "Tiefsitzende Ohren",
-    "hpo_0000444": "Konvexer Nasenrücken",
-    "hpo_0000494": "Nach unten verlaufende Lidspalten",
-    "hpo_0000506": "Telekanthus",
-    "hpo_0001156": "Brachydaktylie",
-    "hpo_0001249": "Intellektuelle Behinderung",
-    "hpo_0001252": "Hypotonie",
-    "hpo_0001263": "Globale Entwicklungsverzögerung"
   }
 }

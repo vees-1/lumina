@@ -370,17 +370,5 @@
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong"
-  },
-  "hpoTerms": {
-    "hpo_0000202": "Orofacial cleft",
-    "hpo_0000316": "Hypertelorism",
-    "hpo_0000369": "Low-set ears",
-    "hpo_0000444": "Convex nasal ridge",
-    "hpo_0000494": "Downslanted palpebral fissures",
-    "hpo_0000506": "Telecanthus",
-    "hpo_0001156": "Brachydactyly",
-    "hpo_0001249": "Intellectual disability",
-    "hpo_0001252": "Hypotonia",
-    "hpo_0001263": "Global developmental delay"
   }
 }
