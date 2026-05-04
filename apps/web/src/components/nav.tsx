@@ -114,7 +114,7 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
                 <UserButton>
             <UserButton.MenuItems>
               <UserButton.Link
-                label={t("profileLink")}
+                label={t("docInfo")}
                 labelIcon={<div className="w-4 h-4 flex items-center justify-center text-muted-foreground"><User className="w-3.5 h-3.5" /></div>}
                 href="/settings/profile"
               />
@@ -325,7 +325,7 @@ export function DashboardNav() {
           <UserButton>
             <UserButton.MenuItems>
               <UserButton.Link
-                label={t("profileLink")}
+                label={t("docInfo")}
                 labelIcon={<div className="w-4 h-4 flex items-center justify-center text-muted-foreground"><User className="w-3.5 h-3.5" /></div>}
                 href="/settings/profile"
               />

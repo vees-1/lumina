@@ -316,6 +316,8 @@
     "ensembl": "Ensembl ↗"
   },
   "landing": {
+    "dashboard": "Panel de control",
+    "newCase": "Nuevo caso",
     "betaPill": "Ahora en beta clínica",
     "heroHeadline": "Enfermedades raras,\ndescifradas.",
     "heroSub": "Notas clínicas, fotos, informes de laboratorio y evidencia genética revisados por el médico antes de puntuar.",
@@ -376,5 +378,18 @@
   "common": {
     "loading": "Cargando...",
     "error": "Algo salió mal"
+  },
+  "docInfo": {
+    "title": "Info médico",
+    "subtitle": "Información profesional para cartas de referencia.",
+    "name": "Nombre completo",
+    "specialization": "Especialización",
+    "degree": "Títulos / Calificaciones",
+    "license": "Número de licencia",
+    "contact": "Información de contacto (Email/Teléfono)",
+    "clinic": "Clínica / Hospital",
+    "save": "Guardar información",
+    "saved": "Información guardada con éxito",
+    "back": "Volver al panel"
   }
 }

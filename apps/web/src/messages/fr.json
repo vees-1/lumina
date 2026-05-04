@@ -5,6 +5,7 @@
     "signIn": "Se connecter",
     "getStarted": "Commencer",
     "dashboard": "Tableau de bord",
+    "docInfo": "Infos médecin",
     "howItWorks": "Comment ça marche",
     "technology": "Technologie",
     "science": "Science",
@@ -284,6 +285,19 @@
     "edit": "Modifier",
     "doneEditing": "Terminé"
   },
+  "docInfo": {
+    "title": "Infos médecin",
+    "subtitle": "Informations professionnelles pour les lettres de référence.",
+    "name": "Nom complet",
+    "specialization": "Spécialisation",
+    "degree": "Diplômes / Qualifications",
+    "license": "Numéro de licence",
+    "contact": "Coordonnées (Email/Téléphone)",
+    "clinic": "Clinique / Hôpital",
+    "save": "Enregistrer les infos",
+    "saved": "Infos enregistrées avec succès",
+    "back": "Retour au tableau de bord"
+  },
   "disease": {
     "back": "Catalogue des maladies",
     "loading": "Chargement…",
@@ -317,6 +331,8 @@
   },
   "landing": {
     "betaPill": "Maintenant en bêta clinique",
+    "dashboard": "Tableau de bord",
+    "newCase": "Nouveau dossier",
     "heroHeadline": "Maladies rares,\ndécodées.",
     "heroSub": "Notes cliniques, photos, comptes rendus biologiques et données génétiques sont revus par le médecin avant le score.",
     "getStartedFree": "Commencer gratuitement",

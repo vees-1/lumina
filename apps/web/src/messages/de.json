@@ -5,6 +5,7 @@
     "signIn": "Anmelden",
     "getStarted": "Loslegen",
     "dashboard": "Dashboard",
+    "docInfo": "Arzt-Info",
     "howItWorks": "So funktioniert es",
     "technology": "Technologie",
     "science": "Wissenschaft",
@@ -284,6 +285,19 @@
     "edit": "Bearbeiten",
     "doneEditing": "Fertig"
   },
+  "docInfo": {
+    "title": "Arzt-Info",
+    "subtitle": "Berufliche Informationen für Überweisungsschreiben und Berichte.",
+    "name": "Vollständiger Name",
+    "specialization": "Fachrichtung",
+    "degree": "Titel / Qualifikationen",
+    "license": "Lizenznummer",
+    "contact": "Kontaktdaten (E-Mail/Telefon)",
+    "clinic": "Klinik / Krankenhaus",
+    "save": "Arzt-Info speichern",
+    "saved": "Arzt-Info erfolgreich gespeichert",
+    "back": "Zurück zum Dashboard"
+  },
   "disease": {
     "back": "Erkrankungskatalog",
     "loading": "Lädt…",
@@ -317,6 +331,8 @@
   },
   "landing": {
     "betaPill": "Jetzt in der klinischen Beta",
+    "dashboard": "Dashboard",
+    "newCase": "Neuer Fall",
     "heroHeadline": "Seltene Erkrankungen,\ndekodiert.",
     "heroSub": "Klinische Notizen, Fotos, Laborberichte und genetische Evidenz werden vor dem Scoring ärztlich geprüft.",
     "getStartedFree": "Kostenlos starten",

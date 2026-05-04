@@ -5,6 +5,7 @@
     "signIn": "サインイン",
     "getStarted": "始める",
     "dashboard": "ダッシュボード",
+    "docInfo": "医師情報",
     "howItWorks": "使い方",
     "technology": "テクノロジー",
     "science": "サイエンス",
@@ -316,6 +317,9 @@
     "ensembl": "Ensembl ↗"
   },
   "landing": {
+    "dashboard": "ダッシュボード",
+    "docInfo": "医師情報",
+    "newCase": "新規症例",
     "betaPill": "現在、臨床ベータ版",
     "heroHeadline": "希少疾患、\n解読。",
     "heroSub": "臨床ノート、写真、検査レポート、遺伝学的エビデンスをスコアリング前に医師が確認します。",
@@ -376,5 +380,18 @@
   "common": {
     "loading": "読み込み中...",
     "error": "問題が発生しました"
+  },
+  "docInfo": {
+    "title": "医師情報",
+    "subtitle": "紹介状やレポート用の専門情報。",
+    "name": "氏名",
+    "specialization": "専門分野",
+    "degree": "学位・資格",
+    "license": "免許番号",
+    "contact": "連絡先詳細 (メール/電話)",
+    "clinic": "クリニック・病院",
+    "save": "情報を保存",
+    "saved": "情報を保存しました",
+    "back": "ダッシュボードに戻る"
   }
 }

@@ -5,7 +5,7 @@
     "signIn": "Sign in",
     "getStarted": "Get started",
     "dashboard": "Dashboard",
-    "profileLink": "Physician Profile",
+    "docInfo": "Doc Info",
     "howItWorks": "How it works",
     "technology": "Technology",
     "science": "Science",
@@ -285,19 +285,17 @@
     "edit": "Edit",
     "doneEditing": "Done"
   },
-  "profile": {
-    "title": "Physician Profile",
-    "subtitle": "Update your professional information for referral letters.",
+  "docInfo": {
+    "title": "Doc Info",
+    "subtitle": "Professional information for referral letters and reports.",
     "name": "Full Name",
-    "namePlaceholder": "Dr. Jane Smith",
     "specialization": "Specialization",
-    "specializationPlaceholder": "Medical Geneticist",
     "degree": "Degree / Qualifications",
-    "degreePlaceholder": "MD, PhD, FACMG",
+    "license": "License Number",
+    "contact": "Contact Detail (Email/Phone)",
     "clinic": "Clinic / Hospital",
-    "clinicPlaceholder": "Central Genomics Institute",
-    "save": "Save Physician Profile",
-    "saved": "Profile saved successfully",
+    "save": "Save Doc Info",
+    "saved": "Doc Info saved successfully",
     "back": "Back to Dashboard"
   },
   "disease": {
@@ -332,6 +330,9 @@
     "ensembl": "Ensembl ↗"
   },
   "landing": {
+    "dashboard": "Dashboard",
+    "docInfo": "Doc Info",
+    "newCase": "New case",
     "betaPill": "Now in clinical beta",
     "heroHeadline": "Rare diseases,\ndecoded.",
     "heroSub": "Clinical notes, photos, lab reports, and genetic evidence reviewed by the doctor before scoring.",

@@ -284,6 +284,19 @@
     "edit": "编辑",
     "doneEditing": "完成"
   },
+  "docInfo": {
+    "title": "医生信息",
+    "subtitle": "用于推荐信和报告的专业信息。",
+    "name": "全名",
+    "specialization": "专业领域",
+    "degree": "学位 / 资格",
+    "license": "执照号码",
+    "contact": "联系详情 (电子邮件/电话)",
+    "clinic": "诊所 / 医院",
+    "save": "保存信息",
+    "saved": "信息保存成功",
+    "back": "返回仪表板"
+  },
   "disease": {
     "back": "疾病目录",
     "loading": "加载中…",
@@ -317,6 +330,8 @@
   },
   "landing": {
     "betaPill": "现已进入临床测试阶段",
+    "dashboard": "仪表板",
+    "newCase": "新案例",
     "heroHeadline": "罕见病，\n解码中。",
     "heroSub": "临床笔记、照片、实验室报告和遗传证据在评分前由医生审核。",
     "getStartedFree": "免费开始",
