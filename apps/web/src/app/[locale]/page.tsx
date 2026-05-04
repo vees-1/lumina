@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
+import { useAuth } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 
@@ -145,6 +146,7 @@ function StepCard({ num, title, description }: { num: string; title: string; des
 export default function HomePage() {
   const t = useTranslations("landing");
   const locale = useLocale();
+  const { isSignedIn } = useAuth();
   const numberLocale = getNumberLocale(locale);
   const formatNumber = new Intl.NumberFormat(numberLocale);
   const formatStepNumber = new Intl.NumberFormat(numberLocale, {
@@ -221,19 +223,39 @@ export default function HomePage() {
             transition={{ duration: 0.5, ease, delay: 0.46 }}
             className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto px-4 sm:px-0"
           >
-            <Link href="/sign-up" className="w-full sm:w-auto">
-              <Button className="w-full h-12 px-8 rounded-full bg-foreground text-background text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
-                {t("getStartedFree")}
-              </Button>
-            </Link>
-            <a href="#how-it-works" className="w-full sm:w-auto">
-              <Button variant="ghost" className="w-full h-12 px-6 rounded-full text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
-                {t("howItWorks")}
-                <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 16 16">
-                  <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Button>
-            </a>
+            {!isSignedIn ? (
+              <>
+                <Link href="/sign-up" className="w-full sm:w-auto">
+                  <Button className="w-full h-10 sm:h-12 px-6 sm:px-8 rounded-full bg-foreground text-background text-[14px] sm:text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
+                    {t("getStartedFree")}
+                  </Button>
+                </Link>
+                <a href="#how-it-works" className="w-full sm:w-auto">
+                  <Button variant="ghost" className="w-full h-10 sm:h-12 px-5 sm:px-6 rounded-full text-[14px] sm:text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
+                    {t("howItWorks")}
+                    <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 16 16">
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Button>
+                </a>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard" className="w-full sm:w-auto">
+                  <Button className="w-full h-10 sm:h-12 px-6 sm:px-8 rounded-full bg-foreground text-background text-[14px] sm:text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
+                    {t("dashboard")}
+                  </Button>
+                </Link>
+                <Link href="/intake" className="w-full sm:w-auto">
+                  <Button variant="ghost" className="w-full h-10 sm:h-12 px-5 sm:px-6 rounded-full text-[14px] sm:text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
+                    {t("newCase")}
+                    <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 16 16">
+                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Button>
+                </Link>
+              </>
+            )}
           </motion.div>
         </motion.div>
 
@@ -441,16 +463,33 @@ export default function HomePage() {
             {t("ctaSub")}
           </motion.p>
           <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-3">
-            <Link href="/sign-up">
-              <Button className="h-11 px-8 rounded-full bg-white text-foreground text-[15px] font-medium hover:bg-white/90 shadow-lg transition-all duration-300">
-                {t("getEarlyAccess")}
-              </Button>
-            </Link>
-            <Link href="/sign-in">
-              <Button variant="ghost" className="h-11 px-8 rounded-full text-[15px] text-white/70 hover:text-white hover:bg-white/10 border border-white/20">
-                {t("signIn")}
-              </Button>
-            </Link>
+            {!isSignedIn ? (
+              <>
+                <Link href="/sign-up">
+                  <Button className="h-11 px-8 rounded-full bg-white text-foreground text-[15px] font-medium hover:bg-white/90 shadow-lg transition-all duration-300">
+                    {t("getEarlyAccess")}
+                  </Button>
+                </Link>
+                <Link href="/sign-in">
+                  <Button variant="ghost" className="h-11 px-8 rounded-full text-[15px] text-white/70 hover:text-white hover:bg-white/10 border border-white/20">
+                    {t("signIn")}
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard">
+                  <Button className="h-11 px-8 rounded-full bg-white text-foreground text-[15px] font-medium hover:bg-white/90 shadow-lg transition-all duration-300">
+                    {t("dashboard")}
+                  </Button>
+                </Link>
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="h-11 px-8 rounded-full text-[15px] text-white/70 hover:text-white hover:bg-white/10 border border-white/20">
+                    {t("cases")}
+                  </Button>
+                </Link>
+              </>
+            )}
           </motion.div>
         </motion.div>
       </section>

@@ -15,7 +15,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      signInForceRedirectUrl="/dashboard"
+      signUpForceRedirectUrl="/dashboard"
+    >
       <html lang="en" className={`${geist.variable} ${geistMono.variable} ${dmSerif.variable} h-full`}>
         <body className="min-h-full flex flex-col antialiased bg-background text-foreground">
           {children}

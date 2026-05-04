@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Check, Menu, X } from "lucide-react";
+import { Globe, Check, Menu, X, User } from "lucide-react";
 import { useAuth, UserButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -111,7 +111,15 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
                     </Button>
                   </Link>
                 )}
-                <UserButton />
+                <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Link
+                label={t("profileLink")}
+                labelIcon={<div className="w-4 h-4 flex items-center justify-center text-muted-foreground"><User className="w-3.5 h-3.5" /></div>}
+                href="/settings/profile"
+              />
+            </UserButton.MenuItems>
+          </UserButton>
               </>
             )}
 
@@ -284,9 +292,8 @@ export function DashboardNav() {
             {t("cases")}
           </Link>
           <Link href="/intake">
-            <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-2 sm:px-3">
-              <span className="hidden sm:inline">{t("newCase")}</span>
-              <span className="sm:hidden">+</span>
+            <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-3">
+              {t("newCase")}
             </Button>
           </Link>
           <LanguageSwitcher />
@@ -302,7 +309,7 @@ export function DashboardNav() {
                     : t("apiStatusUnavailable")
             }
           >
-            <div className={`w-2 h-2 rounded-full transition-colors ${
+            <div className={`w-2 h-2 rounded-full transition-colors flex-shrink-0 ${
               apiStatus === "ready" ? "bg-[oklch(0.52_0.19_160)]" : "bg-[oklch(0.75_0.15_60)]"
             } ${apiStatus === "loading" || apiStatus === "starting" ? "animate-pulse" : ""}`} />
             <span className="text-[11px] text-muted-foreground hidden md:inline">
@@ -315,7 +322,15 @@ export function DashboardNav() {
                     : t("apiStatusUnavailable")}
             </span>
           </div>
-          <UserButton />
+          <UserButton>
+            <UserButton.MenuItems>
+              <UserButton.Link
+                label={t("profileLink")}
+                labelIcon={<div className="w-4 h-4 flex items-center justify-center text-muted-foreground"><User className="w-3.5 h-3.5" /></div>}
+                href="/settings/profile"
+              />
+            </UserButton.MenuItems>
+          </UserButton>
         </div>
       </nav>
     </motion.header>

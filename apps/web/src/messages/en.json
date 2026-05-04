@@ -5,6 +5,7 @@
     "signIn": "Sign in",
     "getStarted": "Get started",
     "dashboard": "Dashboard",
+    "profileLink": "Physician Profile",
     "howItWorks": "How it works",
     "technology": "Technology",
     "science": "Science",
@@ -280,9 +281,24 @@
     "copy": "Copy",
     "download": "Download",
     "words": "{count} words",
-    "print": "Download PDF",
+    "print": "Print",
     "edit": "Edit",
     "doneEditing": "Done"
+  },
+  "profile": {
+    "title": "Physician Profile",
+    "subtitle": "Update your professional information for referral letters.",
+    "name": "Full Name",
+    "namePlaceholder": "Dr. Jane Smith",
+    "specialization": "Specialization",
+    "specializationPlaceholder": "Medical Geneticist",
+    "degree": "Degree / Qualifications",
+    "degreePlaceholder": "MD, PhD, FACMG",
+    "clinic": "Clinic / Hospital",
+    "clinicPlaceholder": "Central Genomics Institute",
+    "save": "Save Physician Profile",
+    "saved": "Profile saved successfully",
+    "back": "Back to Dashboard"
   },
   "disease": {
     "back": "Disease Catalog",
