@@ -206,7 +206,7 @@ function LanguageSwitcher() {
         className="flex items-center gap-1.5 px-2 py-1 text-[13px] text-muted-foreground hover:text-foreground rounded-lg hover:bg-black/5 transition-colors"
       >
         <Globe className="w-3.5 h-3.5" />
-        <span>{currentLabel}</span>
+        <span className="hidden xs:inline">{currentLabel}</span>
       </button>
       {open && (
         <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-background shadow-md z-50 py-1">
@@ -289,9 +289,7 @@ export function DashboardNav() {
               <span className="sm:hidden">+</span>
             </Button>
           </Link>
-          <div className="hidden sm:block">
-            <LanguageSwitcher />
-          </div>
+          <LanguageSwitcher />
           <div
             className="flex items-center gap-1.5"
             title={
