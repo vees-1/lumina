@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Check } from "lucide-react";
+import { Globe, Check, Menu, X } from "lucide-react";
 import { useAuth, UserButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -81,9 +81,12 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            <div className="hidden sm:block">
+              <LanguageSwitcher />
+            </div>
             {!isSignedIn ? (
               <>
-                <Link href="/sign-in">
+                <Link href="/sign-in" className="hidden sm:block">
                   <Button variant="ghost" size="sm" className="text-[13px] h-7">
                     {t("signIn")}
                   </Button>
@@ -97,13 +100,13 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
             ) : (
               <>
                 {!pathname.startsWith("/dashboard") ? (
-                  <Link href="/dashboard">
+                  <Link href="/dashboard" className="hidden sm:block">
                     <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
                       {t("dashboard")}
                     </Button>
                   </Link>
                 ) : (
-                  <Link href="/intake">
+                  <Link href="/intake" className="hidden sm:block">
                     <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
                       {t("newCase")}
                     </Button>
@@ -111,6 +114,17 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
                 )}
                 <UserButton />
               </>
+            )}
+
+            {/* Mobile menu button */}
+            {isLanding && (
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="p-1.5 rounded-lg hover:bg-black/5 transition-colors md:hidden"
+                aria-label="Toggle menu"
+              >
+                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
             )}
           </div>
         </nav>
@@ -120,18 +134,27 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 glass-strong md:hidden"
-            onClick={() => setMenuOpen(false)}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed inset-0 z-40 glass-strong md:hidden pt-12"
           >
-            <div className="flex flex-col gap-2 p-6 pt-20">
+            <div className="flex flex-col gap-4 p-8">
               {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-lg font-medium py-2" onClick={() => setMenuOpen(false)}>
+                <a key={link.href} href={link.href} className="text-xl font-medium py-2 border-b border-black/5" onClick={() => setMenuOpen(false)}>
                   {link.label}
                 </a>
               ))}
+              <div className="pt-4 flex flex-col gap-4">
+                <LanguageSwitcher />
+                {!isSignedIn && (
+                  <Link href="/sign-in" onClick={() => setMenuOpen(false)}>
+                    <Button variant="outline" className="w-full justify-start h-12 text-lg rounded-xl">
+                      {t("signIn")}
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
@@ -237,9 +260,9 @@ export function DashboardNav() {
       transition={{ duration: 0.4 }}
       className="fixed top-0 left-0 right-0 z-50 glass-strong shadow-[0_1px_0_oklch(0_0_0/0.06)]"
     >
-      <nav className="mx-auto max-w-6xl flex items-center justify-between h-12 px-6">
+      <nav className="mx-auto max-w-6xl flex items-center justify-between h-12 px-4 sm:px-6">
         <Link href={`/${locale}`} className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-[8px] bg-foreground flex items-center justify-center">
+          <div className="w-7 h-7 rounded-[8px] bg-foreground flex items-center justify-center flex-shrink-0">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="8" cy="4" r="2" fill="white" />
               <circle cx="4" cy="11" r="2" fill="white" opacity="0.6" />
@@ -248,10 +271,10 @@ export function DashboardNav() {
               <line x1="8" y1="6" x2="12" y2="9" stroke="white" strokeWidth="1.2" opacity="0.5" />
             </svg>
           </div>
-          <span className="font-semibold text-[15px] tracking-[-0.01em]">Lumina</span>
+          <span className="font-semibold text-[15px] tracking-[-0.01em] hidden sm:inline">Lumina</span>
         </Link>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link
             href="/dashboard"
             className={cn(
@@ -262,11 +285,14 @@ export function DashboardNav() {
             {t("cases")}
           </Link>
           <Link href="/intake">
-            <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
-              {t("newCase")}
+            <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-2 sm:px-3">
+              <span className="hidden sm:inline">{t("newCase")}</span>
+              <span className="sm:hidden">+</span>
             </Button>
           </Link>
-          <LanguageSwitcher />
+          <div className="hidden sm:block">
+            <LanguageSwitcher />
+          </div>
           <div
             className="flex items-center gap-1.5"
             title={
@@ -282,7 +308,7 @@ export function DashboardNav() {
             <div className={`w-2 h-2 rounded-full transition-colors ${
               apiStatus === "ready" ? "bg-[oklch(0.52_0.19_160)]" : "bg-[oklch(0.75_0.15_60)]"
             } ${apiStatus === "loading" || apiStatus === "starting" ? "animate-pulse" : ""}`} />
-            <span className="text-[11px] text-muted-foreground hidden sm:inline">
+            <span className="text-[11px] text-muted-foreground hidden md:inline">
               {apiStatus === "ready"
                 ? t("apiStatusReady")
                 : apiStatus === "loading"

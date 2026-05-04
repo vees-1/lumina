@@ -56,10 +56,15 @@ function ConfidenceTooltip({ confidence, modalities, children }: { confidence: n
   const [visible, setVisible] = useState(false);
   const cap = CONFIDENCE_CAPS[modalities] ?? 80;
   return (
-    <span className="relative inline-block" onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)}>
+    <span
+      className="relative inline-block"
+      onMouseEnter={() => setVisible(true)}
+      onMouseLeave={() => setVisible(false)}
+      onClick={() => setVisible(!visible)}
+    >
       {children}
       {visible && (
-        <span className="absolute bottom-full left-0 mb-2 w-64 bg-foreground text-background text-[12px] leading-relaxed rounded-xl px-3 py-2.5 shadow-lg z-50 pointer-events-none">
+        <span className="absolute bottom-full left-0 mb-2 w-64 bg-foreground text-background text-[12px] leading-relaxed rounded-xl px-3 py-2.5 shadow-lg z-50 pointer-events-auto sm:pointer-events-none">
           <span className="font-semibold">{confidence.toFixed(0)}%</span> is a relative phenotypic overlap score, not a probability. The ceiling for {modalities} modality{modalities !== 1 ? " inputs" : ""} is {cap}%. Adding more modalities raises the ceiling.
           <span className="absolute top-full left-4 border-4 border-transparent border-t-foreground" />
         </span>
@@ -67,6 +72,7 @@ function ConfidenceTooltip({ confidence, modalities, children }: { confidence: n
     </span>
   );
 }
+
 
 function HPOChip({ term }: { term: HPOTerm }) {
   const t = useTranslations("case");
@@ -804,7 +810,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
       <DashboardNav />
 
-      <main className="max-w-4xl mx-auto px-6 pt-20 pb-16">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -834,24 +840,26 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   {caseData.patientContext.patientName}
                 </p>
               )}
-              <h1 className="serif text-[28px] tracking-tight mb-1">{topRank.name}</h1>
-              <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="serif text-[24px] sm:text-[28px] tracking-tight mb-2">{topRank.name}</h1>
+              <div className="flex items-center gap-2 flex-wrap mb-4">
                 <ConfidenceTooltip confidence={topRank.confidence} modalities={caseData.modalities.length}>
                   <span
-                    className="text-[13px] font-semibold px-3 py-1 rounded-full cursor-help"
+                    className="text-[12px] sm:text-[13px] font-semibold px-2.5 sm:px-3 py-1 rounded-full cursor-help whitespace-nowrap"
                     style={{ background: `${topColor}15`, color: topColor }}
                   >
                     {topRank.confidence.toFixed(0)}% {t("confidenceLabel")}
                   </span>
                 </ConfidenceTooltip>
-                <span className="text-[13px] text-muted-foreground">ORPHA:{topRank.orpha_code}</span>
-                {caseData.modalities.map((m) => (
-                  <span key={m} className="text-[12px] px-2.5 py-0.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
-                    {modalityLabel[m] ?? m}
-                  </span>
-                ))}
+                <span className="text-[12px] sm:text-[13px] text-muted-foreground">ORPHA:{topRank.orpha_code}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {caseData.modalities.map((m) => (
+                    <span key={m} className="text-[11px] sm:text-[12px] px-2 py-0.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground whitespace-nowrap">
+                      {modalityLabel[m] ?? m}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="mt-3 flex items-center gap-2 flex-wrap text-[12px] text-muted-foreground">
+              <div className="flex items-center gap-2 flex-wrap text-[11px] sm:text-[12px] text-muted-foreground">
                 <time dateTime={analysisTimestamp.toISOString()}>{formattedAnalysisTimestamp}</time>
                 <span className="text-muted-foreground/40">•</span>
                 <span className="inline-flex items-center rounded-full border border-black/[0.06] bg-[oklch(0.97_0_0)] px-2 py-0.5 font-medium text-foreground">
@@ -860,9 +868,10 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               </div>
             </>
           ) : (
-            <h1 className="serif text-[28px] tracking-tight">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
+            <h1 className="serif text-[24px] sm:text-[28px] tracking-tight">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
           )}
         </motion.div>
+
 
         {/* Agent suggestion banner */}
         <AnimatePresence>

@@ -127,16 +127,17 @@ function StepCard({ num, title, description }: { num: string; title: string; des
       initial={{ opacity: 0, x: -20 }}
       animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
       transition={{ duration: 0.6, ease }}
-      className="flex gap-6 items-start"
+      className="flex gap-4 sm:gap-6 items-start"
     >
-      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-foreground text-background text-[13px] font-bold flex items-center justify-center">
+      <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-foreground text-background text-[12px] sm:text-[13px] font-bold flex items-center justify-center">
         {num}
       </div>
       <div>
-        <h3 className="font-semibold text-[17px] tracking-tight">{title}</h3>
-        <p className="mt-1 text-[15px] text-muted-foreground leading-relaxed">{description}</p>
+        <h3 className="font-semibold text-[16px] sm:text-[17px] tracking-tight">{title}</h3>
+        <p className="mt-1 text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed">{description}</p>
       </div>
     </motion.div>
+
   );
 }
 
@@ -177,14 +178,14 @@ export default function HomePage() {
         {/* Hero content — vertically centred, generous spacing */}
         <motion.div
           style={{ y: heroY, opacity: heroOpacity }}
-          className="relative z-10 flex flex-col items-center text-center px-8 w-full max-w-5xl mx-auto"
+          className="relative z-10 flex flex-col items-center text-center px-6 sm:px-8 w-full max-w-5xl mx-auto"
         >
           {/* Eyebrow pill */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/10 bg-white/80 backdrop-blur-sm text-[12px] font-medium text-muted-foreground mb-10"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/10 bg-white/80 backdrop-blur-sm text-[11px] sm:text-[12px] font-medium text-muted-foreground mb-8 sm:mb-10"
           >
             <span className="relative flex h-2 w-2 flex-shrink-0">
               <span className="pulse-ring absolute inline-flex h-full w-full rounded-full bg-[oklch(0.52_0.21_255)]" />
@@ -198,7 +199,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease, delay: 0.15 }}
-            className="font-[family-name:var(--font-serif)] text-[clamp(4.5rem,10vw,8.5rem)] font-normal tracking-[-0.02em] leading-[0.92] text-foreground mb-8 whitespace-pre-line"
+            className="font-[family-name:var(--font-serif)] text-[clamp(2.75rem,10vw,8.5rem)] font-normal tracking-[-0.02em] leading-[0.95] sm:leading-[0.92] text-foreground mb-6 sm:mb-8 whitespace-pre-line"
           >
             {t("heroHeadline")}
           </motion.h1>
@@ -208,7 +209,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease, delay: 0.32 }}
-            className="text-[1.15rem] text-muted-foreground mb-12 max-w-sm leading-relaxed"
+            className="text-[1rem] sm:text-[1.15rem] text-muted-foreground mb-10 sm:mb-12 max-w-sm leading-relaxed"
           >
             {t("heroSub")}
           </motion.p>
@@ -218,15 +219,15 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease, delay: 0.46 }}
-            className="flex items-center gap-3"
+            className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto px-4 sm:px-0"
           >
-            <Link href="/sign-up">
-              <Button className="h-12 px-8 rounded-full bg-foreground text-background text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
+            <Link href="/sign-up" className="w-full sm:w-auto">
+              <Button className="w-full h-12 px-8 rounded-full bg-foreground text-background text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
                 {t("getStartedFree")}
               </Button>
             </Link>
-            <a href="#how-it-works">
-              <Button variant="ghost" className="h-12 px-6 rounded-full text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
+            <a href="#how-it-works" className="w-full sm:w-auto">
+              <Button variant="ghost" className="w-full h-12 px-6 rounded-full text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
                 {t("howItWorks")}
                 <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 16 16">
                   <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -235,6 +236,7 @@ export default function HomePage() {
             </a>
           </motion.div>
         </motion.div>
+
 
         {/* Scroll cue */}
         <motion.div

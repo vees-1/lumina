@@ -512,17 +512,18 @@ export default function IntakePage() {
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
       <DashboardNav />
 
-      <main className="max-w-5xl mx-auto px-8 pt-20 pb-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-16 sm:pt-20 pb-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="pt-6 mb-8"
+          className="pt-6 mb-6 sm:mb-8"
         >
-          <h1 className="serif text-[30px] tracking-tight">{addToId && existingCase ? t("titleAdd") : t("title")}</h1>
-          <p className="text-[14px] text-muted-foreground mt-1">{t("subtitle")}</p>
+          <h1 className="serif text-[24px] sm:text-[30px] tracking-tight">{addToId && existingCase ? t("titleAdd") : t("title")}</h1>
+          <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">{t("subtitle")}</p>
         </motion.div>
+
 
         {/* Add-mode banner */}
         {addToId && existingCase && (
@@ -843,11 +844,11 @@ export default function IntakePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease, delay: 0.15 }}
             >
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
                 <Button
                   onClick={handleSuggest}
                   disabled={!hasAnyInput || analyzing}
-                  className="h-10 min-w-[160px] rounded-full bg-foreground px-6 text-[14px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
+                  className="h-11 sm:h-10 w-full sm:min-w-[160px] sm:w-auto rounded-full bg-foreground px-6 text-[14px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
                 >
                   {analyzing ? (
                     <span className="flex items-center gap-2">
@@ -864,7 +865,7 @@ export default function IntakePage() {
                 <Button
                   onClick={handleAnalyze}
                   disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
-                  className="h-10 min-w-[160px] rounded-full bg-foreground px-6 text-[14px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
+                  className="h-11 sm:h-10 w-full sm:min-w-[160px] sm:w-auto rounded-full bg-foreground px-6 text-[14px] font-medium text-background shadow-sm hover:bg-foreground/85 disabled:opacity-40"
                 >
                   {t("runDifferential")}
                 </Button>
