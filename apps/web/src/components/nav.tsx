@@ -80,10 +80,8 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
           )}
 
           {/* Right side */}
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:block">
-              <LanguageSwitcher />
-            </div>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <LanguageSwitcher />
             {!isSignedIn ? (
               <>
                 <Link href="/sign-in" className="hidden sm:block">
@@ -92,7 +90,7 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
                   </Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
+                  <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-3">
                     {t("getStarted")}
                   </Button>
                 </Link>
@@ -100,15 +98,16 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
             ) : (
               <>
                 {!pathname.startsWith("/dashboard") ? (
-                  <Link href="/dashboard" className="hidden sm:block">
-                    <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
+                  <Link href="/dashboard">
+                    <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-3">
                       {t("dashboard")}
                     </Button>
                   </Link>
                 ) : (
-                  <Link href="/intake" className="hidden sm:block">
-                    <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85">
-                      {t("newCase")}
+                  <Link href="/intake">
+                    <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-2 sm:px-3">
+                      <span className="hidden xs:inline">{t("newCase")}</span>
+                      <span className="xs:hidden">+</span>
                     </Button>
                   </Link>
                 )}
@@ -120,7 +119,7 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
             {isLanding && (
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="p-1.5 rounded-lg hover:bg-black/5 transition-colors md:hidden"
+                className="p-1 rounded-lg hover:bg-black/5 transition-colors md:hidden"
                 aria-label="Toggle menu"
               >
                 {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

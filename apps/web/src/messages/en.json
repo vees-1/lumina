@@ -72,7 +72,7 @@
     "tabVcfLabel": "Genomic Data",
     "tabVcfHint": "VCF file from WES/WGS sequencing",
     "notesDesc": "Enter clinical notes, patient history, symptom descriptions, or consultation summaries.",
-    "notesPlaceholder": "Patient is a 6-year-old male presenting with febrile seizures onset at 5 months. EEG shows irregular spike-wave complexes. Developmental regression noted after first seizure cluster. Family history of epilepsy on maternal side...",
+    "notesPlaceholder": "e.g. 6yo male, febrile seizures since 5mo, EEG spikes, developmental regression...",
     "charCount": "characters · AI NER extracts HPO terms",
     "photoDesc": "Upload a clinical photograph for AI vision analysis.",
     "photoDropLabel": "Drop clinical photo",

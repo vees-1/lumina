@@ -619,7 +619,7 @@ function LetterView({
                 navigator.clipboard.writeText(letter);
                 toast.success(t("copiedToClipboard"));
               }}
-              className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+              className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors print:hidden"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                 <rect x="2" y="5" width="9" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
@@ -627,10 +627,21 @@ function LetterView({
               </svg>
               {letterT("copy")}
             </button>
+            <button
+              onClick={() => window.print()}
+              className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors print:hidden"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+                <path d="M4 4h8M4 7h8M4 10h5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                <path d="M2 4a2 2 0 012-2h5l3 3v9a2 2 0 01-2 2H4a2 2 0 01-2-2V4z" stroke="currentColor" strokeWidth="1.3" />
+              </svg>
+              {letterT("print")}
+            </button>
           </div>
         )}
       </div>
-      <div className="p-6 max-h-[500px] overflow-y-auto">
+      <div className="p-6 max-h-[500px] overflow-y-auto print:max-h-none print:overflow-visible print:p-0 print:m-0 print:border-none">
+
         {isEditing ? (
           <textarea
             value={letter}
@@ -638,16 +649,23 @@ function LetterView({
             className="w-full min-h-[420px] rounded-xl border border-black/[0.06] bg-[oklch(0.99_0_0)] px-4 py-3 text-[14px] leading-relaxed font-serif resize-none outline-none"
           />
         ) : (
-          <div className="prose prose-sm max-w-none text-[14px] leading-relaxed text-foreground whitespace-pre-wrap font-sans">
+          <div className="prose prose-sm max-w-none text-[14px] leading-relaxed text-foreground whitespace-pre-wrap font-sans print:text-[12pt] print:leading-[1.5] print:font-serif">
             {letter}
             {streaming && <span className="cursor-blink" />}
           </div>
         )}
+        <div className="hidden print:block mt-12 pt-8 border-t border-black/10">
+          <p className="font-serif italic text-muted-foreground">Signed,</p>
+          <div className="mt-8 border-b border-black/40 w-64" />
+          <p className="mt-2 font-semibold">Dr. ________________________</p>
+          <p className="text-[10pt] text-muted-foreground">Clinical Specialist</p>
+        </div>
         <div ref={endRef} />
       </div>
     </div>
   );
 }
+
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
@@ -807,17 +825,20 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   }).format(new Date(snapshot.timestamp));
 
   return (
-    <div className="min-h-screen bg-[oklch(0.975_0_0)]">
-      <DashboardNav />
+    <div className="min-h-screen bg-[oklch(0.975_0_0)] print:bg-white print:min-h-0">
+      <div className="print:hidden">
+        <DashboardNav />
+      </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-16">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-16 print:pt-0 print:pb-0 print:px-0 print:max-w-none">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="pt-6 mb-8"
+          className="pt-6 mb-8 print:hidden"
         >
+
           <div className="flex items-center gap-2 mb-3">
             <Link href="/dashboard" className="text-[13px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
@@ -876,19 +897,21 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
         {/* Agent suggestion banner */}
         <AnimatePresence>
           {agentSuggestion && !agentDismissed && (
-            <AgentBanner
-              suggestion={agentSuggestion}
-              onDismiss={() => setAgentDismissed(true)}
-              caseId={id}
-            />
+            <div className="print:hidden">
+              <AgentBanner
+                suggestion={agentSuggestion}
+                onDismiss={() => setAgentDismissed(true)}
+                caseId={id}
+              />
+            </div>
           )}
         </AnimatePresence>
 
-        <div className="grid lg:grid-cols-[1fr_300px] gap-6">
+        <div className="grid lg:grid-cols-[1fr_300px] gap-6 print:block">
           {/* Main column */}
           <div className="space-y-6">
             {(originalNotes || inputHistory.length > 0) && (
-              <section className="bg-white rounded-2xl border border-black/[0.06] p-4">
+              <section className="bg-white rounded-2xl border border-black/[0.06] p-4 print:hidden">
                 <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                   {t("originalInput")}
                 </h2>
@@ -935,7 +958,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             )}
 
             {/* Disease rankings */}
-            <section>
+            <section className="print:hidden">
               <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -951,24 +974,26 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               </div>
             </section>
 
-            <CandidateComparisonPanel rankings={caseData.rankings.slice(0, 2)} />
+            <div className="print:hidden">
+              <CandidateComparisonPanel rankings={caseData.rankings.slice(0, 2)} />
+            </div>
 
             {/* Explainability — why the top diagnosis? */}
             {topRank && topRank.contributing_terms.length > 0 && (
-              <section>
+              <section className="print:hidden">
                 <ExplainabilityPanel result={topRank} caseData={caseData} />
               </section>
             )}
 
             {/* Letter */}
-            <section>
-              <div className="flex items-center justify-between mb-3">
+            <section className="print:m-0">
+              <div className="flex items-center justify-between mb-3 print:hidden">
                 <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
                   {t("clinicalLetter")}
                 </h2>
               </div>
               {!letterStarted && (
-                <div className="mb-3">
+                <div className="mb-3 print:hidden">
                   <button
                     onClick={() => setShowLetterForm((s) => !s)}
                     className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors mb-2"
@@ -1080,7 +1105,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
           </div>
 
           {/* Right sidebar */}
-          <div className="space-y-4">
+          <div className="space-y-4 print:hidden">
             {/* HPO terms */}
             <motion.div
               initial={{ opacity: 0, x: 12 }}
