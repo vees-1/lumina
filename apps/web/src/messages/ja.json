@@ -394,11 +394,11 @@
     "save": "情報を保存",
     "saved": "情報を保存しました",
     "back": "ダッシュボードに戻る",
-    "namePlaceholder": "Dr. Alexander Thorne",
-    "specializationPlaceholder": "Medical Geneticist",
-    "degreePlaceholder": "MD, PhD",
-    "licensePlaceholder": "License Number",
-    "contactPlaceholder": "Email or Phone",
-    "clinicPlaceholder": "Hospital Name"
+    "namePlaceholder": "佐藤 健太郎 医師",
+    "specializationPlaceholder": "例：臨床遺伝学",
+    "degreePlaceholder": "例：医学博士",
+    "licensePlaceholder": "例：登録番号",
+    "contactPlaceholder": "例：メールまたは電話番号",
+    "clinicPlaceholder": "例：大学病院・クリニック"
   }
 }

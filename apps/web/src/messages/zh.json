@@ -296,12 +296,12 @@
     "save": "保存信息",
     "saved": "信息保存成功",
     "back": "返回仪表板",
-    "namePlaceholder": "Dr. Alexander Thorne",
-    "specializationPlaceholder": "Medical Geneticist",
-    "degreePlaceholder": "MD, PhD",
-    "licensePlaceholder": "License Number",
-    "contactPlaceholder": "Email or Phone",
-    "clinicPlaceholder": "Hospital Name"
+    "namePlaceholder": "张医生",
+    "specializationPlaceholder": "例如：医学遗传学",
+    "degreePlaceholder": "例如：医学博士",
+    "licensePlaceholder": "例如：证书编号",
+    "contactPlaceholder": "例如：电子邮件或电话",
+    "clinicPlaceholder": "例如：医院或诊所名称"
   },
   "disease": {
     "back": "疾病目录",

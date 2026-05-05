@@ -255,19 +255,19 @@ Use the following localized fixed text exactly. Structure exactly as follows —
 
 {dear}
 
-[Opening paragraph: reason for referral, 2-3 sentences. Be direct and clinical.]
+[Opening: State the core reason for referral and the suspected diagnosis based on Lumina analysis. Max 2 sentences.]
 
 {history}
-[2-3 sentences on the key presenting complaint and timeline.]
+[Timeline and primary clinical presentation. Max 3 sentences.]
 
 {findings}
-[Bullet list of the most relevant findings, written as plain clinical prose. No markdown bullets — use a dash and space: "- Finding"]
+[List 4-6 most significant accepted HPO findings. Format as: "- Finding Name". No other bullets.]
 
 {impression}
-[The top 1-2 differential diagnoses with brief reasoning. Mention the phenotypic overlap score as supporting evidence. 3-4 sentences.]
+[State the top differential diagnosis. Explain why it matches the current evidence briefly. Mention the phenotypic overlap score. Max 3 sentences.]
 
 {investigations}
-[Specific actionable next steps: genetic panels, specialist consultations, imaging. Use "- " for each.]
+[List exactly 2-3 specific next steps: e.g., "Targeted gene panel for {gene}", "Consultation with {specialist}". Format with "- ".]
 
 {closing}
 
@@ -276,12 +276,11 @@ Use the following localized fixed text exactly. Structure exactly as follows —
 
 ---
 Rules:
-- Use ONLY plain text. No #, ##, ###, **, *, or backticks.
-- Disease names, gene symbols, HPO IDs, ORPHA IDs, and test/panel names may remain in their standard medical form. Everything else must be in {lang_name}.
-- Use the supplied referral metadata when present: patient date of birth, referring physician and clinic, recipient specialist and hospital, and urgency level.
-- If urgency is urgent or emergency, reflect that in the recommendation tone and prioritization.
-- Be concise — under 350 words total.
-- Sound like a real clinician wrote this, not an AI."""
+- STRICT LIMIT: Total length must be under 250 words to fit on a single A4 page.
+- No markdown: No #, ##, ###, **, *, or backticks.
+- Content: Focus on clinical utility. No conversational filler or "I hope this finds you well".
+- Language: Everything except IDs (ORPHA, HPO) and Gene symbols must be in {lang_name}.
+- Metadata: Incorporate patient DOB, referring clinic, and urgency if provided in the request."""
 
 
 class AgentNextRequest(BaseModel):

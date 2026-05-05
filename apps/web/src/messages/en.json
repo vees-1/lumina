@@ -298,11 +298,11 @@
     "saved": "Doc Info saved successfully",
     "back": "Back to Dashboard",
     "namePlaceholder": "Dr. Alexander Thorne",
-    "specializationPlaceholder": "Medical Geneticist",
-    "degreePlaceholder": "MD, PhD",
-    "licensePlaceholder": "License Number",
-    "contactPlaceholder": "Email or Phone",
-    "clinicPlaceholder": "Hospital Name"
+    "specializationPlaceholder": "e.g. Pediatric Medical Genetics",
+    "degreePlaceholder": "e.g. MD, PhD, FRCP",
+    "licensePlaceholder": "e.g. MED-1298472-X",
+    "contactPlaceholder": "e.g. alex.thorne@genomics-central.org",
+    "clinicPlaceholder": "e.g. Royal Genomics Institute"
   },
   "disease": {
     "back": "Disease Catalog",

@@ -156,44 +156,52 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     const clean = letter
       .replace(/^#{1,3}\s+/gm, "")
       .replace(/\*\*/g, "")
-      .replace(/^[-*]\s+/gm, "• ");
+      .replace(/^[-*]\s+/gm, "- ");
 
     win.document.write(`
       <!DOCTYPE html>
-      <html>
+      <html lang="${locale}">
       <head>
         <meta charset="utf-8">
         <title>Referral Letter</title>
         <style>
           @page {
-            size: auto;
-            margin: 20mm;
+            size: A4;
+            margin: 15mm;
+          }
+          * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           body {
             font-family: "Times New Roman", Times, serif;
             color: black;
-            background: white;
-            line-height: 1.5;
-            font-size: 12pt;
+            background: white !important;
+            line-height: 1.4;
+            font-size: 11pt;
             margin: 0;
             padding: 0;
-            -webkit-print-color-adjust: exact;
           }
           .letter-container {
             width: 100%;
-            max-width: 100%;
+            background: white !important;
           }
           pre {
             white-space: pre-wrap;
             word-wrap: break-word;
             font-family: inherit;
             margin: 0;
+            border: none !important;
+            padding: 0 !important;
+            background: transparent !important;
           }
-          /* Ensure non-Latin scripts (Hindi, Japanese, Chinese) render correctly */
-          @media print {
-            body {
-              width: 210mm; /* A4 width */
-            }
+          /* Hide any possible UI artifacts that might leak */
+          .no-print { display: none !important; }
+          
+          /* Specific handling for non-Latin scripts to ensure they fit */
+          [lang="hi"], [lang="ja"], [lang="zh"] {
+            line-height: 1.6;
           }
         </style>
       </head>
@@ -204,7 +212,6 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         <script>
           window.onload = () => {
             window.print();
-            // Optional: win.close();
           };
         </script>
       </body>

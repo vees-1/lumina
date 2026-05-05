@@ -297,12 +297,12 @@
     "save": "विवरण सहेजें",
     "saved": "विवरण सफलतापूर्वक सहेजा गया",
     "back": "डैशबोर्ड पर वापस जाएं",
-    "namePlaceholder": "Dr. Alexander Thorne",
-    "specializationPlaceholder": "Medical Geneticist",
-    "degreePlaceholder": "MD, PhD",
-    "licensePlaceholder": "License Number",
-    "contactPlaceholder": "Email or Phone",
-    "clinicPlaceholder": "Hospital Name"
+    "namePlaceholder": "डॉ. अजय शर्मा",
+    "specializationPlaceholder": "जैसे: बाल चिकित्सा आनुवंशिकी",
+    "degreePlaceholder": "जैसे: एमडी, पीएचडी",
+    "licensePlaceholder": "जैसे: पंजीकरण संख्या",
+    "contactPlaceholder": "जैसे: ईमेल या फोन",
+    "clinicPlaceholder": "जैसे: अस्पताल का नाम"
   },
   "disease": {
     "back": "रोग कैटलॉग",
