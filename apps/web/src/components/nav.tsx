@@ -98,7 +98,7 @@ export function Nav({ transparent = false }: { transparent?: boolean }) {
             ) : (
               <>
                 {!pathname.startsWith("/dashboard") ? (
-                  <Link href="/dashboard">
+                  <Link href="/dashboard" className="hidden sm:block">
                     <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-3">
                       {t("dashboard")}
                     </Button>
@@ -285,7 +285,7 @@ export function DashboardNav() {
           <Link
             href="/dashboard"
             className={cn(
-              "text-[13px] transition-colors",
+              "text-[13px] transition-colors hidden sm:block",
               pathname === "/dashboard" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
             )}
           >

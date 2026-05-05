@@ -375,7 +375,8 @@
     "evidenceTag": "エビデンス",
     "pipelineTagNer": "固有表現抽出",
     "pipelineTagVision": "画像AI",
-    "pipelineTagOcrAi": "OCR + AI"
+    "pipelineTagOcrAi": "OCR + AI",
+    "cases": "ケース"
   },
   "common": {
     "loading": "読み込み中...",
@@ -392,6 +393,12 @@
     "clinic": "クリニック・病院",
     "save": "情報を保存",
     "saved": "情報を保存しました",
-    "back": "ダッシュボードに戻る"
+    "back": "ダッシュボードに戻る",
+    "namePlaceholder": "Dr. Alexander Thorne",
+    "specializationPlaceholder": "Medical Geneticist",
+    "degreePlaceholder": "MD, PhD",
+    "licensePlaceholder": "License Number",
+    "contactPlaceholder": "Email or Phone",
+    "clinicPlaceholder": "Hospital Name"
   }
 }

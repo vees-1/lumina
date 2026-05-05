@@ -296,7 +296,13 @@
     "clinic": "Klinik / Krankenhaus",
     "save": "Arzt-Info speichern",
     "saved": "Arzt-Info erfolgreich gespeichert",
-    "back": "Zurück zum Dashboard"
+    "back": "Zurück zum Dashboard",
+    "namePlaceholder": "Dr. Alexander Thorne",
+    "specializationPlaceholder": "Medical Geneticist",
+    "degreePlaceholder": "MD, PhD",
+    "licensePlaceholder": "License Number",
+    "contactPlaceholder": "Email or Phone",
+    "clinicPlaceholder": "Hospital Name"
   },
   "disease": {
     "back": "Erkrankungskatalog",
@@ -387,7 +393,8 @@
     "evidenceTag": "Evidenz",
     "pipelineTagNer": "NER",
     "pipelineTagVision": "Bild-KI",
-    "pipelineTagOcrAi": "OCR + KI"
+    "pipelineTagOcrAi": "OCR + KI",
+    "cases": "Fälle"
   },
   "common": {
     "loading": "Lädt...",

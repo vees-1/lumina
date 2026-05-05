@@ -295,7 +295,13 @@
     "clinic": "诊所 / 医院",
     "save": "保存信息",
     "saved": "信息保存成功",
-    "back": "返回仪表板"
+    "back": "返回仪表板",
+    "namePlaceholder": "Dr. Alexander Thorne",
+    "specializationPlaceholder": "Medical Geneticist",
+    "degreePlaceholder": "MD, PhD",
+    "licensePlaceholder": "License Number",
+    "contactPlaceholder": "Email or Phone",
+    "clinicPlaceholder": "Hospital Name"
   },
   "disease": {
     "back": "疾病目录",
@@ -386,7 +392,8 @@
     "evidenceTag": "证据",
     "pipelineTagNer": "实体识别",
     "pipelineTagVision": "视觉",
-    "pipelineTagOcrAi": "OCR + AI"
+    "pipelineTagOcrAi": "OCR + AI",
+    "cases": "病例"
   },
   "common": {
     "loading": "加载中……",

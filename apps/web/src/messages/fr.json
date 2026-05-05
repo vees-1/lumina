@@ -296,7 +296,13 @@
     "clinic": "Clinique / Hôpital",
     "save": "Enregistrer les infos",
     "saved": "Infos enregistrées avec succès",
-    "back": "Retour au tableau de bord"
+    "back": "Retour au tableau de bord",
+    "namePlaceholder": "Dr. Alexander Thorne",
+    "specializationPlaceholder": "Medical Geneticist",
+    "degreePlaceholder": "MD, PhD",
+    "licensePlaceholder": "License Number",
+    "contactPlaceholder": "Email or Phone",
+    "clinicPlaceholder": "Hospital Name"
   },
   "disease": {
     "back": "Catalogue des maladies",
@@ -387,7 +393,8 @@
     "evidenceTag": "preuve",
     "pipelineTagNer": "NER",
     "pipelineTagVision": "Vision",
-    "pipelineTagOcrAi": "OCR + IA"
+    "pipelineTagOcrAi": "OCR + IA",
+    "cases": "Dossiers"
   },
   "common": {
     "loading": "Chargement...",

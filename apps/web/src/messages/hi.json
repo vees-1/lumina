@@ -296,7 +296,13 @@
     "clinic": "क्लिनिक / अस्पताल",
     "save": "विवरण सहेजें",
     "saved": "विवरण सफलतापूर्वक सहेजा गया",
-    "back": "डैशबोर्ड पर वापस जाएं"
+    "back": "डैशबोर्ड पर वापस जाएं",
+    "namePlaceholder": "Dr. Alexander Thorne",
+    "specializationPlaceholder": "Medical Geneticist",
+    "degreePlaceholder": "MD, PhD",
+    "licensePlaceholder": "License Number",
+    "contactPlaceholder": "Email or Phone",
+    "clinicPlaceholder": "Hospital Name"
   },
   "disease": {
     "back": "रोग कैटलॉग",
@@ -388,7 +394,8 @@
     "evidenceTag": "साक्ष्य",
     "pipelineTagNer": "एनईआर",
     "pipelineTagVision": "विजन",
-    "pipelineTagOcrAi": "ओसीआर + एआई"
+    "pipelineTagOcrAi": "ओसीआर + एआई",
+    "cases": "केस"
   },
   "common": {
     "loading": "लोड हो रहा है...",

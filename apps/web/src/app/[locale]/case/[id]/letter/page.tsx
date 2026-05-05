@@ -151,15 +151,66 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   const handlePrint = () => {
     const win = window.open("", "_blank");
     if (!win) return;
+    
+    // Clean markdown-like syntax
     const clean = letter
       .replace(/^#{1,3}\s+/gm, "")
       .replace(/\*\*/g, "")
       .replace(/^[-*]\s+/gm, "• ");
-    win.document.write(
-      `<html><head><title>Referral Letter</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.7;font-size:14px}@media print{body{margin:20px}}</style></head><body><pre style="white-space:pre-wrap;font-family:inherit">${clean.replace(/</g, "&lt;")}</pre></body></html>`
-    );
+
+    win.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Referral Letter</title>
+        <style>
+          @page {
+            size: auto;
+            margin: 20mm;
+          }
+          body {
+            font-family: "Times New Roman", Times, serif;
+            color: black;
+            background: white;
+            line-height: 1.5;
+            font-size: 12pt;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+          }
+          .letter-container {
+            width: 100%;
+            max-width: 100%;
+          }
+          pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: inherit;
+            margin: 0;
+          }
+          /* Ensure non-Latin scripts (Hindi, Japanese, Chinese) render correctly */
+          @media print {
+            body {
+              width: 210mm; /* A4 width */
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="letter-container">
+          <pre>${clean.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+        </div>
+        <script>
+          window.onload = () => {
+            window.print();
+            // Optional: win.close();
+          };
+        </script>
+      </body>
+      </html>
+    `);
     win.document.close();
-    win.print();
   };
 
   const topDx = caseData?.rankings?.[0]?.name ?? "Unknown";
