@@ -11,7 +11,8 @@
     "apiStatusReady": "API已就绪",
     "apiStatusStarting": "启动中",
     "apiStatusLoading": "加载中",
-    "apiStatusUnavailable": "不可用"
+    "apiStatusUnavailable": "不可用",
+    "docInfo": "医生信息"
   },
   "dashboard": {
     "title": "病例",
@@ -393,7 +394,8 @@
     "pipelineTagNer": "实体识别",
     "pipelineTagVision": "视觉",
     "pipelineTagOcrAi": "OCR + AI",
-    "cases": "病例"
+    "cases": "病例",
+    "docInfo": "医生信息"
   },
   "common": {
     "loading": "加载中……",

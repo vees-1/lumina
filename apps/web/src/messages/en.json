@@ -299,9 +299,9 @@
     "back": "Back to Dashboard",
     "namePlaceholder": "Dr. Alexander Thorne",
     "specializationPlaceholder": "e.g. Pediatric Medical Genetics",
-    "degreePlaceholder": "e.g. MD, PhD, FRCP",
+    "degreePlaceholder": "e.g. MD, PhD",
     "licensePlaceholder": "e.g. MED-1298472-X",
-    "contactPlaceholder": "e.g. alex.thorne@genomics-central.org",
+    "contactPlaceholder": "e.g. alex.thorne@genomics.central.org",
     "clinicPlaceholder": "e.g. Royal Genomics Institute"
   },
   "disease": {

@@ -246,41 +246,47 @@ Write the "reasoning" value in {lang_name}. Keep all JSON keys in English."""
 _LETTER_SYSTEM = """You are a specialist physician writing a formal clinical referral letter.
 
 Write the entire letter in {lang_name}. Do not mix English into the prose, headings, salutation, closing, field labels, or recommendations.
-Use the following localized fixed text exactly. Structure exactly as follows — use these exact section headers as plain text (no markdown symbols):
+Use standard Markdown for structure (# for title, ## for sections, ** for emphasis, - for lists).
 
-{title}
+Structure exactly as follows:
 
-{date}: [today's date]
-{re}: [Patient name if known, otherwise "{unknown_patient}"]
+# {title}
+
+**{date}**: [today's date]
+**{re}**: [Patient name if known, otherwise "{unknown_patient}"]
 
 {dear}
 
-[Opening: State the core reason for referral and the suspected diagnosis based on Lumina analysis. Max 2 sentences.]
+### Reason for Referral
+[1-2 sentences stating the core suspicion and reason for specialist review.]
 
-{history}
-[Timeline and primary clinical presentation. Max 3 sentences.]
+### Clinical History
+[2 sentences on presentation and timeline.]
 
-{findings}
-[List 4-6 most significant accepted HPO findings. Format as: "- Finding Name". No other bullets.]
+### Clinical Findings
+- [Accepted HPO Finding 1]
+- [Accepted HPO Finding 2]
+- [Maximum 5 most relevant findings]
 
-{impression}
-[State the top differential diagnosis. Explain why it matches the current evidence briefly. Mention the phenotypic overlap score. Max 3 sentences.]
+### Diagnostic Impression
+[State the top differential diagnosis and the Lumina match score. 2 sentences.]
 
-{investigations}
-[List exactly 2-3 specific next steps: e.g., "Targeted gene panel for {gene}", "Consultation with {specialist}". Format with "- ".]
+### Recommended Next Steps
+- [Investigation 1]
+- [Investigation 2]
 
 {closing}
 
 {signoff}
-[{clinician}]
+
+**{clinician}**
 
 ---
 Rules:
-- STRICT LIMIT: Total length must be under 250 words to fit on a single A4 page.
-- No markdown: No #, ##, ###, **, *, or backticks.
-- Content: Focus on clinical utility. No conversational filler or "I hope this finds you well".
-- Language: Everything except IDs (ORPHA, HPO) and Gene symbols must be in {lang_name}.
-- Metadata: Incorporate patient DOB, referring clinic, and urgency if provided in the request."""
+- STRICT CONCISENESS: Maximum 200 words. Must fit on a single A4 page.
+- Medical Terms: Gene symbols and IDs (HPO/ORPHA) remain in standard form.
+- Metadata: Include DOB, clinic, and urgency if provided.
+- Tone: Highly professional, direct, and clinical."""
 
 
 class AgentNextRequest(BaseModel):

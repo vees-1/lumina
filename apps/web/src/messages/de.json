@@ -394,7 +394,8 @@
     "pipelineTagNer": "NER",
     "pipelineTagVision": "Bild-KI",
     "pipelineTagOcrAi": "OCR + KI",
-    "cases": "Fälle"
+    "cases": "Fälle",
+    "docInfo": "Arzt-Info"
   },
   "common": {
     "loading": "Lädt...",

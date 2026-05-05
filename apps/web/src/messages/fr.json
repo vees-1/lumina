@@ -394,7 +394,8 @@
     "pipelineTagNer": "NER",
     "pipelineTagVision": "Vision",
     "pipelineTagOcrAi": "OCR + IA",
-    "cases": "Dossiers"
+    "cases": "Dossiers",
+    "docInfo": "Infos médecin"
   },
   "common": {
     "loading": "Chargement...",

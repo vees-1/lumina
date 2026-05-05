@@ -32,16 +32,25 @@ function formatLetter(text: string): React.ReactNode {
   while (i < lines.length) {
     const line = lines[i];
 
-    // Headings: #, ##, ###
-    if (/^#{1,3}\s/.test(line)) {
-      const content = line.replace(/^#{1,3}\s+/, "");
+    // Main Title: #
+    if (/^#\s/.test(line)) {
+      const content = line.replace(/^#\s+/, "");
       nodes.push(
-        <h3
-          key={i}
-          className="font-semibold text-[15px] mt-5 mb-2 text-foreground"
-        >
+        <h1 key={i} className="text-[20px] font-bold text-center mb-8 uppercase tracking-wide border-b-2 border-black pb-2">
           {renderInline(content)}
-        </h3>
+        </h1>
+      );
+      i++;
+      continue;
+    }
+
+    // Section Headings: ## or ###
+    if (/^#{2,3}\s/.test(line)) {
+      const content = line.replace(/^#{2,3}\s+/, "");
+      nodes.push(
+        <h2 key={i} className="text-[15px] font-bold mt-6 mb-2 text-foreground border-b border-black/10 pb-0.5 uppercase tracking-tight">
+          {renderInline(content)}
+        </h2>
       );
       i++;
       continue;
@@ -49,35 +58,32 @@ function formatLetter(text: string): React.ReactNode {
 
     // Horizontal rule
     if (line.trim() === "---") {
-      nodes.push(<hr key={i} className="my-4 border-black/10" />);
+      nodes.push(<hr key={i} className="my-6 border-black/20" />);
       i++;
       continue;
     }
 
     // Empty line
     if (line.trim() === "") {
-      nodes.push(<div key={i} className="h-3" />);
+      nodes.push(<div key={i} className="h-2" />);
       i++;
       continue;
     }
 
-    // List items — collect consecutive list lines into a <ul>
+    // List items
     if (/^[-*]\s/.test(line)) {
       const listItems: React.ReactNode[] = [];
       while (i < lines.length && /^[-*]\s/.test(lines[i])) {
         const content = lines[i].replace(/^[-*]\s+/, "");
         listItems.push(
-          <li
-            key={i}
-            className="ml-4 text-[14px] leading-relaxed text-foreground/90 list-disc"
-          >
+          <li key={i} className="ml-5 text-[14px] leading-snug text-foreground/90 list-disc mb-1">
             {renderInline(content)}
           </li>
         );
         i++;
       }
       nodes.push(
-        <ul key={`ul-${i}`} className="space-y-1 my-2">
+        <ul key={`ul-${i}`} className="my-2 space-y-0.5">
           {listItems}
         </ul>
       );
@@ -86,10 +92,7 @@ function formatLetter(text: string): React.ReactNode {
 
     // Regular paragraph
     nodes.push(
-      <p
-        key={i}
-        className="text-[14px] leading-relaxed text-foreground/90 mb-1"
-      >
+      <p key={i} className="text-[14px] leading-relaxed text-foreground/90 mb-2">
         {renderInline(line)}
       </p>
     );
@@ -101,6 +104,7 @@ function formatLetter(text: string): React.ReactNode {
 
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations("letter");
+  const tc = useTranslations("case");
   const locale = useLocale();
   const { id } = use(params);
   const [caseData] = useState<CaseData | null>(() => getCaseById(id));
@@ -152,66 +156,115 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     const win = window.open("", "_blank");
     if (!win) return;
     
-    // Clean markdown-like syntax
-    const clean = letter
-      .replace(/^#{1,3}\s+/gm, "")
-      .replace(/\*\*/g, "")
-      .replace(/^[-*]\s+/gm, "- ");
+    // Convert basic Markdown to simple HTML for the print window
+    const htmlContent = letter
+      .split("\n")
+      .map(line => {
+        if (/^#\s/.test(line)) return `<h1 style="font-size: 16pt; text-align: center; border-bottom: 2pt solid black; padding-bottom: 8pt; margin-bottom: 25pt; text-transform: uppercase; font-family: 'Times New Roman', serif;">${line.replace(/^#\s+/, "")}</h1>`;
+        if (/^##\s/.test(line)) return `<h2 style="font-size: 12pt; font-weight: bold; border-bottom: 0.5pt solid #ccc; margin-top: 18pt; margin-bottom: 6pt; text-transform: uppercase; color: #000;">${line.replace(/^##\s+/, "")}</h2>`;
+        if (/^###\s/.test(line)) return `<h3 style="font-size: 11pt; font-weight: bold; margin-top: 12pt; margin-bottom: 4pt; color: #000;">${line.replace(/^###\s+/, "")}</h3>`;
+        if (/^[-*]\s/.test(line)) return `<li style="margin-left: 15pt; margin-bottom: 4pt; font-size: 11pt;">${line.replace(/^[-*]\s+/, "")}</li>`;
+        if (line.trim() === "---") return `<hr style="border: 0; border-top: 1px solid #000; margin: 15pt 0;">`;
+        if (line.trim() === "") return `<div style="height: 6pt;"></div>`;
+        // Handle bold in print
+        const boldified = line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        return `<p style="margin-bottom: 8pt; font-size: 11pt;">${boldified}</p>`;
+      })
+      .join("")
+      // Wrap consecutive li items in ul
+      .replace(/(<li.*?>.*?<\/li>)+/g, '<ul style="margin: 8pt 0; padding: 0;">$&</ul>');
 
     win.document.write(`
       <!DOCTYPE html>
       <html lang="${locale}">
       <head>
         <meta charset="utf-8">
-        <title>Referral Letter</title>
+        <title>Referral Letter - ${caseData?.patientContext?.patientName || id}</title>
         <style>
           @page {
             size: A4;
-            margin: 15mm;
+            margin: 15mm 20mm;
           }
-          * {
-            box-sizing: border-box;
+          * { box-sizing: border-box; }
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
             -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
           }
           body {
             font-family: "Times New Roman", Times, serif;
-            color: black;
-            background: white !important;
-            line-height: 1.4;
-            font-size: 11pt;
-            margin: 0;
-            padding: 0;
+            line-height: 1.5;
           }
-          .letter-container {
+          .letter-wrapper {
             width: 100%;
             background: white !important;
           }
-          pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-family: inherit;
-            margin: 0;
-            border: none !important;
-            padding: 0 !important;
-            background: transparent !important;
+          .letter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30pt;
+            font-size: 10.5pt;
           }
-          /* Hide any possible UI artifacts that might leak */
-          .no-print { display: none !important; }
+          .sender-info { text-align: left; line-height: 1.3; }
+          .recipient-info { text-align: right; line-height: 1.3; }
           
-          /* Specific handling for non-Latin scripts to ensure they fit */
-          [lang="hi"], [lang="ja"], [lang="zh"] {
-            line-height: 1.6;
+          .patient-box {
+            border: 1pt solid #000;
+            padding: 12pt;
+            margin-bottom: 25pt;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8pt;
+            font-size: 10.5pt;
+            background: white !important;
+          }
+          .patient-box div strong { margin-right: 5pt; }
+          
+          .letter-content {
+            margin-bottom: 40pt;
+          }
+          
+          /* Handle non-Latin scripts */
+          [lang="hi"], [lang="ja"], [lang="zh"] { line-height: 1.7; }
+          
+          @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
           }
         </style>
       </head>
       <body>
-        <div class="letter-container">
-          <pre>${clean.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+        <div class="letter-wrapper">
+          <div class="letter-header">
+            <div class="sender-info">
+              <strong>${caseData?.referralMetadata?.referringPhysicianName || "Practitioner"}</strong><br>
+              ${caseData?.referralMetadata?.referringClinic || "Clinical Department"}<br>
+              ${new Date().toLocaleDateString(locale, { dateStyle: 'long' })}
+            </div>
+            <div class="recipient-info">
+              To: <strong>${caseData?.referralMetadata?.recipientSpecialist || "Specialist Consultant"}</strong><br>
+              ${caseData?.referralMetadata?.recipientHospital || "Medical Center"}
+            </div>
+          </div>
+
+          <div class="patient-box">
+            <div><strong>${tc("patient")}:</strong> ${caseData?.patientContext?.patientName || "Anonymous"}</div>
+            <div><strong>${tc("age")}:</strong> ${caseData?.patientContext?.age || "N/A"}</div>
+            <div><strong>${tc("sex")}:</strong> ${caseData?.patientContext?.sex || "N/A"}</div>
+            <div><strong>Case Reference:</strong> ${id.slice(0, 8).toUpperCase()}</div>
+          </div>
+
+          <div class="letter-content">
+            ${htmlContent}
+          </div>
         </div>
         <script>
           window.onload = () => {
             window.print();
+            // win.close();
           };
         </script>
       </body>

@@ -11,7 +11,8 @@
     "apiStatusReady": "API lista",
     "apiStatusStarting": "Iniciando",
     "apiStatusLoading": "Cargando",
-    "apiStatusUnavailable": "No disponible"
+    "apiStatusUnavailable": "No disponible",
+    "docInfo": "Info médico"
   },
   "dashboard": {
     "title": "Casos",
@@ -374,7 +375,8 @@
     "pipelineTagNer": "NER",
     "pipelineTagVision": "Visión",
     "pipelineTagOcrAi": "OCR + IA",
-    "cases": "Casos"
+    "cases": "Casos",
+    "docInfo": "Info médico"
   },
   "common": {
     "loading": "Cargando...",
