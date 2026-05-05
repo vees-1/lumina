@@ -285,7 +285,7 @@ export function DashboardNav() {
           <Link
             href="/dashboard"
             className={cn(
-              "text-[13px] transition-colors hidden sm:block",
+              "text-[13px] transition-colors",
               pathname === "/dashboard" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
             )}
           >

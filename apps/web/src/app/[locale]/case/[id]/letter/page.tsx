@@ -3,103 +3,36 @@
 import { use, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useLocale } from "next-intl";
-import { useTranslations } from "next-intl";
-import { DashboardNav } from "@/components/nav";
+import { useLocale, useTranslations } from "next-intl";
+import { Copy, Download, Edit3, Check, ArrowLeft, Printer, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCaseById, streamLetter } from "@/lib/api";
-import type { CaseData } from "@/types/lumina";
+import { CaseData } from "@/types/lumina";
+import { DashboardNav } from "@/components/nav";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { cn } from "@/lib/utils";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
-function renderInline(text: string): React.ReactNode {
-  // Replace **bold** with <strong>
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  if (parts.length === 1) return text;
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>;
-    }
-    return part;
-  });
-}
-
-function formatLetter(text: string): React.ReactNode {
-  const lines = text.split("\n");
-  const nodes: React.ReactNode[] = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // Main Title: #
-    if (/^#\s/.test(line)) {
-      const content = line.replace(/^#\s+/, "");
-      nodes.push(
-        <h1 key={i} className="text-[20px] font-bold text-center mb-8 uppercase tracking-wide border-b-2 border-black pb-2">
-          {renderInline(content)}
-        </h1>
-      );
-      i++;
-      continue;
-    }
-
-    // Section Headings: ## or ###
-    if (/^#{2,3}\s/.test(line)) {
-      const content = line.replace(/^#{2,3}\s+/, "");
-      nodes.push(
-        <h2 key={i} className="text-[15px] font-bold mt-6 mb-2 text-foreground border-b border-black/10 pb-0.5 uppercase tracking-tight">
-          {renderInline(content)}
-        </h2>
-      );
-      i++;
-      continue;
-    }
-
-    // Horizontal rule
-    if (line.trim() === "---") {
-      nodes.push(<hr key={i} className="my-6 border-black/20" />);
-      i++;
-      continue;
-    }
-
-    // Empty line
-    if (line.trim() === "") {
-      nodes.push(<div key={i} className="h-2" />);
-      i++;
-      continue;
-    }
-
-    // List items
-    if (/^[-*]\s/.test(line)) {
-      const listItems: React.ReactNode[] = [];
-      while (i < lines.length && /^[-*]\s/.test(lines[i])) {
-        const content = lines[i].replace(/^[-*]\s+/, "");
-        listItems.push(
-          <li key={i} className="ml-5 text-[14px] leading-snug text-foreground/90 list-disc mb-1">
-            {renderInline(content)}
-          </li>
-        );
-        i++;
-      }
-      nodes.push(
-        <ul key={`ul-${i}`} className="my-2 space-y-0.5">
-          {listItems}
-        </ul>
-      );
-      continue;
-    }
-
-    // Regular paragraph
-    nodes.push(
-      <p key={i} className="text-[14px] leading-relaxed text-foreground/90 mb-2">
-        {renderInline(line)}
-      </p>
-    );
-    i++;
-  }
-
-  return <>{nodes}</>;
+function MarkdownRenderer({ content }: { content: string }) {
+  return (
+    <ReactMarkdown 
+      remarkPlugins={[remarkGfm]}
+      components={{
+        h1: ({ children }) => <h1 className="text-[20px] font-bold text-center mb-8 uppercase tracking-wide border-b-2 border-black pb-2">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-[15px] font-bold mt-6 mb-2 text-foreground border-b border-black/10 pb-0.5 uppercase tracking-tight">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-[14px] font-bold mt-4 mb-1 text-foreground uppercase tracking-tight">{children}</h3>,
+        p: ({ children }) => <p className="text-[14px] leading-relaxed text-foreground/90 mb-2">{children}</p>,
+        ul: ({ children }) => <ul className="my-2 space-y-0.5">{children}</ul>,
+        li: ({ children }) => <li className="ml-5 text-[14px] leading-snug text-foreground/90 list-disc mb-1">{children}</li>,
+        strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+        hr: () => <hr className="my-6 border-black/20" />,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  );
 }
 
 export default function LetterPage({ params }: { params: Promise<{ id: string }> }) {
@@ -156,23 +89,20 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     const win = window.open("", "_blank");
     if (!win) return;
     
-    // Convert basic Markdown to simple HTML for the print window
     const htmlContent = letter
       .split("\n")
       .map(line => {
-        if (/^#\s/.test(line)) return `<h1 style="font-size: 16pt; text-align: center; border-bottom: 2pt solid black; padding-bottom: 8pt; margin-bottom: 25pt; text-transform: uppercase; font-family: 'Times New Roman', serif;">${line.replace(/^#\s+/, "")}</h1>`;
-        if (/^##\s/.test(line)) return `<h2 style="font-size: 12pt; font-weight: bold; border-bottom: 0.5pt solid #ccc; margin-top: 18pt; margin-bottom: 6pt; text-transform: uppercase; color: #000;">${line.replace(/^##\s+/, "")}</h2>`;
-        if (/^###\s/.test(line)) return `<h3 style="font-size: 11pt; font-weight: bold; margin-top: 12pt; margin-bottom: 4pt; color: #000;">${line.replace(/^###\s+/, "")}</h3>`;
-        if (/^[-*]\s/.test(line)) return `<li style="margin-left: 15pt; margin-bottom: 4pt; font-size: 11pt;">${line.replace(/^[-*]\s+/, "")}</li>`;
-        if (line.trim() === "---") return `<hr style="border: 0; border-top: 1px solid #000; margin: 15pt 0;">`;
-        if (line.trim() === "") return `<div style="height: 6pt;"></div>`;
-        // Handle bold in print
+        if (/^#\s/.test(line)) return `<h1 style="font-size: 15pt; text-align: center; border-bottom: 2pt solid black; padding-bottom: 5pt; margin-bottom: 15pt; text-transform: uppercase; font-family: 'Times New Roman', serif;">${line.replace(/^#\s+/, "")}</h1>`;
+        if (/^##\s/.test(line)) return `<h2 style="font-size: 11pt; font-weight: bold; border-bottom: 0.5pt solid #000; margin-top: 12pt; margin-bottom: 4pt; text-transform: uppercase;">${line.replace(/^##\s+/, "")}</h2>`;
+        if (/^###\s/.test(line)) return `<h3 style="font-size: 10pt; font-weight: bold; margin-top: 8pt; margin-bottom: 3pt; text-transform: uppercase;">${line.replace(/^###\s+/, "")}</h3>`;
+        if (/^[-*]\s/.test(line)) return `<li style="margin-left: 12pt; margin-bottom: 2pt; font-size: 10pt;">${line.replace(/^[-*]\s+/, "")}</li>`;
+        if (line.trim() === "---") return `<hr style="border: 0; border-top: 0.5pt solid #000; margin: 10pt 0;">`;
+        if (line.trim() === "") return `<div style="height: 3pt;"></div>`;
         const boldified = line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-        return `<p style="margin-bottom: 8pt; font-size: 11pt;">${boldified}</p>`;
+        return `<p style="margin-bottom: 5pt; font-size: 10pt; line-height: 1.2;">${boldified}</p>`;
       })
       .join("")
-      // Wrap consecutive li items in ul
-      .replace(/(<li.*?>.*?<\/li>)+/g, '<ul style="margin: 8pt 0; padding: 0;">$&</ul>');
+      .replace(/(<li.*?>.*?<\/li>)+/g, '<ul style="margin: 4pt 0; padding: 0;">$&</ul>');
 
     win.document.write(`
       <!DOCTYPE html>
@@ -183,19 +113,18 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         <style>
           @page {
             size: A4;
-            margin: 15mm 20mm;
+            margin: 10mm 15mm;
           }
-          * { box-sizing: border-box; }
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           html, body {
             margin: 0;
             padding: 0;
             background: white !important;
             color: black !important;
-            -webkit-print-color-adjust: exact;
           }
           body {
             font-family: "Times New Roman", Times, serif;
-            line-height: 1.5;
+            line-height: 1.2;
           }
           .letter-wrapper {
             width: 100%;
@@ -204,48 +133,37 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
           .letter-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30pt;
-            font-size: 10.5pt;
+            margin-bottom: 15pt;
+            font-size: 8.5pt;
           }
-          .sender-info { text-align: left; line-height: 1.3; }
-          .recipient-info { text-align: right; line-height: 1.3; }
-          
           .patient-box {
-            border: 1pt solid #000;
-            padding: 12pt;
-            margin-bottom: 25pt;
+            border: 0.5pt solid #000;
+            padding: 6pt 10pt;
+            margin-bottom: 12pt;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8pt;
-            font-size: 10.5pt;
+            gap: 3pt;
+            font-size: 8.5pt;
             background: white !important;
           }
-          .patient-box div strong { margin-right: 5pt; }
-          
-          .letter-content {
-            margin-bottom: 40pt;
-          }
-          
-          /* Handle non-Latin scripts */
-          [lang="hi"], [lang="ja"], [lang="zh"] { line-height: 1.7; }
-          
+          .letter-content { margin-bottom: 15pt; }
+          [lang="hi"], [lang="ja"], [lang="zh"] { line-height: 1.4; }
           @media print {
             .no-print { display: none !important; }
-            body { background: white !important; color: black !important; }
+            body, .letter-wrapper, .patient-box { background: white !important; background-color: white !important; border-color: black !important; color: black !important; }
           }
         </style>
       </head>
       <body>
         <div class="letter-wrapper">
           <div class="letter-header">
-            <div class="sender-info">
+            <div>
               <strong>${caseData?.referralMetadata?.referringPhysicianName || "Practitioner"}</strong><br>
-              ${caseData?.referralMetadata?.referringClinic || "Clinical Department"}<br>
+              ${caseData?.referralMetadata?.referringClinic || "Clinical Dept"}<br>
               ${new Date().toLocaleDateString(locale, { dateStyle: 'long' })}
             </div>
-            <div class="recipient-info">
-              To: <strong>${caseData?.referralMetadata?.recipientSpecialist || "Specialist Consultant"}</strong><br>
+            <div style="text-align: right;">
+              To: <strong>${caseData?.referralMetadata?.recipientSpecialist || "Consultant"}</strong><br>
               ${caseData?.referralMetadata?.recipientHospital || "Medical Center"}
             </div>
           </div>
@@ -254,19 +172,14 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
             <div><strong>${tc("patient")}:</strong> ${caseData?.patientContext?.patientName || "Anonymous"}</div>
             <div><strong>${tc("age")}:</strong> ${caseData?.patientContext?.age || "N/A"}</div>
             <div><strong>${tc("sex")}:</strong> ${caseData?.patientContext?.sex || "N/A"}</div>
-            <div><strong>Case Reference:</strong> ${id.slice(0, 8).toUpperCase()}</div>
+            <div><strong>Ref:</strong> ${id.slice(0, 8).toUpperCase()}</div>
           </div>
 
           <div class="letter-content">
             ${htmlContent}
           </div>
         </div>
-        <script>
-          window.onload = () => {
-            window.print();
-            // win.close();
-          };
-        </script>
+        <script>window.onload = () => { window.print(); };</script>
       </body>
       </html>
     `);
@@ -277,119 +190,132 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
   const wordCount = letter.split(/\s+/).filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-[oklch(0.975_0_0)]">
+    <div className="min-h-screen bg-[#fafafa]">
       <DashboardNav />
-      <main className="max-w-4xl mx-auto px-6 pt-20 pb-16">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease }}
-          className="flex items-center justify-between mb-8 pt-4"
-        >
-          <div>
-            <Link
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-24 pb-16">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link 
               href={`/case/${id}`}
-              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-1 block"
+              className="w-9 h-9 rounded-full bg-white border border-black/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-black/10 transition-all shadow-sm"
             >
-              {t("backToCase")}
+              <ArrowLeft className="w-4 h-4" />
             </Link>
-            <h1 className="serif text-[26px] tracking-tight">{t("title")}</h1>
-            <p className="text-[13px] text-muted-foreground mt-0.5">{topDx}</p>
-          </div>
-          {done && (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setEditing((e) => !e)}
-                className="text-[13px] h-8 rounded-full"
-              >
-                {editing ? t("doneEditing") : t("edit")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopy}
-                className="text-[13px] h-8 rounded-full"
-              >
-                {t("copy")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handlePrint}
-                className="text-[13px] h-8 rounded-full"
-              >
-                {t("print")}
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleDownload}
-                className="text-[13px] h-8 rounded-full bg-foreground text-background"
-              >
-                {t("download")}
-              </Button>
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
+              <p className="text-[13px] text-muted-foreground mt-0.5">{topDx}</p>
             </div>
-          )}
-        </motion.div>
+          </div>
 
-        {/* Letter body */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditing(!editing)}
+              className={cn(
+                "h-9 rounded-full px-4 text-[13px] font-medium transition-all",
+                editing ? "bg-black text-white border-black hover:bg-black/90" : "bg-white"
+              )}
+            >
+              {editing ? (
+                <>
+                  <Check className="w-3.5 h-3.5 mr-1.5" />
+                  {t("doneEditing")}
+                </>
+              ) : (
+                <>
+                  <Edit3 className="w-3.5 h-3.5 mr-1.5" />
+                  {t("edit")}
+                </>
+              )}
+            </Button>
+
+            <div className="h-4 w-px bg-black/10 mx-1" />
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopy}
+              className="h-9 w-9 rounded-full p-0 bg-white shadow-sm"
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrint}
+              className="h-9 w-9 rounded-full p-0 bg-white shadow-sm"
+            >
+              <Printer className="w-3.5 h-3.5" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownload}
+              className="h-9 w-9 rounded-full p-0 bg-white shadow-sm"
+            >
+              <Download className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease, delay: 0.1 }}
-          className="bg-white rounded-2xl border border-black/[0.06] shadow-sm overflow-hidden"
+          className="bg-white rounded-[24px] border border-black/[0.03] shadow-sm overflow-hidden"
         >
           {/* Status bar */}
-          <div className="flex items-center gap-2 px-5 py-3 border-b border-black/[0.06]">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                streaming
-                  ? "bg-[oklch(0.52_0.21_255)] animate-pulse"
-                  : done
-                  ? "bg-[oklch(0.52_0.19_160)]"
-                  : "bg-[oklch(0.75_0_0)]"
-              }`}
-            />
-            <span className="text-[12px] text-muted-foreground">
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-black/[0.02] bg-black/[0.01]">
+            <div className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              streaming ? "bg-blue-500 animate-pulse" : done ? "bg-green-500" : "bg-gray-300"
+            )} />
+            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               {streaming ? t("generating") : done ? t("complete") : t("waiting")}
             </span>
           </div>
 
-          {error ? (
-            <div className="p-6 text-[13px] text-red-500">{error}</div>
-          ) : (
-            <div className="p-8 min-h-[400px]">
-              {editing ? (
-                <textarea
-                  value={letter}
-                  onChange={(e) => setLetter(e.target.value)}
-                  className="w-full min-h-[500px] p-8 text-[14px] leading-relaxed font-serif resize-none outline-none bg-transparent"
-                />
-              ) : letter ? (
-                formatLetter(letter)
-              ) : (
-                !streaming && (
-                  <p className="text-[14px] text-muted-foreground">
-                    {t("placeholder")}
-                  </p>
-                )
-              )}
-            </div>
-          )}
-
-          {/* Streaming cursor */}
-          {streaming && letter && (
-            <div className="px-8 pb-4">
-              <span className="inline-block w-2 h-4 bg-[oklch(0.52_0.21_255)] animate-pulse rounded-sm" />
-            </div>
-          )}
+          <div className="p-8 sm:p-12 min-h-[600px]">
+            {error ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-4">
+                  <RefreshCw className="w-6 h-6" />
+                </div>
+                <p className="text-[14px] text-muted-foreground max-w-xs">{error}</p>
+                <Button 
+                  variant="link" 
+                  onClick={() => window.location.reload()}
+                  className="mt-2 text-blue-600"
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : streaming && letter === "" ? (
+              <div className="flex flex-col items-center justify-center py-32 space-y-4">
+                <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
+                <p className="text-[13px] text-muted-foreground font-medium">{t("generating")}</p>
+              </div>
+            ) : (
+              <div className="max-w-none">
+                {editing ? (
+                  <textarea
+                    value={letter}
+                    onChange={(e) => setLetter(e.target.value)}
+                    className="w-full min-h-[600px] p-0 border-none outline-none text-[15px] leading-relaxed resize-none font-mono"
+                    autoFocus
+                  />
+                ) : (
+                  <MarkdownRenderer content={letter} />
+                )}
+              </div>
+            )}
+          </div>
         </motion.div>
 
-        {/* Word count */}
-        {letter && (
-          <motion.p
+        {done && !editing && (
+          <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-[12px] text-muted-foreground mt-3 text-right"
