@@ -14,7 +14,7 @@ const isProtectedRoute = createRouteMatcher([
   "/case(.*)",
 ]);
 
-export const proxy = clerkMiddleware(async (auth, req: NextRequest) => {
+export default clerkMiddleware(async (auth, req: NextRequest) => {
   const intlResponse = intlMiddleware(req);
   if (intlResponse) return intlResponse;
   if (isProtectedRoute(req)) await auth.protect();
