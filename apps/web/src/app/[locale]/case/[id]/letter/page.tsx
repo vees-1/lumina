@@ -13,8 +13,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 
-const ease = [0.25, 0.46, 0.45, 0.94] as const;
-
 function MarkdownRenderer({ content }: { content: string }) {
   return (
     <ReactMarkdown 
@@ -158,13 +156,13 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         <div class="letter-wrapper">
           <div class="letter-header">
             <div>
-              <strong>${caseData?.referralMetadata?.referringPhysicianName || "Practitioner"}</strong><br>
-              ${caseData?.referralMetadata?.referringClinic || "Clinical Dept"}<br>
+              <strong>${caseData?.patientContext?.referringPhysicianName || "Practitioner"}</strong><br />
+              ${caseData?.patientContext?.referringClinic || "Clinical Dept"}<br />
               ${new Date().toLocaleDateString(locale, { dateStyle: 'long' })}
             </div>
             <div style="text-align: right;">
-              To: <strong>${caseData?.referralMetadata?.recipientSpecialist || "Consultant"}</strong><br>
-              ${caseData?.referralMetadata?.recipientHospital || "Medical Center"}
+              To: <strong>${caseData?.patientContext?.recipientSpecialist || "Consultant"}</strong><br />
+              ${caseData?.patientContext?.recipientHospital || "Medical Center"}
             </div>
           </div>
 
