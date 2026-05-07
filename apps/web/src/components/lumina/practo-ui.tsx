@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Check, FileText, FlaskConical, Image as ImageIcon, PencilLine, ShieldCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -278,12 +278,24 @@ export function CaseTable({ rows }: { rows: Array<{ id: string; patient: string;
 }
 
 export function HpoApprovalQueue() {
-  const suggestions = [
+  const [suggestions, setSuggestions] = useState([
     { term: "HP:0001250 Seizure", source: "Clinical notes", confidence: "High" },
     { term: "HP:0001249 Intellectual disability", source: "Patient history", confidence: "Medium" },
     { term: "HP:0004322 Short stature", source: "Growth chart", confidence: "High" },
     { term: "HP:0001508 Failure to thrive", source: "Lab report and notes", confidence: "Review" },
-  ];
+  ]);
+  const [accepted, setAccepted] = useState<string[]>([]);
+  const [rejected, setRejected] = useState<string[]>([]);
+
+  function mark(term: string, status: "accepted" | "rejected") {
+    if (status === "accepted") {
+      setAccepted((items) => [...new Set([...items, term])]);
+      setRejected((items) => items.filter((item) => item !== term));
+    } else {
+      setRejected((items) => [...new Set([...items, term])]);
+      setAccepted((items) => items.filter((item) => item !== term));
+    }
+  }
 
   return (
     <div className="space-y-3">
@@ -293,11 +305,26 @@ export function HpoApprovalQueue() {
             <div>
               <h3 className="text-[17px] font-bold text-[#2f3037]">{item.term}</h3>
               <p className="mt-1 text-[14px] text-[#62687a]">{item.source} · {item.confidence} confidence</p>
+              {(accepted.includes(item.term) || rejected.includes(item.term)) && (
+                <p className={cn("mt-2 text-[12px] font-bold uppercase tracking-[0.04em]", accepted.includes(item.term) ? "text-[#16940a]" : "text-[#bd2f2f]")}>
+                  {accepted.includes(item.term) ? "Accepted for scoring" : "Rejected from scoring"}
+                </p>
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
-              <button className="rounded-md bg-[#38b6e8] px-4 py-2 text-[13px] font-bold text-white">Approve</button>
-              <button className="rounded-md border border-[#dce2ee] px-4 py-2 text-[13px] font-bold text-[#414653]">Reject</button>
-              <button className="rounded-md border border-[#dce2ee] px-4 py-2 text-[13px] font-bold text-[#414653]">Edit</button>
+              <button type="button" onClick={() => mark(item.term, "accepted")} className="rounded-md bg-[#38b6e8] px-4 py-2 text-[13px] font-bold text-white">Approve</button>
+              <button type="button" onClick={() => mark(item.term, "rejected")} className="rounded-md border border-[#dce2ee] px-4 py-2 text-[13px] font-bold text-[#414653]">Reject</button>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = window.prompt("Edit HPO term", item.term);
+                  if (!next) return;
+                  setSuggestions((items) => items.map((suggestion) => suggestion.term === item.term ? { ...suggestion, term: next } : suggestion));
+                }}
+                className="rounded-md border border-[#dce2ee] px-4 py-2 text-[13px] font-bold text-[#414653]"
+              >
+                Edit
+              </button>
             </div>
           </div>
         </div>
@@ -325,15 +352,29 @@ export function PatientStatusTimeline({ status = "Doctor review pending" }: { st
   );
 }
 
-export function IntakeUploadCard({ icon, title, description }: { icon: ReactNode; title: string; description: string }) {
-  return (
-    <div className="rounded-lg border border-[#e5e8f0] bg-white p-6">
+export function IntakeUploadCard({ icon, title, description, href }: { icon: ReactNode; title: string; description: string; href?: string }) {
+  const body = (
+    <>
       <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-[#eaf6ff] text-[#2536a0]">{icon}</div>
       <h3 className="text-[20px] font-bold tracking-[-0.02em] text-[#2f3037]">{title}</h3>
       <p className="mt-2 min-h-[48px] text-[14px] leading-6 text-[#62687a]">{description}</p>
-      <button className="mt-5 w-full rounded-md border border-dashed border-[#9eb0ce] bg-[#f8fbff] px-4 py-4 text-[14px] font-semibold text-[#2536a0]">
+      <span className="mt-5 block w-full rounded-md border border-dashed border-[#9eb0ce] bg-[#f8fbff] px-4 py-4 text-center text-[14px] font-semibold text-[#2536a0]">
         Upload or enter evidence
-      </button>
+      </span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className="block rounded-lg border border-[#e5e8f0] bg-white p-6 transition-transform hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-[#e5e8f0] bg-white p-6">
+      {body}
     </div>
   );
 }

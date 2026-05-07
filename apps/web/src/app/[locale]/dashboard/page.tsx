@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { CaseTable, DashboardShell, HpoApprovalQueue, IntakeUploadCard, dashboardIcons } from "@/components/lumina/practo-ui";
 import { getCaseSummaries } from "@/lib/api";
@@ -53,14 +54,14 @@ function StatsGrid({ rows }: { rows: typeof fallbackRows }) {
   );
 }
 
-function MyCases({ rows }: { rows: typeof fallbackRows }) {
+function MyCases({ rows, locale }: { rows: typeof fallbackRows; locale: string }) {
   return (
     <div className="space-y-6">
       <StatsGrid rows={rows} />
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[24px] font-bold tracking-[-0.02em] text-[#2f3037]">Case history</h2>
-          <Link href="/intake" className="rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">
+          <Link href={`/${locale}/intake`} className="rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">
             New case
           </Link>
         </div>
@@ -70,7 +71,7 @@ function MyCases({ rows }: { rows: typeof fallbackRows }) {
   );
 }
 
-function EvidenceIntake() {
+function EvidenceIntake({ locale }: { locale: string }) {
   const { FileText, ImageIcon, FlaskConical, PencilLine } = dashboardIcons;
   return (
     <div className="space-y-6">
@@ -81,10 +82,10 @@ function EvidenceIntake() {
         </p>
       </div>
       <div className="grid gap-5 md:grid-cols-2">
-        <IntakeUploadCard icon={<FileText className="h-6 w-6" />} title="Clinical notes" description="Paste visit notes, history, exam observations, and physician comments." />
-        <IntakeUploadCard icon={<ImageIcon className="h-6 w-6" />} title="Patient photos" description="Add phenotype photos for clinician-reviewed trait suggestions." />
-        <IntakeUploadCard icon={<FlaskConical className="h-6 w-6" />} title="Lab reports" description="Upload CBC, metabolic, imaging, and diagnostic reports for extraction." />
-        <IntakeUploadCard icon={<PencilLine className="h-6 w-6" />} title="Genetic evidence" description="Record gene panel findings, variant notes, inheritance context, or ClinVar evidence." />
+        <IntakeUploadCard href={`/${locale}/intake?tab=notes`} icon={<FileText className="h-6 w-6" />} title="Clinical notes" description="Paste visit notes, history, exam observations, and physician comments." />
+        <IntakeUploadCard href={`/${locale}/intake?tab=photo`} icon={<ImageIcon className="h-6 w-6" />} title="Patient photos" description="Add phenotype photos for clinician-reviewed trait suggestions." />
+        <IntakeUploadCard href={`/${locale}/intake?tab=lab`} icon={<FlaskConical className="h-6 w-6" />} title="Lab reports" description="Upload CBC, metabolic, imaging, and diagnostic reports for extraction." />
+        <IntakeUploadCard href={`/${locale}/intake?tab=genetic`} icon={<PencilLine className="h-6 w-6" />} title="Genetic evidence" description="Record gene panel findings, variant notes, inheritance context, or ClinVar evidence." />
       </div>
     </div>
   );
@@ -155,6 +156,7 @@ function DoctorProfilePanel() {
 }
 
 export default function DashboardPage() {
+  const locale = useLocale();
   const [activeTab, setActiveTab] = useState(getTabFromHash);
   const rows = useMemo(() => {
     if (typeof window === "undefined") return fallbackRows;
@@ -191,8 +193,8 @@ export default function DashboardPage() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
       >
-        {activeTab === "My cases" && <MyCases rows={rows} />}
-        {activeTab === "Evidence intake" && <EvidenceIntake />}
+        {activeTab === "My cases" && <MyCases rows={rows} locale={locale} />}
+        {activeTab === "Evidence intake" && <EvidenceIntake locale={locale} />}
         {activeTab === "HPO approval" && <HpoApprovalQueue />}
         {activeTab === "Output letters" && <OutputLetters />}
         {activeTab === "Team queue" && <TeamQueue />}

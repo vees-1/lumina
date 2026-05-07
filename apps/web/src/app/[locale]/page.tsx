@@ -14,9 +14,9 @@ const services = [
   {
     title: "Doctor Review Workflow",
     description: "AI phenotype suggestions stay pending until a clinician accepts them.",
-    image: "/lumina/doctor-review-1473042992.webp",
+    image: "/lumina/doctor-hero.avif",
     href: "/clinical-reviewer",
-    objectPosition: "center 18%",
+    objectPosition: "center 14%",
   },
   {
     title: "Score Accepted Evidence",

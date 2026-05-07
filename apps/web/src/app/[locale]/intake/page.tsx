@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
-import { useMessages, useTranslations } from "next-intl";
+import { useLocale, useMessages, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { localizeHpoLabel, type HpoLabelMessages } from "@/lib/hpo";
@@ -235,16 +235,19 @@ function ProgressStep({ label, active, done }: { label: string; active: boolean;
 
 export default function IntakePage() {
   const t = useTranslations("intake");
+  const locale = useLocale();
   const messages = useMessages() as HpoLabelMessages;
   const router = useRouter();
   const searchParams = useSearchParams();
   const addToId = searchParams.get("addTo");
   const existingCase = addToId ? getCaseById(addToId) : null;
+  const requestedTab = searchParams.get("tab");
 
   const usedModalities = addToId && existingCase ? existingCase.modalities : [];
   const firstUnused = (["notes", "photo", "lab", "genetic"] as Tab[]).find((m) => !usedModalities.includes(m)) ?? "notes";
+  const validRequestedTab = requestedTab === "notes" || requestedTab === "photo" || requestedTab === "lab" || requestedTab === "genetic" ? requestedTab : null;
 
-  const [tab, setTab] = useState<Tab>(firstUnused);
+  const [tab, setTab] = useState<Tab>(validRequestedTab ?? firstUnused);
   const [showChecklist, setShowChecklist] = useState(false);
   const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(["neurological"]));
   const [notes, setNotes] = useState("");
@@ -405,7 +408,7 @@ export default function IntakePage() {
           geneticEvidence: mergedGeneticEvidence,
           patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
         });
-        router.push(`/case/${addToId}`);
+        router.push(`/${locale}/case/${addToId}`);
       } else {
         const caseId = uuid();
         saveCaseToStorage({
@@ -419,7 +422,7 @@ export default function IntakePage() {
           geneticEvidence: mergedGeneticEvidence,
           patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
         });
-        router.push(`/case/${caseId}`);
+        router.push(`/${locale}/case/${caseId}`);
       }
     } catch (err) {
       console.error(err);
@@ -509,19 +512,22 @@ export default function IntakePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[oklch(0.975_0_0)]">
+    <div className="min-h-screen bg-white text-[#2f3037]">
       <DashboardNav />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-16 sm:pt-20 pb-16">
+      <main className="mx-auto max-w-6xl px-6 pb-20 pt-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="pt-6 mb-6 sm:mb-8"
+          className="mb-8 rounded-lg border border-[#e5e8f0] bg-white p-7 shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
         >
-          <h1 className="serif text-[24px] sm:text-[30px] tracking-tight">{addToId && existingCase ? t("titleAdd") : t("title")}</h1>
-          <p className="text-[13px] sm:text-[14px] text-muted-foreground mt-1">{t("subtitle")}</p>
+          <p className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor workspace</p>
+          <h1 className="mt-2 text-[38px] font-bold tracking-[-0.03em] text-[#2f3037]">{addToId && existingCase ? t("titleAdd") : "Start rare disease case"}</h1>
+          <p className="mt-2 max-w-2xl text-[16px] leading-7 text-[#62687a]">
+            Enter clinical notes, photos, lab reports, or genetic evidence. Lumina sends the evidence to the existing backend and returns doctor-reviewable HPO suggestions before scoring.
+          </p>
         </motion.div>
 
 

@@ -5,8 +5,8 @@ export default function ClinicalBetaPage() {
     <ProductPage
       title="Clinical Beta"
       subtitle="The Lumina beta focuses on the in-clinic workflow: evidence intake, doctor HPO approval, rare disease scoring, and referral output."
-      image="/lumina/doctor-review-1473042992.webp"
-      imagePosition="center 18%"
+      image="/lumina/doctor-review.webp"
+      imagePosition="center center"
       cards={[
         { title: "Evidence intake", text: "Collect clinical notes, patient photos, lab reports, and genetic evidence in one workspace." },
         { title: "Clinician approval", text: "Suggestions stay pending until reviewed, edited, accepted, or rejected by the doctor." },
