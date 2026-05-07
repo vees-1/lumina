@@ -1,164 +1,120 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
-import { User, Award, BookOpen, Save, ArrowLeft, Shield, Mail, Building2 } from "lucide-react";
-import Link from "next/link";
-import { DashboardNav } from "@/components/nav";
-import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 import { toast } from "sonner";
+import { DashboardNav } from "@/components/nav";
 
-interface DocInfo {
+interface DoctorProfile {
   name: string;
-  specialization: string;
-  degree: string;
+  specialty: string;
   clinic: string;
   license: string;
   contact: string;
+  signature: string;
+  referralTo: string;
+  letterTone: string;
 }
 
+const emptyProfile: DoctorProfile = {
+  name: "",
+  specialty: "",
+  clinic: "",
+  license: "",
+  contact: "",
+  signature: "",
+  referralTo: "Rare disease genetics clinic",
+  letterTone: "Concise specialist referral",
+};
+
 export default function ProfilePage() {
-  const t = useTranslations("docInfo");
-  const [info, setInfo] = useState<DocInfo>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("lumina_doc_info");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error("Failed to parse doc info", e);
-        }
-      }
+  const [profile, setProfile] = useState<DoctorProfile>(() => {
+    if (typeof window === "undefined") return emptyProfile;
+    const saved = localStorage.getItem("lumina_doc_info");
+    if (!saved) return emptyProfile;
+    try {
+      const parsed = JSON.parse(saved) as Partial<DoctorProfile> & { specialization?: string };
+      return {
+        ...emptyProfile,
+        ...parsed,
+        specialty: parsed.specialty ?? parsed.specialization ?? "",
+      };
+    } catch {
+      return emptyProfile;
     }
-    return { name: "", specialization: "", degree: "", clinic: "", license: "", contact: "" };
   });
 
-  const handleSave = () => {
-    localStorage.setItem("lumina_doc_info", JSON.stringify(info));
-    toast.success(t("saved"));
-  };
+  function update<K extends keyof DoctorProfile>(key: K, value: DoctorProfile[K]) {
+    setProfile((current) => ({ ...current, [key]: value }));
+  }
+
+  function save() {
+    localStorage.setItem("lumina_doc_info", JSON.stringify(profile));
+    toast.success("Doctor profile saved");
+  }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <DashboardNav />
+      <main className="mx-auto max-w-4xl px-6 pb-24 pt-28">
+        <div className="mb-8">
+          <h1 className="text-[40px] font-bold tracking-[-0.03em] text-[#2f3037]">Doctor profile</h1>
+          <p className="mt-3 max-w-2xl text-[17px] leading-7 text-[#555b6d]">
+            Save doctor information once and reuse it across referral letters, printed case reports, and clinical handoff documents.
+          </p>
+        </div>
 
-      <main className="max-w-2xl mx-auto px-6 pt-24 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-              <p className="text-[14px] text-muted-foreground mt-1">{t("subtitle")}</p>
-            </div>
-            <Link 
-              href="/dashboard" 
-              className="h-8 px-3 rounded-full border border-black/5 bg-black/5 hover:bg-black/10 text-[12px] font-medium flex items-center gap-1.5 transition-colors"
+        <section className="rounded-lg border border-[#e5e8f0] bg-white p-7">
+          <div className="grid gap-5 md:grid-cols-2">
+            {[
+              ["name", "Doctor name", "Dr. Jane Smith"],
+              ["specialty", "Specialty", "Clinical genetics"],
+              ["clinic", "Clinic name", "Lumina Rare Disease Clinic"],
+              ["license", "License / registration", "Medical registration number"],
+              ["contact", "Contact", "clinic@example.com"],
+              ["referralTo", "Default referral destination", "Rare disease genetics clinic"],
+            ].map(([key, label, placeholder]) => (
+              <label key={key} className="block">
+                <span className="mb-2 block text-[13px] font-bold text-[#3d414d]">{label}</span>
+                <input
+                  value={profile[key as keyof DoctorProfile]}
+                  onChange={(event) => update(key as keyof DoctorProfile, event.target.value)}
+                  placeholder={placeholder}
+                  className="h-11 w-full rounded border border-[#cfd5e2] px-4 text-[14px] outline-none focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+                />
+              </label>
+            ))}
+          </div>
+
+          <label className="mt-5 block">
+            <span className="mb-2 block text-[13px] font-bold text-[#3d414d]">Signature / letter details</span>
+            <textarea
+              value={profile.signature}
+              onChange={(event) => update("signature", event.target.value)}
+              placeholder="Dr. Jane Smith, MD, Clinical Genetics, Lumina Clinic"
+              rows={4}
+              className="w-full rounded border border-[#cfd5e2] px-4 py-3 text-[14px] outline-none focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+            />
+          </label>
+
+          <label className="mt-5 block">
+            <span className="mb-2 block text-[13px] font-bold text-[#3d414d]">Default referral preference</span>
+            <select
+              value={profile.letterTone}
+              onChange={(event) => update("letterTone", event.target.value)}
+              className="h-11 w-full rounded border border-[#cfd5e2] px-4 text-[14px] outline-none focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              {t("back")}
-            </Link>
-          </div>
+              <option>Concise specialist referral</option>
+              <option>Detailed evidence summary</option>
+              <option>Patient-friendly summary</option>
+            </select>
+          </label>
 
-          <div className="space-y-8">
-            <section className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-medium text-muted-foreground ml-1">{t("name")}</label>
-                  <div className="relative group">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
-                    <input
-                      value={info.name}
-                      onChange={(e) => setInfo({ ...info, name: e.target.value })}
-                      placeholder={t("namePlaceholder")}
-                      className="w-full h-10 pl-10 pr-4 rounded-full border border-black/5 bg-black/[0.02] text-[14px] outline-none focus:border-foreground focus:bg-transparent transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-medium text-muted-foreground ml-1">{t("specialization")}</label>
-                  <div className="relative group">
-                    <Award className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
-                    <input
-                      value={info.specialization}
-                      onChange={(e) => setInfo({ ...info, specialization: e.target.value })}
-                      placeholder={t("specializationPlaceholder")}
-                      className="w-full h-10 pl-10 pr-4 rounded-full border border-black/5 bg-black/[0.02] text-[14px] outline-none focus:border-foreground focus:bg-transparent transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-medium text-muted-foreground ml-1">{t("degree")}</label>
-                  <div className="relative group">
-                    <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
-                    <input
-                      value={info.degree}
-                      onChange={(e) => setInfo({ ...info, degree: e.target.value })}
-                      placeholder={t("degreePlaceholder")}
-                      className="w-full h-10 pl-10 pr-4 rounded-full border border-black/5 bg-black/[0.02] text-[14px] outline-none focus:border-foreground focus:bg-transparent transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[12px] font-medium text-muted-foreground ml-1">{t("license")}</label>
-                  <div className="relative group">
-                    <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
-                    <input
-                      value={info.license}
-                      onChange={(e) => setInfo({ ...info, license: e.target.value })}
-                      placeholder={t("licensePlaceholder")}
-                      className="w-full h-10 pl-10 pr-4 rounded-full border border-black/5 bg-black/[0.02] text-[14px] outline-none focus:border-foreground focus:bg-transparent transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-muted-foreground ml-1">{t("clinic")}</label>
-                <div className="relative group">
-                  <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
-                  <input
-                    value={info.clinic}
-                    onChange={(e) => setInfo({ ...info, clinic: e.target.value })}
-                    placeholder={t("clinicPlaceholder")}
-                    className="w-full h-10 pl-10 pr-4 rounded-full border border-black/5 bg-black/[0.02] text-[14px] outline-none focus:border-foreground focus:bg-transparent transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[12px] font-medium text-muted-foreground ml-1">{t("contact")}</label>
-                <div className="relative group">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
-                  <input
-                    value={info.contact}
-                    onChange={(e) => setInfo({ ...info, contact: e.target.value })}
-                    placeholder={t("contactPlaceholder")}
-                    className="w-full h-10 pl-10 pr-4 rounded-full border border-black/5 bg-black/[0.02] text-[14px] outline-none focus:border-foreground focus:bg-transparent transition-all"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <div className="pt-4">
-              <Button
-                onClick={handleSave}
-                className="w-full h-12 rounded-full bg-foreground text-background font-medium text-[15px] flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
-              >
-                <Save className="w-4 h-4" />
-                {t("save")}
-              </Button>
-            </div>
-          </div>
-        </motion.div>
+          <button onClick={save} className="mt-7 inline-flex items-center gap-2 rounded bg-[#38b6e8] px-6 py-3 text-[14px] font-bold text-white">
+            <Save className="h-4 w-4" />
+            Save profile
+          </button>
+        </section>
       </main>
     </div>
   );

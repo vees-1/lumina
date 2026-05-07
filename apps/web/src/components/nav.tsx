@@ -3,229 +3,153 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Globe, Check, Menu, X, User } from "lucide-react";
-import { useAuth, UserButton } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
+import { ChevronDown, Check, Menu, User, X } from "lucide-react";
+import { useAuth, useUser, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { LuminaLogo } from "@/components/lumina/practo-ui";
 import { getApiHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-export function Nav({ transparent = false }: { transparent?: boolean }) {
-  const t = useTranslations("nav");
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const pathname = usePathname();
-  const isLanding = pathname === "/";
-  const { isSignedIn } = useAuth();
-
-  const NAV_LINKS = [
-    { href: "#how-it-works", label: t("howItWorks") },
-    { href: "#modalities", label: t("technology") },
-    { href: "#stats", label: t("science") },
-  ];
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const frosted = !transparent || scrolled;
-
-  return (
-    <>
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          frosted
-            ? "glass-strong shadow-[0_1px_0_oklch(0_0_0/0.06)]"
-            : "bg-transparent"
-        )}
-      >
-        <nav className="mx-auto max-w-6xl flex items-center justify-between h-12 px-6">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative w-7 h-7">
-              <div className="absolute inset-0 rounded-[8px] bg-foreground flex items-center justify-center">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="4" r="2" fill="white" />
-                  <circle cx="4" cy="11" r="2" fill="white" opacity="0.6" />
-                  <circle cx="12" cy="11" r="2" fill="white" opacity="0.6" />
-                  <line x1="8" y1="6" x2="4" y2="9" stroke="white" strokeWidth="1.2" opacity="0.5" />
-                  <line x1="8" y1="6" x2="12" y2="9" stroke="white" strokeWidth="1.2" opacity="0.5" />
-                </svg>
-              </div>
-              <div className="absolute inset-0 rounded-[8px] ring-2 ring-foreground/20 scale-110 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-            </div>
-            <span className="font-semibold text-[15px] tracking-[-0.01em]">Lumina</span>
-          </Link>
-
-          {/* Center links (landing only) */}
-          {isLanding && (
-            <div className="hidden md:flex items-center gap-1">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="px-3 py-1.5 text-[13px] text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-black/5"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          )}
-
-          {/* Right side */}
-          <div className="flex items-center gap-1 sm:gap-2">
-            <LanguageSwitcher />
-            {!isSignedIn ? (
-              <>
-                <Link href="/sign-in" className="hidden sm:block">
-                  <Button variant="ghost" size="sm" className="text-[13px] h-7">
-                    {t("signIn")}
-                  </Button>
-                </Link>
-                <Link href="/sign-up">
-                  <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-3">
-                    {t("getStarted")}
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                {!pathname.startsWith("/dashboard") ? (
-                  <Link href="/dashboard" className="hidden sm:block">
-                    <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-3">
-                      {t("dashboard")}
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link href="/intake">
-                    <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-2 sm:px-3">
-                      <span className="hidden xs:inline">{t("newCase")}</span>
-                      <span className="xs:hidden">+</span>
-                    </Button>
-                  </Link>
-                )}
-                <UserButton>
-            <UserButton.MenuItems>
-              <UserButton.Link
-                label={t("docInfo")}
-                labelIcon={<div className="w-4 h-4 flex items-center justify-center text-muted-foreground"><User className="w-3.5 h-3.5" /></div>}
-                href="/settings/profile"
-              />
-            </UserButton.MenuItems>
-          </UserButton>
-              </>
-            )}
-
-            {/* Mobile menu button */}
-            {isLanding && (
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="p-1 rounded-lg hover:bg-black/5 transition-colors md:hidden"
-                aria-label="Toggle menu"
-              >
-                {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            )}
-          </div>
-        </nav>
-      </motion.header>
-
-      {/* Mobile menu overlay */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed inset-0 z-40 glass-strong md:hidden pt-12"
-          >
-            <div className="flex flex-col gap-4 p-8">
-              {NAV_LINKS.map((link) => (
-                <a key={link.href} href={link.href} className="text-xl font-medium py-2 border-b border-black/5" onClick={() => setMenuOpen(false)}>
-                  {link.label}
-                </a>
-              ))}
-              <div className="pt-4 flex flex-col gap-4">
-                <LanguageSwitcher />
-                {!isSignedIn && (
-                  <Link href="/sign-in" onClick={() => setMenuOpen(false)}>
-                    <Button variant="outline" className="w-full justify-start h-12 text-lg rounded-xl">
-                      {t("signIn")}
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
-
 const LOCALES = [
   { code: "en", label: "English" },
-  { code: "hi", label: "हिंदी" },
+  { code: "hi", label: "Hindi" },
   { code: "de", label: "Deutsch" },
   { code: "fr", label: "Français" },
   { code: "es", label: "Español" },
-  { code: "zh", label: "中文" },
-  { code: "ja", label: "日本語" },
+  { code: "zh", label: "Chinese" },
+  { code: "ja", label: "Japanese" },
 ] as const;
 
-function LanguageSwitcher() {
+const clinicLinks = [
+  { label: "Doctor Dashboard", href: "/dashboard" },
+  { label: "Patient Pre-Intake", href: "/patient" },
+  { label: "Clinical Reviewer", href: "/clinical-reviewer" },
+  { label: "Doctor Profile", href: "/settings/profile" },
+];
+
+const providerLinks = [
+  { label: "Referral Letters", href: "/referral-letters" },
+  { label: "HPO Workflow", href: "/hpo-workflow" },
+  { label: "Rare Disease Scoring", href: "/rare-disease-scoring" },
+  { label: "FHIR Export", href: "/fhir-export" },
+];
+
+const securityLinks = [
+  { label: "Privacy", href: "/privacy" },
+  { label: "Support", href: "/support" },
+];
+
+function useLocalePath() {
   const pathname = usePathname();
-  const router = useRouter();
-  const current = pathname.split("/")[1];
-  const activeLocale = LOCALES.find((l) => l.code === current)?.code ?? "en";
+  const first = pathname.split("/")[1];
+  const locale = LOCALES.some((item) => item.code === first) ? first : "en";
+
+  return (href: string) => {
+    if (href.startsWith("#")) return href;
+    return `/${locale}${href === "/" ? "" : href}`;
+  };
+}
+
+function Dropdown({
+  label,
+  items,
+  badge,
+}: {
+  label: string;
+  items: Array<{ label: string; href: string; disabled?: boolean }>;
+  badge?: string;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const toLocalePath = useLocalePath();
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    }
-    if (open) document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const onDown = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
-
-  function handleSwitch(code: string) {
-    const segments = pathname.split("/");
-    const hasLocale = LOCALES.some((l) => l.code === segments[1]);
-    const newPath = hasLocale
-      ? "/" + code + "/" + segments.slice(2).join("/")
-      : "/" + code + pathname;
-    router.push(newPath);
-  }
-
-  const currentLabel = LOCALES.find((l) => l.code === activeLocale)?.label ?? "English";
 
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-2 py-1 text-[13px] text-muted-foreground hover:text-foreground rounded-lg hover:bg-black/5 transition-colors"
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="inline-flex h-10 items-center gap-1.5 text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]"
       >
-        <Globe className="w-3.5 h-3.5" />
-        <span className="hidden xs:inline">{currentLabel}</span>
+        {badge && <span className="rounded-full bg-[#283691] px-1.5 py-0.5 text-[9px] font-bold leading-none text-white">{badge}</span>}
+        {label}
+        <ChevronDown className="h-3.5 w-3.5" />
       </button>
       {open && (
-        <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-background shadow-md z-50 py-1">
+        <div className="absolute left-1/2 top-[calc(100%+8px)] z-50 w-64 -translate-x-1/2 rounded-sm border border-[#edf0f5] bg-white py-3 shadow-[0_6px_24px_rgba(0,0,0,0.14)]">
+          <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-[#edf0f5] bg-white" />
+          {items.map((item) => (
+            <Link
+              key={item.label}
+              href={toLocalePath(item.href)}
+              onClick={() => setOpen(false)}
+              className={cn(
+                "block px-6 py-3 text-[14px] text-[#454851] transition-colors hover:bg-[#f7f9fc] hover:text-[#2536a0]",
+                item.disabled && "pointer-events-none text-[#9aa1af]"
+              )}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LanguageDropdown() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const current = pathname.split("/")[1];
+  const activeLocale = LOCALES.find((item) => item.code === current)?.code ?? "en";
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onDown = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  function switchLocale(code: string) {
+    const segments = pathname.split("/");
+    const hasLocale = LOCALES.some((item) => item.code === segments[1]);
+    const next = hasLocale ? `/${code}/${segments.slice(2).join("/")}` : `/${code}${pathname}`;
+    router.push(next.replace(/\/$/, "") || `/${code}`);
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="inline-flex h-10 items-center gap-1.5 text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]"
+      >
+        Language
+        <ChevronDown className="h-3.5 w-3.5" />
+      </button>
+      {open && (
+        <div className="absolute left-1/2 top-[calc(100%+8px)] z-50 w-48 -translate-x-1/2 rounded-sm border border-[#edf0f5] bg-white py-3 shadow-[0_6px_24px_rgba(0,0,0,0.14)]">
+          <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-[#edf0f5] bg-white" />
           {LOCALES.map((locale) => (
             <button
               key={locale.code}
-              onClick={() => handleSwitch(locale.code)}
-              className="flex items-center justify-between w-full px-3 py-1.5 text-[13px] text-left hover:bg-black/5 transition-colors"
+              type="button"
+              onClick={() => switchLocale(locale.code)}
+              className="flex w-full items-center justify-between px-6 py-2.5 text-left text-[14px] text-[#454851] transition-colors hover:bg-[#f7f9fc] hover:text-[#2536a0]"
             >
-              <span>{locale.label}</span>
-              {activeLocale === locale.code && <Check className="w-3.5 h-3.5 text-foreground" />}
+              {locale.label}
+              {activeLocale === locale.code && <Check className="h-4 w-4 text-[#38b6e8]" />}
             </button>
           ))}
         </div>
@@ -234,105 +158,144 @@ function LanguageSwitcher() {
   );
 }
 
-export function DashboardNav() {
-  const t = useTranslations("nav");
-  const pathname = usePathname();
-  const segments = pathname.split('/');
-  const locale = ['en','hi','de','fr','es','zh','ja'].includes(segments[1]) ? segments[1] : 'en';
-  const [apiStatus, setApiStatus] = useState<"loading" | "ready" | "starting" | "unavailable">("loading");
+export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
+  void transparent;
+  const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const toLocalePath = useLocalePath();
+  const [storedRole] = useState<"doctor" | "patient">(() => {
+    if (typeof window === "undefined") return "doctor";
+    const saved = window.localStorage.getItem("lumina_user_role");
+    return saved === "patient" ? "patient" : "doctor";
+  });
+  const role = typeof user?.publicMetadata?.role === "string" ? user.publicMetadata.role : storedRole;
+  const workspaceHref = role === "patient" ? "/patient" : "/dashboard";
+  const [apiReady, setApiReady] = useState<boolean | null>(null);
 
   useEffect(() => {
+    if (!isSignedIn) return;
     let cancelled = false;
-    const controller = new AbortController();
-
-    void getApiHealth(controller.signal)
-      .then((health) => {
-        if (cancelled) return;
-        setApiStatus(health.status === "ok" && !health.db?.startsWith("error") ? "ready" : "starting");
+    getApiHealth()
+      .then(() => {
+        if (!cancelled) setApiReady(true);
       })
       .catch(() => {
-        if (!cancelled) setApiStatus("unavailable");
+        if (!cancelled) setApiReady(false);
       });
-
     return () => {
       cancelled = true;
-      controller.abort();
     };
-  }, []);
+  }, [isSignedIn]);
 
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className="fixed top-0 left-0 right-0 z-50 glass-strong shadow-[0_1px_0_oklch(0_0_0/0.06)]"
-    >
-      <nav className="mx-auto max-w-6xl flex items-center justify-between h-12 px-4 sm:px-6">
-        <Link href={`/${locale}`} className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-[8px] bg-foreground flex items-center justify-center flex-shrink-0">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="4" r="2" fill="white" />
-              <circle cx="4" cy="11" r="2" fill="white" opacity="0.6" />
-              <circle cx="12" cy="11" r="2" fill="white" opacity="0.6" />
-              <line x1="8" y1="6" x2="4" y2="9" stroke="white" strokeWidth="1.2" opacity="0.5" />
-              <line x1="8" y1="6" x2="12" y2="9" stroke="white" strokeWidth="1.2" opacity="0.5" />
-            </svg>
-          </div>
-          <span className="font-semibold text-[15px] tracking-[-0.01em] hidden sm:inline">Lumina</span>
-        </Link>
-
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Link
-            href="/dashboard"
-            className={cn(
-              "text-[13px] transition-colors",
-              pathname === "/dashboard" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {t("cases")}
+    <header className="sticky top-0 z-50 border-b border-[#edf0f5] bg-white">
+      <nav className="mx-auto flex h-[74px] max-w-6xl items-center justify-between px-6">
+        <div className="flex shrink-0 items-center gap-3">
+          <Link href={toLocalePath("/")} className="flex items-center">
+            <LuminaLogo />
           </Link>
-          <Link href="/intake">
-            <Button size="sm" className="text-[13px] h-7 rounded-full bg-foreground text-background hover:bg-foreground/85 px-3">
-              {t("newCase")}
+        </div>
+
+        <div className="hidden items-center gap-7 md:flex">
+          {!isSignedIn ? (
+            <>
+              <Dropdown label="For Clinics" badge="NEW" items={clinicLinks} />
+              <Dropdown label="For Providers" items={providerLinks} />
+              <Dropdown label="Security & Help" items={securityLinks} />
+              <LanguageDropdown />
+            </>
+          ) : role === "patient" ? (
+            <>
+              <Link href={toLocalePath("/patient")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                Patient Dashboard
+              </Link>
+              <Link href={toLocalePath("/patient")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                Submissions
+              </Link>
+              <Link href={toLocalePath("/patient")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                Reports
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href={toLocalePath("/dashboard")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                Doctor Dashboard
+              </Link>
+              <Link href={toLocalePath("/dashboard#my-cases")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                Cases
+              </Link>
+              <Link href={toLocalePath("/intake")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                New case
+              </Link>
+              <Link href={toLocalePath("/dashboard#output-letters")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                Results
+              </Link>
+            </>
+          )}
+
+          {!isSignedIn ? (
+            <Link href={toLocalePath("/sign-in")}>
+              <Button variant="outline" className="h-10 rounded border-[#cfd5e2] px-4 text-[14px] font-medium text-[#555b68]">
+                Login / Signup
+              </Button>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Link href={toLocalePath(workspaceHref)} className="inline-flex h-10 items-center gap-2 text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                <span className={cn("h-2.5 w-2.5 rounded-full", apiReady === false ? "bg-red-500" : "bg-emerald-500")} />
+                {apiReady === false ? "API unavailable" : "API ready"}
+              </Link>
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="Doctor Profile"
+                    labelIcon={<User className="h-4 w-4 text-[#62687a]" />}
+                    href={toLocalePath("/settings/profile")}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
+            </div>
+          )}
+        </div>
+
+        <button type="button" className="md:hidden" onClick={() => setMobileOpen((value) => !value)} aria-label="Toggle menu">
+          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </nav>
+
+      {mobileOpen && (
+        <div className="border-t border-[#edf0f5] bg-white px-6 py-4 md:hidden">
+          {(isSignedIn
+            ? role === "patient"
+              ? [
+                  { label: "Patient Dashboard", href: "/patient" },
+                  { label: "Submissions", href: "/patient" },
+                  { label: "Reports", href: "/patient" },
+                ]
+              : [
+                  { label: "Doctor Dashboard", href: "/dashboard" },
+                  { label: "Cases", href: "/dashboard#my-cases" },
+                  { label: "New case", href: "/intake" },
+                  { label: "Results", href: "/dashboard#output-letters" },
+                ]
+            : [...clinicLinks, ...providerLinks, ...securityLinks]
+          ).map((item) => (
+            <Link key={item.label} href={toLocalePath(item.href)} className="block py-3 text-[15px] font-semibold text-[#343741]" onClick={() => setMobileOpen(false)}>
+              {item.label}
+            </Link>
+          ))}
+          <Link href={toLocalePath(isSignedIn ? "/dashboard" : "/sign-in")} onClick={() => setMobileOpen(false)}>
+            <Button className="mt-3 h-11 w-full rounded bg-[#38b6e8] font-bold text-white">
+              {isSignedIn ? "Dashboard" : "Login / Signup"}
             </Button>
           </Link>
-          <LanguageSwitcher />
-          <div
-            className="flex items-center gap-1.5"
-            title={
-              apiStatus === "ready"
-                ? t("apiStatusReady")
-                : apiStatus === "loading"
-                  ? t("apiStatusLoading")
-                  : apiStatus === "starting"
-                    ? t("apiStatusStarting")
-                    : t("apiStatusUnavailable")
-            }
-          >
-            <div className={`w-2 h-2 rounded-full transition-colors flex-shrink-0 ${
-              apiStatus === "ready" ? "bg-[oklch(0.52_0.19_160)]" : "bg-[oklch(0.75_0.15_60)]"
-            } ${apiStatus === "loading" || apiStatus === "starting" ? "animate-pulse" : ""}`} />
-            <span className="text-[11px] text-muted-foreground hidden md:inline">
-              {apiStatus === "ready"
-                ? t("apiStatusReady")
-                : apiStatus === "loading"
-                  ? t("apiStatusLoading")
-                  : apiStatus === "starting"
-                    ? t("apiStatusStarting")
-                    : t("apiStatusUnavailable")}
-            </span>
-          </div>
-          <UserButton>
-            <UserButton.MenuItems>
-              <UserButton.Link
-                label={t("docInfo")}
-                labelIcon={<div className="w-4 h-4 flex items-center justify-center text-muted-foreground"><User className="w-3.5 h-3.5" /></div>}
-                href="/settings/profile"
-              />
-            </UserButton.MenuItems>
-          </UserButton>
         </div>
-      </nav>
-    </motion.header>
+      )}
+    </header>
   );
+}
+
+export function DashboardNav() {
+  return <Nav />;
 }

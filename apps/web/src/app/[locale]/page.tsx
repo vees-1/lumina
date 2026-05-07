@@ -1,557 +1,146 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { motion, useScroll, useTransform, useInView, useMotionValue, useSpring } from "framer-motion";
-import { useLocale, useTranslations } from "next-intl";
-import { useAuth } from "@clerk/nextjs";
 import { Nav } from "@/components/nav";
-import { Button } from "@/components/ui/button";
+import { EvidenceModuleCard, MarketingFooter, ServiceCard } from "@/components/lumina/practo-ui";
 
-/* ── Animation variants ───────────────────────────────────────────────────── */
-const ease = [0.25, 0.46, 0.45, 0.94] as const;
+const services = [
+  {
+    title: "Start Rare Disease Case",
+    description: "Bring notes, photos, labs, and genetics into one clinical intake.",
+    image: "/lumina/doctor-start-blue.webp",
+    href: "/dashboard",
+    objectPosition: "center 18%",
+  },
+  {
+    title: "Doctor Review Workflow",
+    description: "AI phenotype suggestions stay pending until a clinician accepts them.",
+    image: "/lumina/doctor-review-1473042992.webp",
+    href: "/clinical-reviewer",
+    objectPosition: "center 18%",
+  },
+  {
+    title: "Score Accepted Evidence",
+    description: "Transparent Orphanet ranking from reviewed HPO findings only.",
+    image: "/lumina/doctor-score.avif",
+    href: "/rare-disease-scoring",
+    objectPosition: "center 18%",
+  },
+  {
+    title: "Referral Ready Output",
+    description: "Generate a concise letter with doctor profile and evidence trail.",
+    image: "/lumina/doctor-referral.avif",
+    href: "/referral-letters",
+    objectPosition: "center 10%",
+  },
+];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
-};
+const evidence = [
+  { kind: "notes" as const, title: "Clinical notes", action: "Extract HPO" },
+  { kind: "photos" as const, title: "Patient photos", action: "Suggest traits" },
+  { kind: "labs" as const, title: "Lab reports", action: "Parse findings" },
+  { kind: "genetics" as const, title: "Genetic evidence", action: "Add variants" },
+  { kind: "approval" as const, title: "Doctor approval", action: "Review terms" },
+  { kind: "letter" as const, title: "Draft letter", action: "Create letter" },
+];
 
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
-const staggerFast = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
-};
-
-const NUMBER_LOCALES: Record<string, string> = {
-  en: "en-US",
-  de: "de-DE",
-  es: "es-ES",
-  fr: "fr-FR",
-  hi: "hi-IN-u-nu-deva",
-  ja: "ja-JP",
-  zh: "zh-CN",
-};
-
-function getNumberLocale(locale: string) {
-  return NUMBER_LOCALES[locale] ?? locale;
-}
-
-/* ── Sub-components ───────────────────────────────────────────────────────── */
-
-function StatCard({
-  value,
-  label,
-  locale,
-  suffix = "",
-}: {
-  value: number;
-  label: string;
-  locale: string;
-  suffix?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true });
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!inView) return;
-    const start = Date.now();
-    const duration = 1800;
-    const raf = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * value));
-      if (progress < 1) requestAnimationFrame(raf);
-      else setCount(value);
-    };
-    requestAnimationFrame(raf);
-  }, [inView, value]);
-
+export default function LandingPage() {
   return (
-    <motion.div ref={ref} variants={fadeUp} className="text-center">
-      <div className="serif text-5xl tracking-tight text-foreground">
-        {count.toLocaleString(locale)}{suffix}
-      </div>
-      <div className="mt-2 text-[15px] text-muted-foreground">{label}</div>
-    </motion.div>
-  );
-}
+    <div className="min-h-screen bg-white text-[#2f3037]">
+      <Nav />
 
-function ModalityCard({
-  icon, title, description, delay,
-}: {
-  icon: React.ReactNode; title: string; description: string; delay: number;
-}) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const rotateX = useTransform(y, [-60, 60], [6, -6]);
-  const rotateY = useTransform(x, [-60, 60], [-6, 6]);
-  const springX = useSpring(rotateX, { stiffness: 200, damping: 30 });
-  const springY = useSpring(rotateY, { stiffness: 200, damping: 30 });
+      <main>
+        <section className="mx-auto max-w-6xl px-6 pb-20 pt-24">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {services.map((service) => (
+              <ServiceCard key={service.title} {...service} />
+            ))}
+          </div>
+        </section>
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease, delay }}
-      viewport={{ once: true }}
-      style={{ rotateX: springX, rotateY: springY, transformPerspective: 800 }}
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        x.set(e.clientX - rect.left - rect.width / 2);
-        y.set(e.clientY - rect.top - rect.height / 2);
-      }}
-      onMouseLeave={() => { x.set(0); y.set(0); }}
-      className="group relative bg-white rounded-2xl border border-black/[0.06] p-6 hover:shadow-[0_8px_40px_oklch(0_0_0/0.1)] transition-shadow duration-300 cursor-default"
-    >
-      <div className="w-11 h-11 rounded-xl bg-[oklch(0.97_0_0)] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-        {icon}
-      </div>
-      <h3 className="font-semibold text-[15px] tracking-tight mb-1">{title}</h3>
-      <p className="text-[13px] text-muted-foreground leading-relaxed">{description}</p>
-    </motion.div>
-  );
-}
-
-function StepCard({ num, title, description }: { num: string; title: string; description: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, x: -20 }}
-      animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-      transition={{ duration: 0.6, ease }}
-      className="flex gap-4 sm:gap-6 items-start"
-    >
-      <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-foreground text-background text-[12px] sm:text-[13px] font-bold flex items-center justify-center">
-        {num}
-      </div>
-      <div>
-        <h3 className="font-semibold text-[16px] sm:text-[17px] tracking-tight">{title}</h3>
-        <p className="mt-1 text-[14px] sm:text-[15px] text-muted-foreground leading-relaxed">{description}</p>
-      </div>
-    </motion.div>
-
-  );
-}
-
-/* ── Page ─────────────────────────────────────────────────────────────────── */
-export default function HomePage() {
-  const t = useTranslations("landing");
-  const locale = useLocale();
-  const { isSignedIn } = useAuth();
-  const numberLocale = getNumberLocale(locale);
-  const formatNumber = new Intl.NumberFormat(numberLocale);
-  const formatStepNumber = new Intl.NumberFormat(numberLocale, {
-    minimumIntegerDigits: 2,
-    useGrouping: false,
-  });
-  const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-
-  return (
-    <div className="relative overflow-x-hidden">
-      <Nav transparent />
-
-      {/* Scroll progress bar */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-[2px] bg-[oklch(0.52_0.21_255)] origin-left z-50"
-        style={{ scaleX: scrollYProgress }}
-      />
-
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section
-        ref={heroRef}
-        className="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-white"
-      >
-        <div className="orb orb-1" />
-        <div className="orb orb-2" />
-        <div className="orb orb-3" />
-
-        {/* Hero content — vertically centred, generous spacing */}
-        <motion.div
-          style={{ y: heroY, opacity: heroOpacity }}
-          className="relative z-10 flex flex-col items-center text-center px-6 sm:px-8 w-full max-w-5xl mx-auto"
-        >
-          {/* Eyebrow pill */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/10 bg-white/80 backdrop-blur-sm text-[11px] sm:text-[12px] font-medium text-muted-foreground mb-8 sm:mb-10"
-          >
-            <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className="pulse-ring absolute inline-flex h-full w-full rounded-full bg-[oklch(0.52_0.21_255)]" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[oklch(0.52_0.21_255)]" />
-            </span>
-            {t("betaPill")}
-          </motion.div>
-
-          {/* Giant headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease, delay: 0.15 }}
-            className="font-[family-name:var(--font-serif)] text-[clamp(2.75rem,10vw,8.5rem)] font-normal tracking-[-0.02em] leading-[0.95] sm:leading-[0.92] text-foreground mb-6 sm:mb-8 whitespace-pre-line"
-          >
-            {t("heroHeadline")}
-          </motion.h1>
-
-          {/* Subtitle — one clean line */}
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease, delay: 0.32 }}
-            className="text-[1rem] sm:text-[1.15rem] text-muted-foreground mb-10 sm:mb-12 max-w-sm leading-relaxed"
-          >
-            {t("heroSub")}
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease, delay: 0.46 }}
-            className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto px-4 sm:px-0"
-          >
-            {!isSignedIn ? (
-              <>
-                <Link href="/sign-up" className="w-full sm:w-auto">
-                  <Button className="w-full h-10 sm:h-12 px-6 sm:px-8 rounded-full bg-foreground text-background text-[14px] sm:text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
-                    {t("getStartedFree")}
-                  </Button>
-                </Link>
-                <a href="#how-it-works" className="w-full sm:w-auto">
-                  <Button variant="ghost" className="w-full h-10 sm:h-12 px-5 sm:px-6 rounded-full text-[14px] sm:text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
-                    {t("howItWorks")}
-                    <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 16 16">
-                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </Button>
-                </a>
-              </>
-            ) : (
-              <>
-                <Link href="/dashboard" className="w-full sm:w-auto">
-                  <Button className="w-full h-10 sm:h-12 px-6 sm:px-8 rounded-full bg-foreground text-background text-[14px] sm:text-[15px] font-medium hover:bg-foreground/85 shadow-[0_2px_24px_oklch(0_0_0/0.14)] hover:shadow-[0_6px_32px_oklch(0_0_0/0.2)] transition-all duration-300">
-                    {t("dashboard")}
-                  </Button>
-                </Link>
-                <Link href="/intake" className="w-full sm:w-auto">
-                  <Button variant="ghost" className="w-full h-10 sm:h-12 px-5 sm:px-6 rounded-full text-[14px] sm:text-[15px] text-muted-foreground hover:text-foreground border border-black/10 hover:bg-black/[0.04]">
-                    {t("newCase")}
-                    <svg className="ml-1.5 w-4 h-4" fill="none" viewBox="0 0 16 16">
-                      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </Button>
-                </Link>
-              </>
-            )}
-          </motion.div>
-        </motion.div>
-
-
-        {/* Scroll cue */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 pointer-events-none"
-        >
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          >
-            <svg className="w-5 h-5 text-black/20" fill="none" viewBox="0 0 20 20">
-              <path d="M10 4v12M7 13l3 3 3-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* ── How it works ──────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="bg-[oklch(0.975_0_0)] py-28 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={stagger}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeUp} className="text-[13px] font-medium text-[oklch(0.52_0.21_255)] mb-3 tracking-wider uppercase">
-              {t("workflowLabel")}
-            </motion.p>
-            <motion.h2 variants={fadeUp} className="serif text-[clamp(2rem,5vw,3.25rem)] tracking-tight mb-4">
-              {t("workflowHeadline")}
-            </motion.h2>
-            <motion.p variants={fadeUp} className="text-[17px] text-muted-foreground max-w-xl mx-auto">
-              {t("workflowSub")}
-            </motion.p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <StepCard num={formatStepNumber.format(1)} title={t("step1Title")} description={t("step1Desc")} />
-              <StepCard num={formatStepNumber.format(2)} title={t("step2Title")} description={t("step2Desc")} />
-              <StepCard num={formatStepNumber.format(3)} title={t("step3Title")} description={t("step3Desc")} />
-              <StepCard num={formatStepNumber.format(4)} title={t("step4Title")} description={t("step4Desc")} />
+        <section className="mx-auto max-w-6xl px-6 py-10">
+          <div className="mb-9 flex items-end justify-between gap-6">
+            <div>
+              <h1 className="text-[28px] font-bold tracking-[-0.02em]">Analyze complex clinical evidence for rare disease diagnosis</h1>
+              <p className="mt-1 text-[15px] text-[#40434d]">Doctor-reviewed HPO extraction with transparent scoring and referral support</p>
             </div>
+            <Link href="/dashboard" className="hidden rounded border border-[#21aeee] px-5 py-3 text-[14px] font-medium text-[#20aeea] sm:block">
+              View All Modalities
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
+            {evidence.map((item) => (
+              <EvidenceModuleCard key={item.title} {...item} />
+            ))}
+          </div>
+        </section>
 
-            {/* Animated pipeline visual */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.94 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, ease }}
-              className="hidden md:block"
-            >
-              <div className="bg-white rounded-2xl border border-black/[0.06] shadow-sm p-6 space-y-3">
-                {[
-                  { label: t("clinicalNotes"), tag: t("pipelineTagNer"), color: "oklch(0.52 0.21 255)", terms: 12 },
-                  { label: t("facialPhoto"), tag: t("pipelineTagVision"), color: "oklch(0.65 0.18 200)", terms: 7 },
-                  { label: t("labReport"), tag: t("pipelineTagOcrAi"), color: "oklch(0.60 0.20 285)", terms: 9 },
-                  { label: t("geneticEvidence"), tag: t("manualTag"), color: "oklch(0.52 0.19 160)", terms: t("evidenceTag") },
-                ].map((item, i) => (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, x: -16 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.12, duration: 0.5, ease }}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-[oklch(0.975_0_0)]"
-                  >
-                    <div
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                      style={{ background: item.color }}
-                    />
-                    <span className="text-[13px] font-medium flex-1">{item.label}</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-white border border-black/10 text-muted-foreground">
-                      {item.tag}
-                    </span>
-                    <span className="text-[12px] font-semibold" style={{ color: item.color }}>
-                      {typeof item.terms === "number" ? `${formatNumber.format(item.terms)} ${t("pipelineTerms")}` : item.terms}
-                    </span>
-                  </motion.div>
-                ))}
-                <div className="pt-2 border-t border-black/[0.06] flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-[oklch(0.97_0_0)] rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: "96%" }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 1.2, ease, delay: 0.5 }}
-                      className="h-full rounded-full bg-gradient-to-r from-[oklch(0.52_0.21_255)] to-[oklch(0.65_0.18_200)]"
-                    />
-                  </div>
-                  <span className="text-[13px] font-bold text-[oklch(0.52_0.21_255)]">{formatNumber.format(96)}%</span>
-                </div>
+        <section className="border-y border-[#edf0f5] bg-[#fbfcfe]">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <h2 className="max-w-md text-[36px] font-bold leading-[1.08] tracking-[-0.03em]">Clinical intelligence that stays doctor-led</h2>
+              <p className="mt-5 max-w-md text-[16px] leading-7 text-[#4f5668]">
+                Lumina helps clinicians move from messy evidence to accepted phenotypes, ranked differentials, and a referral-ready summary without automating clinical acceptance.
+              </p>
+              <Link href="/dashboard" className="mt-8 inline-flex rounded bg-[#38b6e8] px-6 py-3 text-[15px] font-bold text-white">
+                Start a case
+              </Link>
+            </div>
+            <div className="relative min-h-[360px] overflow-hidden rounded shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
+              <Image src="/lumina/doctor-hero.avif" alt="" fill sizes="(max-width: 1024px) 90vw, 720px" className="object-cover" style={{ objectPosition: "center 14%" }} priority />
+              <div className="absolute bottom-8 left-8 rounded bg-white px-5 py-4 shadow-[0_8px_24px_rgba(0,0,0,0.14)]">
+                <p className="text-[20px] font-bold text-[#2536a0]">Doctor-reviewed AI</p>
+                <p className="text-[14px] text-[#343741]">Accepted evidence drives every score</p>
               </div>
-            </motion.div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Modalities ────────────────────────────────────────────────────── */}
-      <section id="modalities" className="bg-white py-28 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={stagger}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeUp} className="text-[13px] font-medium text-[oklch(0.52_0.21_255)] mb-3 tracking-wider uppercase">
-              {t("technologyLabel")}
-            </motion.p>
-            <motion.h2 variants={fadeUp} className="serif text-[clamp(2rem,5vw,3.25rem)] tracking-tight mb-4">
-              {t("technologyHeadline")}
-            </motion.h2>
-            <motion.p variants={fadeUp} className="text-[17px] text-muted-foreground max-w-lg mx-auto">
-              {t("technologySub")}
-            </motion.p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ModalityCard delay={0} icon={<NoteIcon />} title={t("modalityNoteTitle")} description={t("modalityNoteDesc")} />
-            <ModalityCard delay={0.07} icon={<PhotoIcon />} title={t("modalityPhotoTitle")} description={t("modalityPhotoDesc")} />
-            <ModalityCard delay={0.14} icon={<LabIcon />} title={t("modalityLabTitle")} description={t("modalityLabDesc")} />
-            <ModalityCard delay={0.21} icon={<DnaIcon />} title={t("modalityDnaTitle")} description={t("modalityDnaDesc")} />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Stats ─────────────────────────────────────────────────────────── */}
-      <section id="stats" className="bg-[oklch(0.975_0_0)] py-28 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={stagger}
-            className="text-center mb-16"
-          >
-            <motion.p variants={fadeUp} className="text-[13px] font-medium text-[oklch(0.52_0.21_255)] mb-3 tracking-wider uppercase">
-              {t("scienceLabel")}
-            </motion.p>
-            <motion.h2 variants={fadeUp} className="serif text-[clamp(2rem,5vw,3.25rem)] tracking-tight">
-              {t("scienceHeadline")}
-            </motion.h2>
-          </motion.div>
-
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={staggerFast}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8"
-          >
-            <StatCard value={7000} label={t("statRareDiseases")} suffix="+" locale={numberLocale} />
-            <StatCard value={30000} label={t("statHpoTerms")} suffix="+" locale={numberLocale} />
-            <StatCard value={4} label={t("statModalities")} locale={numberLocale} />
-            <StatCard value={100} label={t("statScoring")} locale={numberLocale} />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease, delay: 0.3 }}
-            className="mt-12 grid md:grid-cols-3 gap-4"
-          >
+        <section className="mx-auto max-w-6xl px-6 py-16">
+          <div className="grid gap-6 lg:grid-cols-4">
+            <div className="border border-[#e5e8f0] p-8 lg:col-span-1">
+              <h2 className="text-[30px] font-bold leading-tight tracking-[-0.03em]">Designed for real clinical handoff</h2>
+              <p className="mt-4 text-[15px] leading-6 text-[#5d6373]">Each step keeps the clinician in control while Lumina structures the case for rare disease triage.</p>
+              <Link href="/hpo-workflow" className="mt-8 inline-flex rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">
+                See workflow
+              </Link>
+            </div>
             {[
-              { title: "Orphanet", desc: t("orphanetDesc") },
-              { title: "HPO Ontology", desc: t("hpoOntologyDesc") },
-              { title: "ClinVar", desc: t("clinvarDesc") },
-            ].map((item) => (
-              <div key={item.title} className="bg-white rounded-xl border border-black/[0.06] p-5">
-                <div className="text-[13px] font-semibold mb-1.5">{item.title}</div>
-                <div className="text-[13px] text-muted-foreground">{item.desc}</div>
+              { label: "REVIEW", title: "AI suggestions remain pending until approved", text: "Doctor-in-the-loop by design", image: "/lumina/doctor-referral.avif", pos: "center 12%" },
+              { label: "SCORE", title: "Ranked rare disease differentials with evidence", text: "Top matches and differentiating clues", image: "/lumina/doctor-score.avif", pos: "center 22%" },
+              { label: "REFER", title: "Professional letter ready for specialist referral", text: "Saved doctor signature and clinic details", image: "/lumina/clinic-profile.jpg", pos: "center 18%" },
+            ].map((card) => (
+              <article key={card.label} className="border border-[#e5e8f0] bg-white">
+                <div className="relative h-40">
+                  <Image src={card.image} alt="" fill sizes="260px" className="object-cover" style={{ objectPosition: card.pos }} />
+                </div>
+                <div className="p-5">
+                  <p className="text-[12px] font-bold text-[#16940a]">{card.label}</p>
+                  <h3 className="mt-2 text-[18px] font-bold leading-tight text-[#2f3037]">{card.title}</h3>
+                  <p className="mt-3 text-[14px] text-[#6a7080]">{card.text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-6 pb-6 pt-4 text-center">
+          <h2 className="text-[32px] font-bold tracking-[-0.03em]">Built for clinical confidence</h2>
+          <div className="mt-9 grid gap-6 md:grid-cols-3">
+            {[
+              ["Evidence audit", "Every phenotype is traceable to notes, images, lab reports, or genetic context before it contributes to scoring."],
+              ["Transparent scoring", "Accepted HPO terms drive deterministic ranking instead of opaque black-box diagnosis claims."],
+              ["Referral workflow", "The final output is structured for real referral work, not just a demo result screen."],
+            ].map(([title, text]) => (
+              <div key={title} className="border border-[#e5e8f0] p-7 text-left">
+                <p className="text-[16px] leading-7 text-[#343741]">{text}</p>
+                <p className="mt-5 text-[16px] font-bold text-[#2536a0]">{title}</p>
               </div>
             ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="relative bg-foreground py-28 px-6 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="orb orb-1" style={{ opacity: 0.15 }} />
-          <div className="orb orb-2" style={{ opacity: 0.12 }} />
-        </div>
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={stagger}
-          className="relative z-10 text-center max-w-2xl mx-auto"
-        >
-          <motion.h2 variants={fadeUp} className="serif text-[clamp(2.5rem,6vw,4rem)] tracking-tight text-white mb-4">
-            {t("ctaHeadline")}
-          </motion.h2>
-          <motion.p variants={fadeUp} className="text-[17px] text-white/60 mb-10">
-            {t("ctaSub")}
-          </motion.p>
-          <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-3">
-            {!isSignedIn ? (
-              <>
-                <Link href="/sign-up">
-                  <Button className="h-11 px-8 rounded-full bg-white text-foreground text-[15px] font-medium hover:bg-white/90 shadow-lg transition-all duration-300">
-                    {t("getEarlyAccess")}
-                  </Button>
-                </Link>
-                <Link href="/sign-in">
-                  <Button variant="ghost" className="h-11 px-8 rounded-full text-[15px] text-white/70 hover:text-white hover:bg-white/10 border border-white/20">
-                    {t("signIn")}
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link href="/dashboard">
-                  <Button className="h-11 px-8 rounded-full bg-white text-foreground text-[15px] font-medium hover:bg-white/90 shadow-lg transition-all duration-300">
-                    {t("dashboard")}
-                  </Button>
-                </Link>
-                <Link href="/dashboard">
-                  <Button variant="ghost" className="h-11 px-8 rounded-full text-[15px] text-white/70 hover:text-white hover:bg-white/10 border border-white/20">
-                    {t("cases")}
-                  </Button>
-                </Link>
-              </>
-            )}
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="bg-foreground border-t border-white/10 py-8 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-white">
-            <div className="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="4" r="2" fill="white" />
-                <circle cx="4" cy="11" r="2" fill="white" opacity="0.6" />
-                <circle cx="12" cy="11" r="2" fill="white" opacity="0.6" />
-                <line x1="8" y1="6" x2="4" y2="9" stroke="white" strokeWidth="1.2" opacity="0.5" />
-                <line x1="8" y1="6" x2="12" y2="9" stroke="white" strokeWidth="1.2" opacity="0.5" />
-              </svg>
-            </div>
-            <span className="text-[13px] font-medium">Lumina</span>
           </div>
-          <p className="text-[12px] text-white/40">
-            &copy; {formatNumber.format(new Date().getFullYear())} Lumina. {t("footerTagline")}
-          </p>
-        </div>
-      </footer>
+        </section>
+      </main>
+
+      <MarketingFooter />
     </div>
-  );
-}
-
-/* ── Icons ────────────────────────────────────────────────────────────────── */
-function NoteIcon() {
-  return (
-    <svg className="w-5 h-5 text-[oklch(0.52_0.21_255)]" fill="none" viewBox="0 0 20 20">
-      <path d="M6 6h8M6 10h8M6 14h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <rect x="3" y="3" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function PhotoIcon() {
-  return (
-    <svg className="w-5 h-5 text-[oklch(0.65_0.18_200)]" fill="none" viewBox="0 0 20 20">
-      <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M7.5 4h5L14 6h3a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V7a1 1 0 011-1h3l1.5-2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function LabIcon() {
-  return (
-    <svg className="w-5 h-5 text-[oklch(0.60_0.20_285)]" fill="none" viewBox="0 0 20 20">
-      <path d="M8 3v6.5L5 14.5A2 2 0 007 17h6a2 2 0 002-2.5L12 9.5V3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M7 3h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M6.5 12.5h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function DnaIcon() {
-  return (
-    <svg className="w-5 h-5 text-[oklch(0.52_0.19_160)]" fill="none" viewBox="0 0 20 20">
-      <path d="M5 3c2 2 8 3 8 7S7 15 5 17M15 3c-2 2-8 3-8 7s6 5 8 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M5.5 8h9M5.5 12h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
   );
 }
