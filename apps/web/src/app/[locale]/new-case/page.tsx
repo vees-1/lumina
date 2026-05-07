@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -511,229 +512,226 @@ export default function IntakePage() {
     recognition.start();
   }
 
+  const modalityCards = TABS.map((tabItem) => {
+    const state =
+      tabItem.id === "notes" ? !!notes.trim() :
+      tabItem.id === "photo" ? !!photo :
+      tabItem.id === "lab" ? !!lab :
+      !!geneSymbol.trim();
+    const art = {
+      notes: "/lumina/doctor-start-blue.webp",
+      photo: "/lumina/doctor-review.webp",
+      lab: "/lumina/doctor-score.avif",
+      genetic: "/lumina/doctor-referral.avif",
+    }[tabItem.id];
+    return { ...tabItem, complete: state, art };
+  });
+
   return (
-    <div className="min-h-screen bg-white text-[#2f3037]">
+    <div className="min-h-screen bg-[#fbfcfe] text-[#2f3037]">
       <DashboardNav />
 
-      <main className="mx-auto max-w-6xl px-6 pb-20 pt-24">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
+      <main className="mx-auto max-w-6xl px-5 pb-28 pt-24 sm:px-6">
+        <motion.section
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease }}
-          className="mb-8 rounded-lg border border-[#e5e8f0] bg-white p-7 shadow-[0_8px_24px_rgba(0,0,0,0.04)]"
+          transition={{ duration: 0.45, ease }}
+          className="overflow-hidden rounded-lg border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]"
         >
-          <p className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor workspace</p>
-          <h1 className="mt-2 text-[38px] font-bold tracking-[-0.03em] text-[#2f3037]">{addToId && existingCase ? t("titleAdd") : "Start rare disease case"}</h1>
-          <p className="mt-2 max-w-2xl text-[16px] leading-7 text-[#62687a]">
-            Enter clinical notes, photos, lab reports, or genetic evidence. Lumina sends the evidence to the existing backend and returns doctor-reviewable HPO suggestions before scoring.
-          </p>
-        </motion.div>
+          <div className="grid gap-0 lg:grid-cols-[1fr_420px]">
+            <div className="p-6 sm:p-8">
+              <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor workspace</p>
+              <h1 className="mt-3 max-w-2xl text-[38px] font-bold leading-[1.05] tracking-[-0.04em] sm:text-[46px]">
+                {addToId && existingCase ? t("titleAdd") : "Start rare disease case"}
+              </h1>
+              <p className="mt-4 max-w-2xl text-[16px] leading-7 text-[#5d6474]">
+                Capture the consultation, attach supporting evidence, approve HPO suggestions, then run a top 10 rare disease differential from the same screen.
+              </p>
 
-
-        {/* Add-mode banner */}
-        {addToId && existingCase && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease }}
-            className="bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.2)] rounded-xl px-4 py-3 mb-6"
-          >
-            <div className="flex items-center gap-3">
-              <svg className="w-4 h-4 text-[oklch(0.52_0.21_255)] flex-shrink-0" fill="none" viewBox="0 0 16 16">
-                <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-              <span className="text-[13px] text-[oklch(0.52_0.21_255)]">{t("addingToCase")}</span>
-            </div>
-            <div className="mt-2.5 space-y-1 text-[12px] text-foreground/80">
-              {existingCase.notes && (
-                <p className="line-clamp-3 whitespace-pre-wrap">
-                  {existingCase.notes}
-                </p>
-              )}
-              {!!existingCase.inputHistory?.length && (
-                <p className="text-muted-foreground">
-                  {existingCase.inputHistory
-                    .slice(-1)
-                    .map((snapshot) => [snapshot.photo?.fileName, snapshot.lab?.fileName, snapshot.genetic?.gene_symbol].filter(Boolean).join(" · "))
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        <div className="grid lg:grid-cols-[1fr_300px] gap-8">
-          <div className="space-y-4">
-
-            {/* Patient context */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease, delay: 0.05 }}
-              className="bg-white rounded-2xl border border-black/[0.06] p-5"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded-lg bg-[oklch(0.97_0_0)] flex items-center justify-center">
-                  <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" viewBox="0 0 16 16">
-                    <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.3" />
-                    <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                  </svg>
-                </div>
-                <h2 className="text-[14px] font-semibold">{t("patientContext")}</h2>
-                <span className="text-[12px] text-muted-foreground font-normal">{t("optional")}</span>
-              </div>
-
-              {/* Patient name — full width */}
-              <div className="mb-3">
-                <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">{t("patientName")}</label>
-                <input
-                  value={patientName}
-                  onChange={(e) => setPatientName(e.target.value)}
-                  placeholder={t("patientNamePlaceholder")}
-                  className="w-full h-9 px-3 rounded-lg border border-black/10 text-[13px] outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all bg-white"
-                />
-              </div>
-
-              {/* Age + Sex */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">{t("age")}</label>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("patientName")}</span>
+                  <input
+                    value={patientName}
+                    onChange={(event) => setPatientName(event.target.value)}
+                    placeholder={t("patientNamePlaceholder")}
+                    className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("age")}</span>
                   <input
                     value={age}
-                    onChange={(e) => setAge(e.target.value)}
+                    onChange={(event) => setAge(event.target.value)}
                     placeholder={t("agePlaceholder")}
-                    className="w-full h-9 px-3 rounded-lg border border-black/10 text-[13px] outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all bg-white"
+                    className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
                   />
-                </div>
-                <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1.5 block">{t("sex")}</label>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("sex")}</span>
                   <select
                     value={sex}
-                    onChange={(e) => setSex(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-black/10 text-[13px] outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all bg-white appearance-none"
+                    onChange={(event) => setSex(event.target.value)}
+                    className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
                   >
                     <option value="">{t("sexUnknown")}</option>
                     <option value="male">{t("sexMale")}</option>
                     <option value="female">{t("sexFemale")}</option>
                   </select>
-                </div>
+                </label>
               </div>
-            </motion.div>
+            </div>
 
-            {/* Modality tabs */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease, delay: 0.1 }}
-              className={`bg-white rounded-2xl border overflow-hidden transition-all duration-500 ${
-                analyzing
-                  ? "border-[oklch(0.52_0.21_255/0.4)] shadow-[0_0_0_3px_oklch(0.52_0.21_255/0.08)]"
-                  : "border-black/[0.06]"
+            <div className="relative min-h-[280px] bg-[#dff2fa]">
+              <Image
+                src="/lumina/doctor-hero.avif"
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 420px, 100vw"
+                className="object-cover object-[52%_35%]"
+              />
+              <div className="absolute bottom-5 left-5 rounded bg-white px-4 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.13)]">
+                <p className="text-[15px] font-bold text-[#2536a0]">Doctor-controlled scoring</p>
+                <p className="mt-0.5 text-[12px] text-[#4d5566]">{acceptedTerms.length} accepted HPO terms</p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {addToId && existingCase && (
+          <div className="mt-5 rounded border border-[#cfe6f5] bg-[#f2fbff] px-4 py-3 text-[13px] text-[#31566d]">
+            {t("addingToCase")} {existingCase.patientContext?.patientName ? `for ${existingCase.patientContext.patientName}` : ""}
+          </div>
+        )}
+
+        <section className="mt-8 grid gap-5 lg:grid-cols-4">
+          {modalityCards.map((item) => (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => setTab(item.id)}
+              className={`group overflow-hidden rounded-lg border bg-white text-left shadow-[0_10px_28px_rgba(34,45,74,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(34,45,74,0.1)] ${
+                tab === item.id ? "border-[#38b6e8]" : "border-[#e8ecf3]"
               }`}
             >
-              {/* Tab bar */}
-              <div className="flex border-b border-black/[0.06] overflow-x-auto scrollbar-none">
-                {TABS.map((tabItem) => {
-                  const hasData =
-                    tabItem.id === "notes" ? !!notes.trim() :
-                    tabItem.id === "photo" ? !!photo :
-                    tabItem.id === "lab" ? !!lab :
-                    !!geneSymbol.trim();
-                  return (
-                    <button
-                      key={tabItem.id}
-                      onClick={() => setTab(tabItem.id)}
-                      className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-3 text-[13px] font-medium transition-all border-b-2 ${
-                        tab === tabItem.id
-                          ? "text-foreground border-foreground"
-                          : "text-muted-foreground border-transparent hover:text-foreground"
-                      }`}
-                    >
-                      {TAB_ICONS[tabItem.id]}
-                      {tabItem.label}
-                      {hasData && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.52_0.21_255)]" />
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="relative h-36 overflow-hidden bg-[#eef6fb]">
+                <Image
+                  src={item.art}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover object-center transition duration-300 group-hover:scale-[1.03]"
+                />
+                <span className={`absolute right-3 top-3 rounded-full px-2 py-1 text-[11px] font-bold ${
+                  item.complete ? "bg-emerald-600 text-white" : "bg-white text-[#2536a0]"
+                }`}>
+                  {item.complete ? "Ready" : "Open"}
+                </span>
               </div>
-
-              {/* Tab content */}
               <div className="p-5">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={tab}
-                    initial={{ opacity: 0, x: 8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -8 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {tab === "notes" && (
-                      <div>
-                        <div className="mb-4">
-                          <button
-                            type="button"
-                            onClick={() => setShowChecklist((s) => !s)}
-                            className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors mb-2"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
-                              <path d="M2 5h12M2 8h8M2 11h10" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                            </svg>
-                            {showChecklist ? t("hideChecklist") : t("quickAdd")}
-                          </button>
+                <div className="flex items-center gap-2 text-[#2536a0]">
+                  {TAB_ICONS[item.id]}
+                  <span className="text-[12px] font-bold uppercase tracking-[0.05em]">Evidence</span>
+                </div>
+                <h2 className="mt-2 text-[22px] font-bold leading-tight tracking-[-0.03em] text-[#2f3037]">{item.label}</h2>
+                <p className="mt-2 text-[14px] leading-6 text-[#667084]">{item.hint}</p>
+              </div>
+            </button>
+          ))}
+        </section>
 
-                          {showChecklist && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: "auto" }}
-                              exit={{ opacity: 0, height: 0 }}
-                              className="space-y-3 p-3 rounded-xl bg-[oklch(0.975_0_0)] border border-black/[0.06]"
-                            >
-                              <div className="flex items-center justify-between gap-3">
-                                <p className="text-[12px] text-muted-foreground">
-                                  {t("checklistDesc")}
-                                </p>
-                                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                                  <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-emerald-700">
-                                    {t("present")}
-                                  </span>
-                                  <span className="rounded-full border border-slate-300 bg-white px-2 py-0.5">
-                                    {t("absent")}
-                                  </span>
-                                </div>
-                              </div>
-                              {SYMPTOM_CATEGORIES.map((category) => (
-                                <div key={category.id}>
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleCategory(category.id)}
-                                    className="w-full flex items-center justify-between text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2"
-                                  >
-                                    <span>{t(category.i18nKey)}</span>
-                                    <span className={`transition-transform ${openCategories.has(category.id) ? "rotate-90" : ""}`}>›</span>
-                                  </button>
-                                  {openCategories.has(category.id) && (
-                                  <div className="space-y-1.5">
+        <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
+          <div className="rounded-lg border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
+            <div className="flex flex-col gap-4 border-b border-[#edf0f5] p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">
+                  {TABS.find((item) => item.id === tab)?.label}
+                </p>
+                <h2 className="mt-1 text-[26px] font-bold tracking-[-0.03em]">Input evidence</h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {TABS.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setTab(item.id)}
+                    className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold ${
+                      tab === item.id
+                        ? "border-[#2536a0] bg-[#2536a0] text-white"
+                        : "border-[#d9dfeb] bg-white text-[#50576a] hover:border-[#38b6e8]"
+                    }`}
+                  >
+                    {TAB_ICONS[item.id]}
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-5 sm:p-6">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={tab}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {tab === "notes" && (
+                    <div className="space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setShowChecklist((value) => !value)}
+                          className="rounded border border-[#d9dfeb] px-4 py-2 text-[13px] font-bold text-[#343741] hover:border-[#38b6e8]"
+                        >
+                          {showChecklist ? t("hideChecklist") : t("quickAdd")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={startVoiceInput}
+                          className={`rounded px-4 py-2 text-[13px] font-bold ${
+                            isListening ? "bg-emerald-600 text-white" : "bg-[#38b6e8] text-white"
+                          }`}
+                        >
+                          {isListening ? t("voiceListening") : t("voice")}
+                        </button>
+                      </div>
+
+                      {showChecklist && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="max-h-[420px] overflow-auto rounded-lg border border-[#e6eaf2] bg-[#f8fbff] p-4"
+                        >
+                          <p className="mb-4 text-[13px] leading-6 text-[#5d6474]">{t("checklistDesc")}</p>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            {SYMPTOM_CATEGORIES.map((category) => (
+                              <div key={category.id} className="rounded border border-[#e6eaf2] bg-white p-4">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleCategory(category.id)}
+                                  className="flex w-full items-center justify-between text-left text-[13px] font-bold uppercase tracking-[0.04em] text-[#2536a0]"
+                                >
+                                  {t(category.i18nKey)}
+                                  <span>{openCategories.has(category.id) ? "-" : "+"}</span>
+                                </button>
+                                {openCategories.has(category.id) && (
+                                  <div className="mt-3 space-y-2">
                                     {category.symptoms.map((symptom) => {
                                       const categoryLabel = t(category.i18nKey);
                                       const symptomLabel = t(symptom.labelKey);
                                       const state = symptomState(categoryLabel, symptomLabel);
                                       return (
-                                        <div key={symptom.id} className="flex flex-wrap items-center gap-2">
-                                          <span className="min-w-[180px] flex-1 text-[12px] text-foreground/85">
-                                            {symptomLabel}
-                                          </span>
-                                          <div className="flex items-center gap-1">
+                                        <div key={symptom.id} className="flex flex-wrap items-center justify-between gap-2 rounded bg-[#fbfcfe] px-3 py-2">
+                                          <span className="text-[13px] text-[#343741]">{symptomLabel}</span>
+                                          <div className="flex gap-1">
                                             <button
                                               type="button"
                                               onClick={() => appendSymptom(categoryLabel, symptomLabel, "present")}
-                                              className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
-                                                state === "present"
-                                                  ? "border-emerald-500/30 bg-emerald-500/12 text-emerald-700"
-                                                  : "border-black/10 bg-white text-foreground/75 hover:border-emerald-500/25 hover:bg-emerald-500/6"
+                                              className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                                                state === "present" ? "bg-emerald-600 text-white" : "border border-[#d9dfeb] bg-white text-[#50576a]"
                                               }`}
                                             >
                                               {t("present")}
@@ -741,10 +739,8 @@ export default function IntakePage() {
                                             <button
                                               type="button"
                                               onClick={() => appendSymptom(categoryLabel, symptomLabel, "absent")}
-                                              className={`rounded-full border px-2.5 py-1 text-[12px] transition-all ${
-                                                state === "absent"
-                                                  ? "border-slate-400 bg-slate-100 text-slate-700"
-                                                  : "border-black/10 bg-white text-foreground/75 hover:border-slate-300 hover:bg-slate-50"
+                                              className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                                                state === "absent" ? "bg-slate-700 text-white" : "border border-[#d9dfeb] bg-white text-[#50576a]"
                                               }`}
                                             >
                                               {t("absent")}
@@ -754,258 +750,164 @@ export default function IntakePage() {
                                       );
                                     })}
                                   </div>
-                                  )}
-                                </div>
-                              ))}
-                            </motion.div>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between gap-3 mb-3">
-                          <p className="text-[12px] text-muted-foreground">{t("notesDesc")}</p>
-                          <button
-                            type="button"
-                            onClick={startVoiceInput}
-                            className="rounded-full border border-black/10 px-3 py-1 text-[12px] hover:border-black/20"
-                          >
-                            {isListening ? t("voiceListening") : t("voice")}
-                          </button>
-                        </div>
-                        <textarea
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          placeholder={t("notesPlaceholder")}
-                          rows={8}
-                          className="w-full px-4 py-3 rounded-xl border border-black/10 text-[14px] leading-relaxed outline-none focus:border-[oklch(0.52_0.21_255)] focus:ring-2 focus:ring-[oklch(0.52_0.21_255/0.15)] transition-all resize-none font-mono text-muted-foreground placeholder:text-black/25"
-                        />
-                        <p className="text-[11px] text-muted-foreground mt-2">
-                          {`${notes.length} ${t("charCount")}`}
-                        </p>
-                      </div>
-                    )}
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
 
-                    {tab === "photo" && (
-                      <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">{t("photoDesc")}</p>
-                        <DropZone
-                          accept="image/*"
-                          label={t("photoDropLabel")}
-                          hint={t("photoDropHint")}
-                          file={photo}
-                          onFile={setPhoto}
-                          onClear={() => setPhoto(null)}
-                        />
-                        <label className="mt-3 flex items-center gap-2.5 cursor-pointer group">
-                          <input
-                            type="checkbox"
-                            checked={isFacial}
-                            onChange={(e) => setIsFacial(e.target.checked)}
-                            className="w-4 h-4 rounded accent-[oklch(0.52_0.21_255)]"
-                          />
-                          <span className="text-[13px] text-muted-foreground group-hover:text-foreground transition-colors">
-                            {t("photoFacialToggle")}
-                          </span>
-                        </label>
-                      </div>
-                    )}
-
-                    {tab === "lab" && (
-                      <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">{t("labDesc")}</p>
-                        <DropZone
-                          accept="image/*,.pdf"
-                          label={t("labDropLabel")}
-                          hint={t("labDropHint")}
-                          file={lab}
-                          onFile={setLab}
-                          onClear={() => setLab(null)}
-                        />
-                      </div>
-                    )}
-
-                    {tab === "genetic" && (
-                      <div>
-                        <p className="text-[12px] text-muted-foreground mb-3">{t("geneticDesc")}</p>
-                        <div className="grid grid-cols-2 gap-3">
-                          <input value={geneSymbol} onChange={(e) => setGeneSymbol(e.target.value)} placeholder={t("genePlaceholder")} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none" />
-                          <input value={variant} onChange={(e) => setVariant(e.target.value)} placeholder={t("variantPlaceholder")} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none" />
-                          <select value={classification} onChange={(e) => setClassification(e.target.value)} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none bg-white">
-                            <option value="unknown">{t("classificationUnknown")}</option>
-                            <option value="pathogenic">{t("classificationPathogenic")}</option>
-                            <option value="likely_pathogenic">{t("classificationLikelyPathogenic")}</option>
-                            <option value="vus">VUS</option>
-                            <option value="benign">{t("classificationBenign")}</option>
-                          </select>
-                          <input value={zygosity} onChange={(e) => setZygosity(e.target.value)} placeholder={t("zygosityPlaceholder")} className="h-10 px-3 rounded-lg border border-black/10 text-[13px] outline-none" />
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </motion.div>
-
-            {/* Submit */}
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease, delay: 0.15 }}
-            >
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <Button
-                  onClick={handleSuggest}
-                  disabled={!hasAnyInput || analyzing}
-                  className="h-10 sm:h-9 w-full sm:flex-1 rounded-full bg-[#000000] px-8 text-[14px] font-medium text-white shadow-sm hover:bg-[#000000] transition-all disabled:cursor-not-allowed disabled:opacity-100"
-                >
-                  {analyzing ? (
-                    <span className="flex items-center gap-2">
-                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.4 0 0 5.4 0 12h4z" />
-                      </svg>
-                      {t("analyzing")}
-                    </span>
-                  ) : (
-                    t("suggestFindings")
+                      <textarea
+                        value={notes}
+                        onChange={(event) => setNotes(event.target.value)}
+                        placeholder={t("notesPlaceholder")}
+                        rows={12}
+                        className="w-full resize-none rounded-lg border border-[#d9dfeb] bg-white px-4 py-4 text-[15px] leading-7 outline-none transition placeholder:text-[#adb5c3] focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+                      />
+                      <p className="text-[12px] text-[#73798a]">{notes.length} {t("charCount")}</p>
+                    </div>
                   )}
-                </Button>
-                <Button
-                  onClick={handleAnalyze}
-                  disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
-                  className="h-10 sm:h-9 w-full sm:flex-1 rounded-full bg-[#000000] px-8 text-[14px] font-medium text-white shadow-sm hover:bg-[#000000] transition-all disabled:cursor-not-allowed disabled:opacity-100"
-                >
-                  {t("runDifferential")}
-                </Button>
-              </div>
-            </motion.div>
+
+                  {tab === "photo" && (
+                    <div className="space-y-4">
+                      <p className="text-[14px] leading-6 text-[#5d6474]">{t("photoDesc")}</p>
+                      <DropZone accept="image/*" label={t("photoDropLabel")} hint={t("photoDropHint")} file={photo} onFile={setPhoto} onClear={() => setPhoto(null)} />
+                      <label className="flex items-center gap-2 text-[14px] font-semibold text-[#50576a]">
+                        <input type="checkbox" checked={isFacial} onChange={(event) => setIsFacial(event.target.checked)} className="h-4 w-4 accent-[#38b6e8]" />
+                        {t("photoFacialToggle")}
+                      </label>
+                    </div>
+                  )}
+
+                  {tab === "lab" && (
+                    <div className="space-y-4">
+                      <p className="text-[14px] leading-6 text-[#5d6474]">{t("labDesc")}</p>
+                      <DropZone accept="image/*,.pdf" label={t("labDropLabel")} hint={t("labDropHint")} file={lab} onFile={setLab} onClear={() => setLab(null)} />
+                    </div>
+                  )}
+
+                  {tab === "genetic" && (
+                    <div className="space-y-5">
+                      <p className="text-[14px] leading-6 text-[#5d6474]">{t("geneticDesc")}</p>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <input value={geneSymbol} onChange={(event) => setGeneSymbol(event.target.value)} placeholder={t("genePlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#38b6e8]" />
+                        <input value={variant} onChange={(event) => setVariant(event.target.value)} placeholder={t("variantPlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#38b6e8]" />
+                        <select value={classification} onChange={(event) => setClassification(event.target.value)} className="h-12 rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none focus:border-[#38b6e8]">
+                          <option value="unknown">{t("classificationUnknown")}</option>
+                          <option value="pathogenic">{t("classificationPathogenic")}</option>
+                          <option value="likely_pathogenic">{t("classificationLikelyPathogenic")}</option>
+                          <option value="vus">VUS</option>
+                          <option value="benign">{t("classificationBenign")}</option>
+                        </select>
+                        <input value={zygosity} onChange={(event) => setZygosity(event.target.value)} placeholder={t("zygosityPlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#38b6e8]" />
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Modality checklist + confidence ceiling */}
-            <motion.div
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, ease, delay: 0.2 }}
-              className="bg-white rounded-2xl border border-black/[0.06] p-5"
-            >
-              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("sidebarInputs")}</h3>
-              <div className="space-y-3">
-                {[
-                  { id: "notes", label: t("sidebarNotes"), active: !!notes.trim(), icon: TAB_ICONS.notes },
-                  { id: "photo", label: t("sidebarPhoto"), active: !!photo,        icon: TAB_ICONS.photo },
-                  { id: "lab",   label: t("sidebarLab"),   active: !!lab,           icon: TAB_ICONS.lab   },
-                  { id: "genetic", label: t("sidebarGenetic"), active: !!geneSymbol.trim(), icon: TAB_ICONS.genetic },
-                ].map((item) => (
-                  <div key={item.id} className="flex items-center gap-2.5">
-                    <div className={`w-5 h-5 rounded-md flex items-center justify-center transition-all duration-300 flex-shrink-0 ${item.active ? "bg-[oklch(0.52_0.19_160)]" : "border border-black/15 bg-[oklch(0.98_0_0)]"}`}>
-                      {item.active ? (
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
-                          <path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      ) : (
-                        <span className="text-muted-foreground/50">{item.icon}</span>
-                      )}
-                    </div>
-                    <span className={`text-[13px] transition-colors ${item.active ? "text-foreground font-medium" : "text-muted-foreground"}`}>
+          <aside className="space-y-5">
+            <div className="rounded-lg border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
+              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">{t("sidebarInputs")}</h3>
+              <div className="mt-4 space-y-3">
+                {modalityCards.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setTab(item.id)}
+                    className="flex w-full items-center justify-between rounded border border-[#edf0f5] px-3 py-3 text-left hover:border-[#38b6e8]"
+                  >
+                    <span className="flex items-center gap-2 text-[14px] font-semibold text-[#343741]">
+                      {TAB_ICONS[item.id]}
                       {item.label}
                     </span>
-                    {item.active && <span className="ml-auto text-[10px] text-[oklch(0.52_0.19_160)] font-medium">✓</span>}
-                  </div>
+                    <span className={`h-2.5 w-2.5 rounded-full ${item.complete ? "bg-emerald-500" : "bg-[#c8cfdd]"}`} />
+                  </button>
                 ))}
               </div>
+            </div>
 
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, ease, delay: 0.24 }}
-              className="bg-white rounded-2xl border border-black/[0.06] p-5"
-            >
-              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("reviewFindings")}</h3>
-              <div className="space-y-4">
+            <div className="rounded-lg border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
+              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">{t("reviewFindings")}</h3>
+              <div className="mt-4 space-y-5">
                 <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-2">{t("pendingSuggestions")} ({pendingTerms.length})</p>
-                  <div className="space-y-2 max-h-64 overflow-auto pr-1">
-                    {pendingTerms.length === 0 && <p className="text-[12px] text-muted-foreground">{t("noPendingSuggestions")}</p>}
+                  <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("pendingSuggestions")} ({pendingTerms.length})</p>
+                  <div className="mt-2 max-h-72 space-y-2 overflow-auto pr-1">
+                    {pendingTerms.length === 0 && <p className="rounded border border-dashed border-[#d9dfeb] p-4 text-[13px] text-[#73798a]">{t("noPendingSuggestions")}</p>}
                     {pendingTerms.map((term) => (
-                      <div key={term.hpo_id} className="rounded-lg border border-black/10 p-2">
-                        <p className="text-[12px] font-medium" title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`}>
+                      <div key={term.hpo_id} className="rounded border border-[#e6eaf2] p-3">
+                        <p className="text-[13px] font-bold" title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`}>
                           {localizeHpoLabel(term.hpo_id, term.label, messages)}
                         </p>
-                        <p className="text-[11px] text-muted-foreground truncate">{term.source}</p>
-                        <div className="flex gap-1.5 mt-2">
-                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "accepted")} className="rounded-full bg-emerald-600 text-white px-2.5 py-1 text-[11px]">{t("accept")}</button>
-                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "rejected")} className="rounded-full border border-black/10 px-2.5 py-1 text-[11px]">{t("reject")}</button>
+                        <p className="mt-1 truncate text-[11px] text-[#73798a]">{term.hpo_id} · {term.source}</p>
+                        <div className="mt-3 flex gap-2">
+                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "accepted")} className="rounded bg-emerald-600 px-3 py-1.5 text-[12px] font-bold text-white">{t("accept")}</button>
+                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "rejected")} className="rounded border border-[#d9dfeb] px-3 py-1.5 text-[12px] font-bold text-[#50576a]">{t("reject")}</button>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-2">{t("acceptedFindings")} ({acceptedTerms.length})</p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("acceptedFindings")} ({acceptedTerms.length})</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {acceptedTerms.map((term) => (
-                      <span key={term.hpo_id} title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`} className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-1 text-[11px] text-emerald-800">
+                      <span key={term.hpo_id} className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800">
                         {localizeHpoLabel(term.hpo_id, term.label, messages)}
                       </span>
                     ))}
                   </div>
                 </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-2">{t("rejectedFindings")} ({rejectedTerms.length})</p>
-                </div>
+                <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("rejectedFindings")} ({rejectedTerms.length})</p>
                 {geneticEvidence.length > 0 && (
-                  <div className="rounded-lg bg-[oklch(0.97_0_0)] p-3 text-[12px]">
-                    <p className="font-medium">{geneticEvidence[0].gene_symbol} · {geneticEvidence[0].classification}</p>
-                    {geneticEvidence[0].variant && <p className="text-muted-foreground">{geneticEvidence[0].variant}</p>}
+                  <div className="rounded bg-[#f8fbff] p-3 text-[13px]">
+                    <p className="font-bold text-[#2536a0]">{geneticEvidence[0].gene_symbol} · {geneticEvidence[0].classification}</p>
+                    {geneticEvidence[0].variant && <p className="mt-1 text-[#5d6474]">{geneticEvidence[0].variant}</p>}
                   </div>
                 )}
               </div>
-            </motion.div>
+            </div>
 
-            {/* Analysis progress */}
-            <AnimatePresence>
-              {analyzing && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  className="bg-white rounded-2xl border border-black/[0.06] p-4"
-                >
-                  <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("sidebarProgress")}</h3>
-                  <div className="space-y-2">
-                    {progress.map((step) => (
-                      <ProgressStep key={step} label={step} active={step === activeStep} done={step !== activeStep} />
-                    ))}
-                    {activeStep && progress[progress.length - 1] === activeStep && (
-                      <ProgressStep label={activeStep} active done={false} />
-                    )}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Tip */}
-            <motion.div
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, ease, delay: 0.3 }}
-              className="rounded-xl bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.15)] p-4"
-            >
-              <div className="flex items-center gap-1.5 mb-1">
-                <svg className="w-3.5 h-3.5 text-[oklch(0.52_0.21_255)]" fill="none" viewBox="0 0 16 16">
-                  <circle cx="8" cy="6" r="4" stroke="currentColor" strokeWidth="1.3" />
-                  <path d="M6 10.5c0 1.1.9 2 2 2s2-.9 2-2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                  <path d="M8 14.5v-2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                </svg>
-                <p className="text-[12px] text-[oklch(0.52_0.21_255)] font-medium">{t("tipTitle")}</p>
+            {analyzing && (
+              <div className="rounded-lg border border-[#cfe6f5] bg-[#f3fbff] p-5">
+                <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">{t("sidebarProgress")}</h3>
+                <div className="mt-4 space-y-2">
+                  {progress.map((step) => (
+                    <ProgressStep key={step} label={step} active={step === activeStep} done={step !== activeStep} />
+                  ))}
+                  {activeStep && progress[progress.length - 1] === activeStep && <ProgressStep label={activeStep} active done={false} />}
+                </div>
               </div>
-              <p className="text-[12px] text-muted-foreground leading-relaxed">{t("tipBody")}</p>
-            </motion.div>
+            )}
+          </aside>
+        </section>
+      </main>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e6eaf2] bg-white/95 px-5 py-3 shadow-[0_-8px_28px_rgba(34,45,74,0.08)] backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-[13px] text-[#5d6474]">
+            {activeModalities} of 4 evidence streams added · {pendingTerms.length} pending · {acceptedTerms.length} accepted
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              onClick={handleSuggest}
+              disabled={!hasAnyInput || analyzing}
+              className="h-11 rounded bg-[#38b6e8] px-6 text-[14px] font-bold text-white hover:bg-[#24a6dc] disabled:opacity-60"
+            >
+              {analyzing ? t("analyzing") : t("suggestFindings")}
+            </Button>
+            <Button
+              onClick={handleAnalyze}
+              disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
+              className="h-11 rounded bg-[#2536a0] px-6 text-[14px] font-bold text-white hover:bg-[#1f2d86] disabled:opacity-60"
+            >
+              {t("runDifferential")}
+            </Button>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

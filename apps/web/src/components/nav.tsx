@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, Check, Menu, User, X } from "lucide-react";
+import { ChevronDown, Check, Menu, X } from "lucide-react";
 import { useAuth, useUser, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { LuminaLogo } from "@/components/lumina/practo-ui";
@@ -251,15 +251,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
                 <span className={cn("h-2.5 w-2.5 rounded-full", apiReady === false ? "bg-red-500" : "bg-emerald-500")} />
                 {apiReady === false ? "API unavailable" : "API ready"}
               </Link>
-              <UserButton>
-                <UserButton.MenuItems>
-                  <UserButton.Link
-                    label="Doctor Profile"
-                    labelIcon={<User className="h-4 w-4 text-[#62687a]" />}
-                    href={toLocalePath("/settings/profile")}
-                  />
-                </UserButton.MenuItems>
-              </UserButton>
+              <UserButton />
             </div>
           )}
         </div>
