@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMessages, useTranslations } from "next-intl";
+import { useLocale, useMessages, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -92,7 +92,7 @@ function LoadingSkeleton() {
   );
 }
 
-function ErrorState({ orpha }: { orpha: string }) {
+function ErrorState({ orpha, locale }: { orpha: string; locale: string }) {
   const t = useTranslations("disease");
   return (
     <motion.div
@@ -110,7 +110,7 @@ function ErrorState({ orpha }: { orpha: string }) {
       <p className="text-[13px] text-muted-foreground mb-6">
         {t("notFoundSub", { orpha: `ORPHA:${orpha}` })}
       </p>
-      <Link href="/diseases">
+      <Link href={`/${locale}/results`}>
         <Button variant="outline" className="rounded-full">{t("backToCatalog")}</Button>
       </Link>
     </motion.div>
@@ -119,6 +119,7 @@ function ErrorState({ orpha }: { orpha: string }) {
 
 export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha: string }> }) {
   const t = useTranslations("disease");
+  const locale = useLocale();
   const messages = useMessages() as HpoLabelMessages;
   const { orpha } = use(params);
   const [disease, setDisease] = useState<DiseaseDetail | null>(null);
@@ -160,7 +161,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
           {/* Back nav */}
           <div className="flex items-center gap-2 mb-6">
             <Link
-              href="/diseases"
+              href={`/${locale}/results`}
               className="text-[13px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
@@ -171,7 +172,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
           </div>
 
           {loading && <LoadingSkeleton />}
-          {!loading && error && <ErrorState orpha={orpha} />}
+          {!loading && error && <ErrorState orpha={orpha} locale={locale} />}
 
           {!loading && !error && disease && (
             <AnimatePresence mode="wait">
@@ -275,7 +276,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
 
                 {/* Action buttons */}
                 <div className="flex items-center gap-3 mb-8">
-                  <Link href="/intake">
+                  <Link href={`/${locale}/new-case`}>
                     <Button className="rounded-full bg-foreground text-background h-9 px-5 text-[13px]">
                       {t("analyzeThis")}
                     </Button>

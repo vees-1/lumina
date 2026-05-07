@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { SignIn } from "@clerk/nextjs";
+import { useLocale } from "next-intl";
 import { LuminaLogo } from "@/components/lumina/practo-ui";
 
 function AuthArt() {
@@ -54,6 +55,7 @@ function RoleGate({ onSelect }: { onSelect: (role: "doctor" | "patient") => void
 }
 
 export default function SignInPage() {
+  const locale = useLocale();
   const [role, setRole] = useState<"doctor" | "patient" | null>(null);
 
   function chooseRole(nextRole: "doctor" | "patient") {
@@ -65,10 +67,10 @@ export default function SignInPage() {
     <div className="min-h-screen bg-white">
       <header className="border-b border-[#eeeef3]">
         <nav className="mx-auto flex h-[74px] max-w-6xl items-center justify-between px-6">
-          <Link href="/">
+          <Link href={`/${locale}`}>
             <LuminaLogo />
           </Link>
-          <Link href="/sign-up" className="rounded border border-[#d3d3dc] px-4 py-2 text-[14px] text-[#62626e]">
+          <Link href={`/${locale}/sign-up`} className="rounded border border-[#d3d3dc] px-4 py-2 text-[14px] text-[#62626e]">
             Login / Signup
           </Link>
         </nav>
@@ -76,7 +78,7 @@ export default function SignInPage() {
 
       <div className="mx-auto flex w-full max-w-[892px] justify-center gap-[72px] border-b border-[#e6e6eb]">
         <button className="h-[55px] border-b-2 border-[#14bef0] bg-white px-3 text-[14px] font-bold text-[#14bef0]">Login</button>
-        <Link href="/sign-up" className="flex h-[55px] items-center px-3 text-[14px] text-[#414146]">Register</Link>
+        <Link href={`/${locale}/sign-up`} className="flex h-[55px] items-center px-3 text-[14px] text-[#414146]">Register</Link>
       </div>
 
       <main className="mx-auto grid w-[900px] max-w-[calc(100%-32px)] grid-cols-1 items-center gap-[72px] py-[84px] lg:grid-cols-[1fr_400px]">
@@ -86,8 +88,8 @@ export default function SignInPage() {
             <RoleGate onSelect={chooseRole} />
           ) : (
             <SignIn
-              forceRedirectUrl={role === "patient" ? "/patient" : "/dashboard"}
-              signUpUrl="/sign-up"
+              forceRedirectUrl={`/${locale}/${role === "patient" ? "patient" : "dashboard"}`}
+              signUpUrl={`/${locale}/sign-up`}
               appearance={{
                 elements: {
                   rootBox: "w-full",

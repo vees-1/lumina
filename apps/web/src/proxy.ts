@@ -7,10 +7,16 @@ const intlMiddleware = createIntlMiddleware(routing);
 
 const isProtectedRoute = createRouteMatcher([
   "/:locale/dashboard(.*)",
+  "/:locale/cases(.*)",
+  "/:locale/new-case(.*)",
+  "/:locale/results(.*)",
   "/:locale/intake(.*)",
   "/:locale/case(.*)",
   "/:locale/patient(.*)",
   "/dashboard(.*)",
+  "/cases(.*)",
+  "/new-case(.*)",
+  "/results(.*)",
   "/intake(.*)",
   "/case(.*)",
   "/patient(.*)",

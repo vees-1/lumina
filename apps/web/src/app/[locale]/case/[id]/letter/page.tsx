@@ -194,7 +194,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link 
-              href={`/case/${id}`}
+              href={`/${locale}/case/${id}`}
               className="w-9 h-9 rounded-full bg-white border border-black/5 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-black/10 transition-all shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />

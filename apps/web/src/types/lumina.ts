@@ -95,3 +95,19 @@ export interface CaseSummary {
   patientName?: string;
   status?: CaseOutcome;
 }
+
+export type PatientSubmissionStatus = "submitted" | "doctor_review_pending" | "approved" | "scorecard_ready";
+
+export interface PatientSubmission {
+  id: string;
+  timestamp: number;
+  patientName?: string;
+  age?: string;
+  sex?: string;
+  notes?: string;
+  photoFileName?: string;
+  labFileName?: string;
+  geneticEvidence?: GeneticEvidence;
+  status: PatientSubmissionStatus;
+  linkedCaseId?: string;
+}

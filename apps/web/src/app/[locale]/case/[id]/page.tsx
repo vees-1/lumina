@@ -152,6 +152,7 @@ function ConfidenceBar({ value, color, delay }: { value: number; color: string; 
 
 function RankCard({ result, rank, delay }: { result: RankResult; rank: number; delay: number }) {
   const t = useTranslations("case");
+  const locale = useLocale();
   const color = RANK_COLOR;
   const isTop = rank === 1;
   const contributingTerms = getTermDetails(result, "contributing").slice(0, 5);
@@ -187,7 +188,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
               {result.confidence.toFixed(0)}%
             </span>
           </div>
-          <Link href={`/disease/${result.orpha_code}`} className="text-[12px] text-muted-foreground hover:text-[oklch(0.52_0.21_255)] transition-colors mb-3 inline-block">
+          <Link href={`/${locale}/disease/${result.orpha_code}`} className="text-[12px] text-muted-foreground hover:text-[oklch(0.52_0.21_255)] transition-colors mb-3 inline-block">
             ORPHA:{result.orpha_code} ↗
           </Link>
           <ConfidenceBar value={result.confidence} color={color} delay={delay + 0.2} />
@@ -240,6 +241,7 @@ function AgentBanner({
   caseId: string;
 }) {
   const t = useTranslations("case");
+  const locale = useLocale();
   const modalityNextLabel: Record<string, string> = {
     notes: t("modalityNextNotes"),
     photo: t("modalityNextPhoto"),
@@ -267,7 +269,7 @@ function AgentBanner({
         </p>
         <p className="text-[12px] text-muted-foreground leading-relaxed">{suggestion.reasoning}</p>
         <div className="flex items-center gap-2 mt-3">
-          <Link href={`/intake?addTo=${caseId}`}>
+          <Link href={`/${locale}/new-case?addTo=${caseId}`}>
             <button className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[oklch(0.52_0.21_255)] text-white hover:bg-[oklch(0.46_0.21_255)] transition-colors">
               {t("addNow")}
             </button>
@@ -791,7 +793,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
           >
             <h2 className="text-[20px] font-semibold mb-2">{t("notFound")}</h2>
             <p className="text-muted-foreground text-[14px] mb-6">{t("notFoundSub")}</p>
-            <Link href="/dashboard">
+            <Link href={`/${locale}/dashboard`}>
               <Button variant="outline" className="rounded-full">{t("backToDashboard")}</Button>
             </Link>
           </motion.div>
@@ -857,7 +859,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
         >
 
           <div className="flex items-center gap-2 mb-3">
-            <Link href="/dashboard" className="text-[13px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/cases`} className="text-[13px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                 <path d="M10 4l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -1224,7 +1226,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               className="space-y-2"
             >
               {caseData.modalities.length < 4 && (
-                <Link href={`/intake?addTo=${id}`} className="block">
+                <Link href={`/${locale}/new-case?addTo=${id}`} className="block">
                   <Button variant="outline" size="sm" className="w-full rounded-xl h-9 text-[13px] border-black/10 gap-1.5">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                       <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -1240,12 +1242,12 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               >
                 {t("exportFhir")}
               </Button>
-              <Link href="/intake" className="block">
+              <Link href={`/${locale}/new-case`} className="block">
                 <Button variant="outline" className="w-full rounded-xl h-9 text-[13px] border-black/10">
                   {t("newCase")}
                 </Button>
               </Link>
-              <Link href="/dashboard" className="block">
+              <Link href={`/${locale}/cases`} className="block">
                 <Button variant="ghost" className="w-full rounded-xl h-9 text-[13px]">
                   {t("allCases")}
                 </Button>

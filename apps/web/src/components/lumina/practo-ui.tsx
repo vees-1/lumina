@@ -39,19 +39,19 @@ export function MarketingFooter() {
     {
       title: "For doctors",
       links: [
-        { label: "Start rare disease case", href: "dashboard#evidence-intake" },
-        { label: "Review HPO findings", href: "dashboard#hpo-approval" },
-        { label: "Generate referral letter", href: "dashboard#output-letters" },
+        { label: "Start rare disease case", href: "new-case" },
+        { label: "Review HPO findings", href: "new-case" },
+        { label: "Generate referral letter", href: "results" },
         { label: "View case dashboard", href: "dashboard" },
       ],
     },
     {
       title: "Modalities",
       links: [
-        { label: "Clinical notes", href: "dashboard#evidence-intake" },
-        { label: "Photos", href: "dashboard#evidence-intake" },
-        { label: "Lab reports", href: "dashboard#evidence-intake" },
-        { label: "Genetic evidence", href: "dashboard#evidence-intake" },
+        { label: "Clinical notes", href: "new-case?tab=notes" },
+        { label: "Photos", href: "new-case?tab=photo" },
+        { label: "Lab reports", href: "new-case?tab=lab" },
+        { label: "Genetic evidence", href: "new-case?tab=genetic" },
       ],
     },
     {

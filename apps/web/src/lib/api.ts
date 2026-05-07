@@ -1,4 +1,4 @@
-import type { CaseData, CaseOutcome, CaseSummary, GeneticEvidence, HPOTerm, PatientContext, RankResult } from "@/types/lumina";
+import type { CaseData, CaseOutcome, CaseSummary, GeneticEvidence, HPOTerm, PatientContext, PatientSubmission, RankResult } from "@/types/lumina";
 
 const API = "/api";
 type StoredCaseSummary = CaseSummary & { status: CaseOutcome };
@@ -157,6 +157,7 @@ export async function* streamLetter(
 }
 
 export function saveCaseToStorage(caseData: CaseData): void {
+  if (typeof window === "undefined") return;
   const normalizedCase: CaseData = {
     ...caseData,
     outcome: caseData.outcome ?? "pending",
@@ -178,6 +179,7 @@ export function saveCaseToStorage(caseData: CaseData): void {
 }
 
 export function getCaseSummaries(): StoredCaseSummary[] {
+  if (typeof window === "undefined") return [];
   try {
     const summaries = JSON.parse(localStorage.getItem("lumina_cases") ?? "[]") as StoredCaseSummary[];
     return summaries.map((summary) => ({
@@ -190,6 +192,7 @@ export function getCaseSummaries(): StoredCaseSummary[] {
 }
 
 export function getCaseById(id: string): CaseData | null {
+  if (typeof window === "undefined") return null;
   try {
     return JSON.parse(localStorage.getItem(`lumina_case_${id}`) ?? "null");
   } catch {
@@ -198,6 +201,7 @@ export function getCaseById(id: string): CaseData | null {
 }
 
 export function updateCaseInStorage(caseId: string, updated: CaseData): void {
+  if (typeof window === "undefined") return;
   const summaries = getCaseSummaries();
   const existingStatus = summaries.find((s: CaseSummary) => s.id === caseId)?.status;
   const normalizedCase: CaseData = {
@@ -222,6 +226,7 @@ export function updateCaseInStorage(caseId: string, updated: CaseData): void {
 }
 
 export function exportAllCases(): void {
+  if (typeof window === "undefined") return;
   const summaries = getCaseSummaries();
   const full = summaries.map((summary: StoredCaseSummary) => {
     try {
@@ -247,4 +252,32 @@ export function exportAllCases(): void {
 export function normalizeCaseOutcome(outcome?: string | null): CaseOutcome {
   if (outcome === "confirmed" || outcome === "ruled_out" || outcome === "pending") return outcome;
   return "pending";
+}
+
+export function savePatientSubmission(submission: PatientSubmission): void {
+  if (typeof window === "undefined") return;
+  const submissions = getPatientSubmissions();
+  localStorage.setItem("lumina_patient_submissions", JSON.stringify([submission, ...submissions].slice(0, 50)));
+}
+
+export function getPatientSubmissions(): PatientSubmission[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem("lumina_patient_submissions") ?? "[]") as PatientSubmission[];
+  } catch {
+    return [];
+  }
+}
+
+export function getPatientSubmissionById(id: string): PatientSubmission | null {
+  return getPatientSubmissions().find((submission) => submission.id === id) ?? null;
+}
+
+export function updatePatientSubmission(id: string, patch: Partial<PatientSubmission>): void {
+  if (typeof window === "undefined") return;
+  const submissions = getPatientSubmissions();
+  localStorage.setItem(
+    "lumina_patient_submissions",
+    JSON.stringify(submissions.map((submission) => submission.id === id ? { ...submission, ...patch } : submission))
+  );
 }

@@ -23,7 +23,7 @@ export function ProductPage({
           <div>
             <h1 className="text-[44px] font-bold leading-tight tracking-[-0.04em]">{title}</h1>
             <p className="mt-5 max-w-xl text-[18px] leading-8 text-[#555b6d]">{subtitle}</p>
-            <Link href="/dashboard" className="mt-8 inline-flex rounded bg-[#38b6e8] px-6 py-3 text-[14px] font-bold text-white">
+            <Link href="/en/dashboard" className="mt-8 inline-flex rounded bg-[#38b6e8] px-6 py-3 text-[14px] font-bold text-white">
               Login to continue
             </Link>
             <div className="mt-8 grid max-w-xl grid-cols-3 gap-4">
@@ -49,7 +49,7 @@ export function ProductPage({
             <article key={card.title} className="border border-[#e5e8f0] p-7">
               <h2 className="text-[24px] font-bold tracking-[-0.02em]">{card.title}</h2>
               <p className="mt-3 text-[15px] leading-7 text-[#62687a]">{card.text}</p>
-              <Link href="/dashboard" className="mt-5 inline-flex text-[16px] font-bold text-[#20aeea]">
+              <Link href="/en/new-case" className="mt-5 inline-flex text-[16px] font-bold text-[#20aeea]">
                 View workflow
               </Link>
             </article>

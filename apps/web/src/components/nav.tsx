@@ -210,27 +210,32 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
               <Link href={toLocalePath("/patient")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 Patient Dashboard
               </Link>
-              <Link href={toLocalePath("/patient")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+              <Link href={toLocalePath("/patient/submissions")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 Submissions
               </Link>
-              <Link href={toLocalePath("/patient")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+              <Link href={toLocalePath("/patient/new")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+                New submission
+              </Link>
+              <Link href={toLocalePath("/patient/reports")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 Reports
               </Link>
+              <LanguageDropdown />
             </>
           ) : (
             <>
               <Link href={toLocalePath("/dashboard")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 Doctor Dashboard
               </Link>
-              <Link href={toLocalePath("/dashboard#my-cases")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+              <Link href={toLocalePath("/cases")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 Cases
               </Link>
-              <Link href={toLocalePath("/intake")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+              <Link href={toLocalePath("/new-case")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 New case
               </Link>
-              <Link href={toLocalePath("/dashboard#output-letters")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
+              <Link href={toLocalePath("/results")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 Results
               </Link>
+              <LanguageDropdown />
             </>
           )}
 
@@ -270,14 +275,15 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
             ? role === "patient"
               ? [
                   { label: "Patient Dashboard", href: "/patient" },
-                  { label: "Submissions", href: "/patient" },
-                  { label: "Reports", href: "/patient" },
+                  { label: "Submissions", href: "/patient/submissions" },
+                  { label: "New submission", href: "/patient/new" },
+                  { label: "Reports", href: "/patient/reports" },
                 ]
               : [
                   { label: "Doctor Dashboard", href: "/dashboard" },
-                  { label: "Cases", href: "/dashboard#my-cases" },
-                  { label: "New case", href: "/intake" },
-                  { label: "Results", href: "/dashboard#output-letters" },
+                  { label: "Cases", href: "/cases" },
+                  { label: "New case", href: "/new-case" },
+                  { label: "Results", href: "/results" },
                 ]
             : [...clinicLinks, ...providerLinks, ...securityLinks]
           ).map((item) => (

@@ -8,28 +8,28 @@ const services = [
     title: "Start Rare Disease Case",
     description: "Bring notes, photos, labs, and genetics into one clinical intake.",
     image: "/lumina/doctor-start-blue.webp",
-    href: "/dashboard",
+    href: "/en/new-case",
     objectPosition: "center 18%",
   },
   {
     title: "Doctor Review Workflow",
     description: "AI phenotype suggestions stay pending until a clinician accepts them.",
     image: "/lumina/doctor-hero.avif",
-    href: "/clinical-reviewer",
+    href: "/en/clinical-reviewer",
     objectPosition: "center 14%",
   },
   {
     title: "Score Accepted Evidence",
     description: "Transparent Orphanet ranking from reviewed HPO findings only.",
     image: "/lumina/doctor-score.avif",
-    href: "/rare-disease-scoring",
+    href: "/en/rare-disease-scoring",
     objectPosition: "center 18%",
   },
   {
     title: "Referral Ready Output",
     description: "Generate a concise letter with doctor profile and evidence trail.",
     image: "/lumina/doctor-referral.avif",
-    href: "/referral-letters",
+    href: "/en/referral-letters",
     objectPosition: "center 10%",
   },
 ];
@@ -63,7 +63,7 @@ export default function LandingPage() {
               <h1 className="text-[28px] font-bold tracking-[-0.02em]">Analyze complex clinical evidence for rare disease diagnosis</h1>
               <p className="mt-1 text-[15px] text-[#40434d]">Doctor-reviewed HPO extraction with transparent scoring and referral support</p>
             </div>
-            <Link href="/dashboard" className="hidden rounded border border-[#21aeee] px-5 py-3 text-[14px] font-medium text-[#20aeea] sm:block">
+            <Link href="/en/new-case" className="hidden rounded border border-[#21aeee] px-5 py-3 text-[14px] font-medium text-[#20aeea] sm:block">
               View All Modalities
             </Link>
           </div>
@@ -81,7 +81,7 @@ export default function LandingPage() {
               <p className="mt-5 max-w-md text-[16px] leading-7 text-[#4f5668]">
                 Lumina helps clinicians move from messy evidence to accepted phenotypes, ranked differentials, and a referral-ready summary without automating clinical acceptance.
               </p>
-              <Link href="/dashboard" className="mt-8 inline-flex rounded bg-[#38b6e8] px-6 py-3 text-[15px] font-bold text-white">
+              <Link href="/en/new-case" className="mt-8 inline-flex rounded bg-[#38b6e8] px-6 py-3 text-[15px] font-bold text-white">
                 Start a case
               </Link>
             </div>
@@ -100,7 +100,7 @@ export default function LandingPage() {
             <div className="border border-[#e5e8f0] p-8 lg:col-span-1">
               <h2 className="text-[30px] font-bold leading-tight tracking-[-0.03em]">Designed for real clinical handoff</h2>
               <p className="mt-4 text-[15px] leading-6 text-[#5d6373]">Each step keeps the clinician in control while Lumina structures the case for rare disease triage.</p>
-              <Link href="/hpo-workflow" className="mt-8 inline-flex rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">
+              <Link href="/en/hpo-workflow" className="mt-8 inline-flex rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">
                 See workflow
               </Link>
             </div>
