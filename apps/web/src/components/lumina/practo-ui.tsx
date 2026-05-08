@@ -41,7 +41,7 @@ export function MarketingFooter() {
       links: [
         { label: "Start rare disease case", href: "new-case" },
         { label: "Review HPO findings", href: "new-case" },
-        { label: "Generate referral letter", href: "results" },
+        { label: "Generate referral letter", href: "cases" },
         { label: "View case dashboard", href: "dashboard" },
       ],
     },
@@ -76,7 +76,7 @@ export function MarketingFooter() {
       links: [
         { label: "Doctor workspace", href: "dashboard" },
         { label: "Patient intake", href: "patient-dashboard" },
-        { label: "Scorecard review", href: "results" },
+        { label: "Scorecard review", href: "cases" },
         { label: "Referral output", href: "referral-letters" },
       ],
     },

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -518,13 +517,7 @@ export default function IntakePage() {
       tabItem.id === "photo" ? !!photo :
       tabItem.id === "lab" ? !!lab :
       !!geneSymbol.trim();
-    const art = {
-      notes: "/lumina/doctor-start-blue.webp",
-      photo: "/lumina/doctor-review.webp",
-      lab: "/lumina/doctor-score.avif",
-      genetic: "/lumina/doctor-referral.avif",
-    }[tabItem.id];
-    return { ...tabItem, complete: state, art };
+    return { ...tabItem, complete: state };
   });
 
   return (
@@ -536,65 +529,65 @@ export default function IntakePage() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease }}
-          className="overflow-hidden rounded-lg border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]"
+          className="rounded-lg border border-[#e6eaf2] bg-white px-6 py-7 shadow-[0_10px_30px_rgba(34,45,74,0.05)] sm:px-8"
         >
-          <div className="grid gap-0 lg:grid-cols-[1fr_420px]">
-            <div className="p-6 sm:p-8">
-              <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor workspace</p>
-              <h1 className="mt-3 max-w-2xl text-[38px] font-bold leading-[1.05] tracking-[-0.04em] sm:text-[46px]">
+          <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor workspace</p>
+          <div className="mt-3 grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
+            <div>
+              <h1 className="max-w-2xl text-[38px] font-bold leading-[1.05] tracking-[-0.04em] sm:text-[46px]">
                 {addToId && existingCase ? t("titleAdd") : "Start rare disease case"}
               </h1>
               <p className="mt-4 max-w-2xl text-[16px] leading-7 text-[#5d6474]">
-                Capture the consultation, attach supporting evidence, approve HPO suggestions, then run a top 10 rare disease differential from the same screen.
+                Enter consultation notes, photos, lab reports, and genetic evidence. Lumina suggests HPO terms only for doctor review before scoring.
               </p>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                <label className="block">
-                  <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("patientName")}</span>
-                  <input
-                    value={patientName}
-                    onChange={(event) => setPatientName(event.target.value)}
-                    placeholder={t("patientNamePlaceholder")}
-                    className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("age")}</span>
-                  <input
-                    value={age}
-                    onChange={(event) => setAge(event.target.value)}
-                    placeholder={t("agePlaceholder")}
-                    className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
-                  />
-                </label>
-                <label className="block">
-                  <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("sex")}</span>
-                  <select
-                    value={sex}
-                    onChange={(event) => setSex(event.target.value)}
-                    className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
-                  >
-                    <option value="">{t("sexUnknown")}</option>
-                    <option value="male">{t("sexMale")}</option>
-                    <option value="female">{t("sexFemale")}</option>
-                  </select>
-                </label>
+            </div>
+            <div className="grid grid-cols-3 gap-2 rounded-lg border border-[#e6eaf2] bg-[#fbfcfe] p-3">
+              <div>
+                <p className="text-[24px] font-bold text-[#2536a0]">{activeModalities}/4</p>
+                <p className="text-[12px] text-[#667085]">inputs</p>
+              </div>
+              <div>
+                <p className="text-[24px] font-bold text-[#2536a0]">{pendingTerms.length}</p>
+                <p className="text-[12px] text-[#667085]">pending</p>
+              </div>
+              <div>
+                <p className="text-[24px] font-bold text-[#2536a0]">{acceptedTerms.length}</p>
+                <p className="text-[12px] text-[#667085]">accepted</p>
               </div>
             </div>
+          </div>
 
-            <div className="relative min-h-[280px] bg-[#dff2fa]">
-              <Image
-                src="/lumina/doctor-hero.avif"
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 420px, 100vw"
-                className="object-cover object-[52%_35%]"
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <label className="block">
+              <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("patientName")}</span>
+              <input
+                value={patientName}
+                onChange={(event) => setPatientName(event.target.value)}
+                placeholder={t("patientNamePlaceholder")}
+                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
               />
-              <div className="absolute bottom-5 left-5 rounded bg-white px-4 py-3 shadow-[0_8px_24px_rgba(0,0,0,0.13)]">
-                <p className="text-[15px] font-bold text-[#2536a0]">Doctor-controlled scoring</p>
-                <p className="mt-0.5 text-[12px] text-[#4d5566]">{acceptedTerms.length} accepted HPO terms</p>
-              </div>
-            </div>
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("age")}</span>
+              <input
+                value={age}
+                onChange={(event) => setAge(event.target.value)}
+                placeholder={t("agePlaceholder")}
+                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("sex")}</span>
+              <select
+                value={sex}
+                onChange={(event) => setSex(event.target.value)}
+                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+              >
+                <option value="">{t("sexUnknown")}</option>
+                <option value="male">{t("sexMale")}</option>
+                <option value="female">{t("sexFemale")}</option>
+              </select>
+            </label>
           </div>
         </motion.section>
 

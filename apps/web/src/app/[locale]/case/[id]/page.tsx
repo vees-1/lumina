@@ -84,7 +84,7 @@ function HPOChip({ term }: { term: HPOTerm }) {
       key={`${term.hpo_id}-${term.source}-${term.assertion ?? "present"}`}
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="relative group text-[11px] px-2 py-0.5 rounded-full border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground cursor-default hover:border-[oklch(0.52_0.21_255/0.3)] hover:bg-[oklch(0.52_0.21_255/0.04)] transition-colors"
+      className="group relative cursor-default rounded-full border border-[#dfe5f0] bg-[#fbfcfe] px-2.5 py-1 text-[11px] text-[#62687a] transition-colors hover:border-[#38b6e8]/40 hover:bg-[#f2fbff]"
     >
       <span className="font-medium">{label}</span>{" "}
       <span className="font-mono text-[10px] opacity-75">{term.hpo_id}</span>
@@ -107,9 +107,9 @@ function RankTermChip({
 }) {
   const messages = useMessages() as HpoLabelMessages;
   const toneClasses = {
-    default: "border border-black/[0.08] bg-[oklch(0.975_0_0)] text-muted-foreground",
-    missing: "border border-dashed border-black/[0.12] text-muted-foreground/80",
-    distinguishing: "bg-[oklch(0.52_0.21_255/0.06)] border border-[oklch(0.52_0.21_255/0.2)] text-[oklch(0.38_0.21_255)]",
+    default: "border border-[#dfe5f0] bg-[#fbfcfe] text-[#62687a]",
+    missing: "border border-dashed border-[#dfe5f0] bg-white text-[#73798a]",
+    distinguishing: "border border-[#bceafd] bg-[#f2fbff] text-[#2536a0]",
   } as const;
 
   const id = tone === "default" ? term.matched_hpo_id ?? term.hpo_id : term.hpo_id;
@@ -117,7 +117,7 @@ function RankTermChip({
   const label = localizeHpoLabel(id, fallbackLabel, messages);
 
   return (
-    <span className={`text-[11px] px-2 py-1 rounded-lg ${toneClasses[tone]}`}>
+    <span className={`rounded px-2 py-1 text-[11px] ${toneClasses[tone]}`}>
       {label ? (
         <>
           <span className="font-medium">{label}</span>{" "}
@@ -136,7 +136,7 @@ function ConfidenceBar({ value, color, delay }: { value: number; color: string; 
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true });
   return (
-    <div ref={ref} className="h-1.5 bg-[oklch(0.95_0_0)] rounded-full overflow-hidden">
+    <div ref={ref} className="h-1.5 overflow-hidden rounded-full bg-[#edf2f8]">
       <motion.div
         initial={{ width: 0 }}
         animate={inView ? { width: `${value}%` } : { width: 0 }}
@@ -164,7 +164,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
       initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease, delay }}
-      className={`relative bg-white rounded-2xl border p-5 ${isTop ? "border-[oklch(0.60_0.20_285/0.3)] shadow-[0_4px_24px_oklch(0.60_0.20_285/0.1)]" : "border-black/[0.06]"}`}
+      className={`relative rounded-lg border bg-white p-5 transition-shadow hover:shadow-[0_8px_26px_rgba(34,45,74,0.08)] ${isTop ? "border-[#bceafd] shadow-[0_8px_26px_rgba(56,182,232,0.12)]" : "border-[#e6eaf2]"}`}
     >
       {isTop && (
         <div className="absolute -top-2.5 left-4">
@@ -176,19 +176,19 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
 
       <div className="flex items-start gap-4">
         <div
-          className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-[15px]"
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded bg-[#2536a0] text-[15px] font-bold text-white"
           style={{ background: color }}
         >
           {rank}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-semibold text-[15px] tracking-tight leading-tight">{result.name}</h3>
+            <h3 className="text-[16px] font-bold leading-tight tracking-[-0.01em] text-[#2f3037]">{result.name}</h3>
             <span className="flex-shrink-0 text-[13px] font-bold" style={{ color }}>
               {result.confidence.toFixed(0)}%
             </span>
           </div>
-          <Link href={`/${locale}/disease/${result.orpha_code}`} className="text-[12px] text-muted-foreground hover:text-[oklch(0.52_0.21_255)] transition-colors mb-3 inline-block">
+          <Link href={`/${locale}/disease/${result.orpha_code}`} className="mb-3 inline-block text-[12px] font-semibold text-[#20aeea] transition-colors hover:text-[#2536a0]">
             ORPHA:{result.orpha_code} ↗
           </Link>
           <ConfidenceBar value={result.confidence} color={color} delay={delay + 0.2} />
@@ -200,8 +200,8 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
             </div>
           )}
           {missingTerms.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-black/[0.04]">
-              <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+            <div className="mt-3 border-t border-[#edf0f5] pt-3">
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#73798a]">
                 {t("missingFindings")}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -213,7 +213,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
           )}
           {distinguishingTerms.length > 0 && (
             <div className="mt-2">
-              <p className="text-[10px] font-semibold text-[oklch(0.52_0.21_255/0.7)] uppercase tracking-wider mb-1.5">
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#2536a0]">
                 {t("distinguishingFeatures")}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -296,7 +296,8 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
     notes: t("modalityNotes"),
     photo: t("modalityPhoto"),
     lab: t("modalityLab"),
-    vcf: t("modalityVcf"),
+    genetic: "Genetic evidence",
+    vcf: "Genetic evidence",
   };
   const terms = getTermDetails(result, "contributing").slice(0, 5);
 
@@ -809,7 +810,6 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   const absentTerms = caseData.hpoTerms
     .filter((term) => isAbsentTerm(term))
     .sort((a, b) => Math.abs(b.confidence) - Math.abs(a.confidence));
-  const topColor = "oklch(0.52 0.21 255)";
   const analysisTimestamp = new Date(caseData.timestamp);
   const formattedAnalysisTimestamp = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
@@ -836,6 +836,10 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       acc.vcf ??= new Set();
       acc.vcf.add(snapshot.vcf.fileName);
     }
+    if (snapshot.genetic?.gene_symbol) {
+      acc.genetic ??= new Set();
+      acc.genetic.add([snapshot.genetic.gene_symbol, snapshot.genetic.variant, snapshot.genetic.classification].filter(Boolean).join(" · "));
+    }
     return acc;
   }, {});
   const formatSnapshotTime = (snapshot: InputSnapshot) => new Intl.DateTimeFormat(locale, {
@@ -844,35 +848,35 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   }).format(new Date(snapshot.timestamp));
 
   return (
-    <div className="min-h-screen bg-[oklch(0.975_0_0)] print:bg-white print:min-h-0">
+    <div className="min-h-screen bg-white text-[#2f3037] print:min-h-0 print:bg-white">
       <div className="print:hidden">
         <DashboardNav />
       </div>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 sm:pt-20 pb-16 print:pt-0 print:pb-0 print:px-0 print:max-w-none">
+      <main className="mx-auto max-w-6xl px-5 pb-20 pt-24 sm:px-6 print:max-w-none print:px-0 print:pb-0 print:pt-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="pt-6 mb-8 print:hidden"
+          className="mb-8 rounded-lg border border-[#e6eaf2] bg-white p-6 shadow-[0_10px_30px_rgba(34,45,74,0.05)] print:hidden sm:p-8"
         >
 
           <div className="flex items-center gap-2 mb-3">
-            <Link href={`/${locale}/cases`} className="text-[13px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+            <Link href={`/${locale}/cases`} className="flex items-center gap-1 text-[13px] font-semibold text-[#20aeea] transition-colors hover:text-[#2536a0]">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                 <path d="M10 4l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               {t("cases")}
             </Link>
-            <span className="text-muted-foreground/40">/</span>
-            <span className="text-[13px] text-muted-foreground font-mono">{id.slice(0, 8)}…</span>
+            <span className="text-[#c8cfdd]">/</span>
+            <span className="font-mono text-[13px] text-[#73798a]">{id.slice(0, 8)}...</span>
           </div>
 
           {topRank ? (
             <>
               {caseData.patientContext?.patientName && (
-                <p className="text-[13px] text-muted-foreground font-medium mb-1 flex items-center gap-1.5">
+                <p className="mb-1 flex items-center gap-1.5 text-[13px] font-semibold text-[#62687a]">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                     <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.3" />
                     <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -880,35 +884,35 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   {caseData.patientContext.patientName}
                 </p>
               )}
-              <h1 className="serif text-[24px] sm:text-[28px] tracking-tight mb-2">{topRank.name}</h1>
+              <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor-reviewed scorecard</p>
+              <h1 className="mb-3 mt-2 text-[34px] font-bold leading-tight tracking-[-0.04em] sm:text-[44px]">{topRank.name}</h1>
               <div className="flex items-center gap-2 flex-wrap mb-4">
                 <ConfidenceTooltip confidence={topRank.confidence} modalities={caseData.modalities.length}>
                   <span
-                    className="text-[12px] sm:text-[13px] font-semibold px-2.5 sm:px-3 py-1 rounded-full cursor-help whitespace-nowrap"
-                    style={{ background: `${topColor}15`, color: topColor }}
+                    className="cursor-help whitespace-nowrap rounded-full bg-[#f2fbff] px-3 py-1 text-[12px] font-bold text-[#2536a0] sm:text-[13px]"
                   >
                     {topRank.confidence.toFixed(0)}% {t("confidenceLabel")}
                   </span>
                 </ConfidenceTooltip>
-                <span className="text-[12px] sm:text-[13px] text-muted-foreground">ORPHA:{topRank.orpha_code}</span>
+                <span className="text-[12px] text-[#73798a] sm:text-[13px]">ORPHA:{topRank.orpha_code}</span>
                 <div className="flex flex-wrap gap-1.5">
                   {caseData.modalities.map((m) => (
-                    <span key={m} className="text-[11px] sm:text-[12px] px-2 py-0.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground whitespace-nowrap">
+                    <span key={m} className="whitespace-nowrap rounded-full border border-[#dfe5f0] bg-white px-2 py-0.5 text-[11px] text-[#62687a] sm:text-[12px]">
                       {modalityLabel[m] ?? m}
                     </span>
                   ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2 flex-wrap text-[11px] sm:text-[12px] text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#73798a] sm:text-[12px]">
                 <time dateTime={analysisTimestamp.toISOString()}>{formattedAnalysisTimestamp}</time>
-                <span className="text-muted-foreground/40">•</span>
-                <span className="inline-flex items-center rounded-full border border-black/[0.06] bg-[oklch(0.97_0_0)] px-2 py-0.5 font-medium text-foreground">
+                <span className="text-[#c8cfdd]">•</span>
+                <span className="inline-flex items-center rounded-full border border-[#dfe5f0] bg-[#fbfcfe] px-2 py-0.5 font-semibold text-[#343741]">
                   {t("deterministicBadge")}
                 </span>
               </div>
             </>
           ) : (
-            <h1 className="serif text-[24px] sm:text-[28px] tracking-tight">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
+            <h1 className="text-[34px] font-bold tracking-[-0.04em] sm:text-[44px]">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
           )}
         </motion.div>
 
@@ -926,35 +930,35 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
           )}
         </AnimatePresence>
 
-        <div className="grid lg:grid-cols-[1fr_300px] gap-6 print:block">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] print:block">
           {/* Main column */}
           <div className="space-y-6">
             {(originalNotes || inputHistory.length > 0) && (
-              <section className="bg-white rounded-2xl border border-black/[0.06] p-4 print:hidden">
-                <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              <section className="rounded-lg border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.04)] print:hidden">
+                <h2 className="mb-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">
                   {t("originalInput")}
                 </h2>
                 {originalNotes && (
                   <div className="mb-3">
-                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[#73798a]">
                       {t("originalNotes")}
                     </p>
-                    <p className="text-[12px] text-foreground/85 whitespace-pre-wrap rounded-lg border border-black/[0.06] bg-[oklch(0.985_0_0)] px-3 py-2">
+                    <p className="whitespace-pre-wrap rounded border border-[#e6eaf2] bg-[#fbfcfe] px-3 py-2 text-[13px] leading-6 text-[#343741]">
                       {originalNotes}
                     </p>
                   </div>
                 )}
                 {!!Object.keys(modalityMetadataSummary).length && (
                   <div className="space-y-2">
-                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#73798a]">
                       {t("inputMetadata")}
                     </p>
                     {Object.entries(modalityMetadataSummary).map(([modality, values]) => (
                       <div key={modality} className="flex items-start justify-between gap-3">
-                        <span className="text-[12px] text-muted-foreground">
+                        <span className="text-[12px] text-[#73798a]">
                           {modalityLabel[modality] ?? modality}
                         </span>
-                        <span className="text-[12px] text-right text-foreground/80">
+                        <span className="text-right text-[12px] text-[#343741]">
                           {Array.from(values).join(" · ")}
                         </span>
                       </div>

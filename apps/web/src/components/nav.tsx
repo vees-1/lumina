@@ -232,9 +232,6 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
               <Link href={toLocalePath("/new-case")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
                 New case
               </Link>
-              <Link href={toLocalePath("/results")} className="inline-flex h-10 items-center text-[14px] font-medium text-[#33343b] transition-colors hover:text-[#2536a0]">
-                Results
-              </Link>
               <LanguageDropdown />
             </>
           )}
@@ -275,7 +272,6 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
                   { label: "Doctor Dashboard", href: "/dashboard" },
                   { label: "Cases", href: "/cases" },
                   { label: "New case", href: "/new-case" },
-                  { label: "Results", href: "/results" },
                 ]
             : [...clinicLinks, ...providerLinks, ...securityLinks]
           ).map((item) => (

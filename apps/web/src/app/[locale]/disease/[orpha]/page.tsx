@@ -110,7 +110,7 @@ function ErrorState({ orpha, locale }: { orpha: string; locale: string }) {
       <p className="text-[13px] text-muted-foreground mb-6">
         {t("notFoundSub", { orpha: `ORPHA:${orpha}` })}
       </p>
-      <Link href={`/${locale}/results`}>
+      <Link href={`/${locale}/cases`}>
         <Button variant="outline" className="rounded-full">{t("backToCatalog")}</Button>
       </Link>
     </motion.div>
@@ -161,7 +161,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
           {/* Back nav */}
           <div className="flex items-center gap-2 mb-6">
             <Link
-              href={`/${locale}/results`}
+              href={`/${locale}/cases`}
               className="text-[13px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">

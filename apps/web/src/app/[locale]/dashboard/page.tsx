@@ -52,7 +52,7 @@ export default function DashboardPage() {
           {[
             ["Cases", "Review every diagnosed case and reopen the full result page.", `/${locale}/cases`],
             ["New case", "Enter notes, photos, lab reports, and genetic evidence.", `/${locale}/new-case`],
-            ["Results", "Open scorecards, top 10 differentials, and referral output.", `/${locale}/results`],
+            ["Scorecards", "Open top 10 differentials and referral output from saved cases.", `/${locale}/cases`],
           ].map(([title, text, href]) => (
             <Link key={title} href={href} className="border border-[#e5e8f0] bg-white p-7 transition-transform hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
               <h2 className="text-[25px] font-bold tracking-[-0.03em]">{title}</h2>
