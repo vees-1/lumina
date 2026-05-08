@@ -604,43 +604,7 @@ export default function IntakePage() {
           </div>
         )}
 
-        <section className="mt-8 grid gap-5 lg:grid-cols-4">
-          {modalityCards.map((item) => (
-            <button
-              type="button"
-              key={item.id}
-              onClick={() => setTab(item.id)}
-              className={`group overflow-hidden rounded-lg border bg-white text-left shadow-[0_10px_28px_rgba(34,45,74,0.07)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(34,45,74,0.1)] ${
-                tab === item.id ? "border-[#38b6e8]" : "border-[#e8ecf3]"
-              }`}
-            >
-              <div className="relative h-36 overflow-hidden bg-[#eef6fb]">
-                <Image
-                  src={item.art}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover object-center transition duration-300 group-hover:scale-[1.03]"
-                />
-                <span className={`absolute right-3 top-3 rounded-full px-2 py-1 text-[11px] font-bold ${
-                  item.complete ? "bg-emerald-600 text-white" : "bg-white text-[#2536a0]"
-                }`}>
-                  {item.complete ? "Ready" : "Open"}
-                </span>
-              </div>
-              <div className="p-5">
-                <div className="flex items-center gap-2 text-[#2536a0]">
-                  {TAB_ICONS[item.id]}
-                  <span className="text-[12px] font-bold uppercase tracking-[0.05em]">Evidence</span>
-                </div>
-                <h2 className="mt-2 text-[22px] font-bold leading-tight tracking-[-0.03em] text-[#2f3037]">{item.label}</h2>
-                <p className="mt-2 text-[14px] leading-6 text-[#667084]">{item.hint}</p>
-              </div>
-            </button>
-          ))}
-        </section>
-
-        <section className="mt-8 grid gap-6 lg:grid-cols-[1fr_340px]">
+        <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
           <div className="rounded-lg border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
             <div className="flex flex-col gap-4 border-b border-[#edf0f5] p-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -706,7 +670,7 @@ export default function IntakePage() {
                           className="max-h-[420px] overflow-auto rounded-lg border border-[#e6eaf2] bg-[#f8fbff] p-4"
                         >
                           <p className="mb-4 text-[13px] leading-6 text-[#5d6474]">{t("checklistDesc")}</p>
-                          <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-4">
                             {SYMPTOM_CATEGORIES.map((category) => (
                               <div key={category.id} className="rounded border border-[#e6eaf2] bg-white p-4">
                                 <button
@@ -724,9 +688,9 @@ export default function IntakePage() {
                                       const symptomLabel = t(symptom.labelKey);
                                       const state = symptomState(categoryLabel, symptomLabel);
                                       return (
-                                        <div key={symptom.id} className="flex flex-wrap items-center justify-between gap-2 rounded bg-[#fbfcfe] px-3 py-2">
-                                          <span className="text-[13px] text-[#343741]">{symptomLabel}</span>
-                                          <div className="flex gap-1">
+                                        <div key={symptom.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded bg-[#fbfcfe] px-3 py-2">
+                                          <span className="min-w-0 text-[13px] leading-5 text-[#343741]">{symptomLabel}</span>
+                                          <div className="flex shrink-0 gap-1">
                                             <button
                                               type="button"
                                               onClick={() => appendSymptom(categoryLabel, symptomLabel, "present")}

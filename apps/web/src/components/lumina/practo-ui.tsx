@@ -71,6 +71,15 @@ export function MarketingFooter() {
         { label: "Security", href: "privacy" },
       ],
     },
+    {
+      title: "Clinical",
+      links: [
+        { label: "Doctor workspace", href: "dashboard" },
+        { label: "Patient intake", href: "patient-dashboard" },
+        { label: "Scorecard review", href: "results" },
+        { label: "Referral output", href: "referral-letters" },
+      ],
+    },
   ];
 
   return (

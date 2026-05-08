@@ -7,7 +7,7 @@ const services = [
   {
     title: "Start Rare Disease Case",
     description: "Bring notes, photos, labs, and genetics into one clinical intake.",
-    image: "/lumina/doctor-start-blue.webp",
+    image: "/lumina/confident-male-doctor-white-lab-600nw-2735790063.webp",
     href: "/en/new-case",
     objectPosition: "center 18%",
   },
