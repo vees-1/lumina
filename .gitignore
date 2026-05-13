@@ -1,5 +1,13 @@
 # markdown docs
 # (All .md files are now tracked by default)
+# EXCEPT local-only private project docs:
+GEMINI.md
+LUMINA.md
+AGENTS.md
+PROJECT_RULES.md
+STRUCTURE.md
+apps/web/AGENTS.md
+test-results/
 
 # deps
 node_modules/
