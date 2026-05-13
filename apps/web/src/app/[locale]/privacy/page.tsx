@@ -39,7 +39,7 @@ export default function PrivacyPage() {
       
       {/* Hero Section */}
       <div className="bg-slate-900 text-white py-24 lg:py-32 px-6 lg:px-8 text-center shadow-inner">
-        <h1 className="text-4xl lg:text-6xl font-editorial mb-6">{t("heroTitle")}</h1>
+        <h1 className="text-4xl lg:text-6xl font-bold mb-6">{t("heroTitle")}</h1>
         <p className="text-lg lg:text-xl text-cyan-200 max-w-3xl mx-auto leading-relaxed">
           {t("heroSubtitle")}
         </p>

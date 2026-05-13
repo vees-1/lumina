@@ -32,7 +32,7 @@ export default function Page() {
       
       {/* Hero Section */}
       <section className="bg-slate-900 px-6 py-24 text-center text-white lg:px-8 lg:py-32 shadow-inner">
-        <h1 className="mb-6 text-4xl font-editorial lg:text-6xl">
+        <h1 className="mb-6 text-4xl font-bold lg:text-6xl">
           {t("heroHeadline")}
         </h1>
         <p className="mx-auto max-w-3xl text-lg leading-relaxed text-cyan-200 lg:text-xl">

@@ -200,7 +200,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h1 className="text-xl font-editorial">{t("title")}</h1>
+              <h1 className="text-xl font-bold">{t("title")}</h1>
               <p className="text-[13px] text-muted-foreground mt-0.5">{topDx}</p>
             </div>
           </div>

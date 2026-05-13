@@ -83,7 +83,7 @@ export default function LandingPage() {
               <p className="section-label mb-3 justify-center lg:justify-start">
                 {t("betaPill", { brandName })}
               </p>
-              <h1 className="font-editorial text-[36px] leading-[1.08] text-[#0D1B2A] sm:text-[46px] lg:text-[58px] whitespace-pre-line">
+              <h1 className="text-[36px] font-bold leading-[1.08] text-[#0D1B2A] sm:text-[46px] lg:text-[58px] whitespace-pre-line">
                 {t("heroHeadline", { brandName })}
               </h1>
               <p className="mx-auto mt-4 max-w-[480px] text-[15px] leading-7 text-[#4A5568] lg:mx-0">

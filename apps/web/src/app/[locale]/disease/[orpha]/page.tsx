@@ -194,7 +194,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 transition={{ duration: 0.45, ease }}
               >
                 <div className="mb-8">
-                  <h1 className="font-editorial text-[30px] mb-3">{disease.name}</h1>
+                  <h1 className="font-bold text-[30px] mb-3">{disease.name}</h1>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[12px] font-mono font-medium px-2.5 py-1 rounded-full bg-[oklch(0.13_0_0/0.06)] text-foreground">
                       ORPHA:{disease.orpha_code}
