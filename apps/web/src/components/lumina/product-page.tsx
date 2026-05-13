@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Nav } from "@/components/nav";
+import { useTranslations } from "next-intl";
 
 export function ProductPage({
   title,
@@ -15,6 +16,7 @@ export function ProductPage({
   imagePosition?: string;
   cards: Array<{ title: string; text: string }>;
 }) {
+  const t = useTranslations("landing");
   return (
     <div className="min-h-screen bg-white text-[#2f3037]">
       <Nav />
@@ -24,13 +26,13 @@ export function ProductPage({
             <h1 className="text-[44px] font-bold leading-tight tracking-[-0.04em]">{title}</h1>
             <p className="mt-5 max-w-xl text-[18px] leading-8 text-[#555b6d]">{subtitle}</p>
             <Link href="/en/dashboard" className="mt-8 inline-flex rounded bg-[#38b6e8] px-6 py-3 text-[14px] font-bold text-white">
-              Login to continue
+              {t("loginToContinue")}
             </Link>
             <div className="mt-8 grid max-w-xl grid-cols-3 gap-4">
               {[
-                ["100%", "reviewable evidence"],
-                ["FHIR", "structured export"],
-                ["HPO", "accepted terms only"],
+                ["100%", t("reviewableEvidence")],
+                ["FHIR", t("structuredExport")],
+                ["HPO", t("acceptedTermsOnly")],
               ].map(([value, label]) => (
                 <div key={value} className="border border-[#e5e8f0] p-5">
                   <p className="text-[28px] font-bold text-[#2536a0]">{value}</p>
@@ -40,7 +42,15 @@ export function ProductPage({
             </div>
           </div>
           <div className="relative min-h-[390px] overflow-hidden rounded shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
-            <Image src={image} alt="" fill sizes="(max-width: 1024px) 90vw, 640px" className="object-cover" style={{ objectPosition: imagePosition }} priority />
+            <Image
+              src={image}
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 90vw, 640px"
+              className="scale-[1.06] object-cover"
+              style={{ objectPosition: imagePosition }}
+              priority
+            />
           </div>
         </section>
 
@@ -50,7 +60,7 @@ export function ProductPage({
               <h2 className="text-[24px] font-bold tracking-[-0.02em]">{card.title}</h2>
               <p className="mt-3 text-[15px] leading-7 text-[#62687a]">{card.text}</p>
               <Link href="/en/new-case" className="mt-5 inline-flex text-[16px] font-bold text-[#20aeea]">
-                View workflow
+                {t("viewWorkflow")}
               </Link>
             </article>
           ))}

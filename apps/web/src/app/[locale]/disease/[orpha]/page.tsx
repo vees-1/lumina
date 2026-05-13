@@ -60,13 +60,24 @@ const FREQ_COLORS: Record<string, { bg: string; color: string }> = {
 };
 
 function FreqBadge({ label }: { label: string }) {
+  const t = useTranslations("disease");
   const colors = FREQ_COLORS[label] ?? { bg: "oklch(0.97 0 0)", color: "oklch(0.46 0 0)" };
+  
+  const labelMap: Record<string, string> = {
+    "Obligate": t("freqObligate"),
+    "Very frequent": t("freqVeryFrequent"),
+    "Frequent": t("freqFrequent"),
+    "Occasional": t("freqOccasional"),
+    "Rare": t("freqRare"),
+    "Excluded": t("freqExcluded")
+  };
+
   return (
     <span
       className="text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
       style={{ background: colors.bg, color: colors.color }}
     >
-      {label}
+      {labelMap[label] || label}
     </span>
   );
 }
@@ -130,7 +141,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
     let cancelled = false;
     async function fetchDisease() {
       try {
-        const res = await fetch(`${API}/disease/${orpha}`);
+        const res = await fetch(`${API}/disease/${orpha}?lang=${encodeURIComponent(locale)}`);
         if (!res.ok) {
           if (!cancelled) setError(true);
           return;
@@ -145,7 +156,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
     }
     fetchDisease();
     return () => { cancelled = true; };
-  }, [orpha]);
+  }, [locale, orpha]);
 
   return (
     <div className="min-h-screen bg-[oklch(0.975_0_0)]">
@@ -182,9 +193,8 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, ease }}
               >
-                {/* Header */}
                 <div className="mb-8">
-                  <h1 className="serif text-[30px] tracking-tight mb-3">{disease.name}</h1>
+                  <h1 className="font-editorial text-[30px] mb-3">{disease.name}</h1>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[12px] font-mono font-medium px-2.5 py-1 rounded-full bg-[oklch(0.13_0_0/0.06)] text-foreground">
                       ORPHA:{disease.orpha_code}

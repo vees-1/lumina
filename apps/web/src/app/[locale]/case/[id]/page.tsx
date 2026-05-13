@@ -8,6 +8,7 @@ import { useTranslations, useLocale, useMessages } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { localizeHpoLabel, type HpoLabelMessages } from "@/lib/hpo";
+import { formatConfidence, formatDateTime, formatNumber } from "@/lib/formatters";
 import { getCaseById, getAgentSuggestion, streamLetter, updateCaseInStorage } from "@/lib/api";
 import type { AgentSuggestion } from "@/lib/api";
 import type { CaseData, HPOTerm, InputSnapshot, RankResult, RankTermContext } from "@/types/lumina";
@@ -16,7 +17,7 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 const CONFIDENCE_CAPS: Record<number, number> = { 1: 40, 2: 55, 3: 65, 4: 80 };
 const CLOSE_CONFIDENCE_GAP = 10;
-const RANK_COLOR = "oklch(0.60 0.20 285)";
+const RANK_COLOR = "#0D1B2A";
 
 function isAbsentTerm(term: Pick<HPOTerm, "assertion" | "confidence">) {
   return term.assertion === "absent" || term.confidence < 0;
@@ -53,6 +54,8 @@ function getTermDetails(
 }
 
 function ConfidenceTooltip({ confidence, modalities, children }: { confidence: number; modalities: number; children: React.ReactNode }) {
+  const t = useTranslations("case");
+  const locale = useLocale();
   const [visible, setVisible] = useState(false);
   const cap = CONFIDENCE_CAPS[modalities] ?? 80;
   return (
@@ -64,8 +67,12 @@ function ConfidenceTooltip({ confidence, modalities, children }: { confidence: n
     >
       {children}
       {visible && (
-        <span className="absolute bottom-full left-0 mb-2 w-64 bg-foreground text-background text-[12px] leading-relaxed rounded-xl px-3 py-2.5 shadow-lg z-50 pointer-events-auto sm:pointer-events-none">
-          <span className="font-semibold">{confidence.toFixed(0)}%</span> is a relative phenotypic overlap score, not a probability. The ceiling for {modalities} modality{modalities !== 1 ? " inputs" : ""} is {cap}%. Adding more modalities raises the ceiling.
+        <span className="absolute bottom-full left-0 mb-2 w-64 bg-foreground text-background text-[12px] leading-relaxed rounded-sm px-3 py-2.5 shadow-lg z-50 pointer-events-auto sm:pointer-events-none">
+          {t("confidenceTooltip", {
+            confidence: formatConfidence(locale, confidence),
+            modalities,
+            cap
+          })}
           <span className="absolute top-full left-4 border-4 border-transparent border-t-foreground" />
         </span>
       )}
@@ -84,12 +91,12 @@ function HPOChip({ term }: { term: HPOTerm }) {
       key={`${term.hpo_id}-${term.source}-${term.assertion ?? "present"}`}
       initial={{ opacity: 0, scale: 0.85 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="group relative cursor-default rounded-full border border-[#dfe5f0] bg-[#fbfcfe] px-2.5 py-1 text-[11px] text-[#62687a] transition-colors hover:border-[#38b6e8]/40 hover:bg-[#f2fbff]"
+      className="group relative cursor-default rounded-none border border-[#dfe5f0] bg-[#fbfcfe] px-2.5 py-1 text-[11px] text-[#62687a] transition-colors hover:border-[#0AAFCE]/40 hover:bg-[#f2fbff]"
     >
       <span className="font-medium">{label}</span>{" "}
       <span className="font-mono text-[10px] opacity-75">{term.hpo_id}</span>
       {term.source && (
-        <span className="absolute bottom-full left-1/2 mb-2 w-60 max-w-[calc(100vw-2rem)] -translate-x-1/2 bg-foreground text-background text-[11px] leading-relaxed rounded-lg px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-[100] pointer-events-none whitespace-normal font-sans shadow-xl">
+        <span className="absolute bottom-full left-1/2 mb-2 w-60 max-w-[calc(100vw-2rem)] -translate-x-1/2 bg-foreground text-background text-[11px] leading-relaxed rounded-sm px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-[100] pointer-events-none whitespace-normal font-sans shadow-xl">
           <span className="font-semibold">{t("fromLabel")}</span> {term.source}
           <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
         </span>
@@ -109,7 +116,7 @@ function RankTermChip({
   const toneClasses = {
     default: "border border-[#dfe5f0] bg-[#fbfcfe] text-[#62687a]",
     missing: "border border-dashed border-[#dfe5f0] bg-white text-[#73798a]",
-    distinguishing: "border border-[#bceafd] bg-[#f2fbff] text-[#2536a0]",
+    distinguishing: "border border-[#bceafd] bg-[#f2fbff] text-[#0D1B2A]",
   } as const;
 
   const id = tone === "default" ? term.matched_hpo_id ?? term.hpo_id : term.hpo_id;
@@ -130,25 +137,25 @@ function RankTermChip({
   );
 }
 
-// ── Confidence bar ────────────────────────────────────────────────────────────
+// -- Confidence bar ------------------------------------------------------------
 
 function ConfidenceBar({ value, color, delay }: { value: number; color: string; delay: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true });
   return (
-    <div ref={ref} className="h-1.5 overflow-hidden rounded-full bg-[#edf2f8]">
+    <div ref={ref} className="h-1.5 overflow-hidden rounded-none bg-[#edf2f8]">
       <motion.div
         initial={{ width: 0 }}
         animate={inView ? { width: `${value}%` } : { width: 0 }}
         transition={{ duration: 1.0, ease, delay }}
-        className="h-full rounded-full"
+        className="h-full rounded-none"
         style={{ background: color }}
       />
     </div>
   );
 }
 
-// ── Rank card ─────────────────────────────────────────────────────────────────
+// -- Rank card -----------------------------------------------------------------
 
 function RankCard({ result, rank, delay }: { result: RankResult; rank: number; delay: number }) {
   const t = useTranslations("case");
@@ -164,11 +171,11 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
       initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease, delay }}
-      className={`relative rounded-lg border bg-white p-5 transition-shadow hover:shadow-[0_8px_26px_rgba(34,45,74,0.08)] ${isTop ? "border-[#bceafd] shadow-[0_8px_26px_rgba(56,182,232,0.12)]" : "border-[#e6eaf2]"}`}
+      className={`relative rounded-sm border bg-white p-5 transition-shadow hover:shadow-[0_8px_26px_rgba(34,45,74,0.08)] ${isTop ? "border-[#bceafd] shadow-[0_8px_26px_rgba(56,182,232,0.12)]" : "border-[#e6eaf2]"}`}
     >
       {isTop && (
         <div className="absolute -top-2.5 left-4">
-          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: color }}>
+          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-none text-white" style={{ background: color }}>
             {t("topMatch")}
           </span>
         </div>
@@ -176,7 +183,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
 
       <div className="flex items-start gap-4">
         <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded bg-[#2536a0] text-[15px] font-bold text-white"
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded bg-[#0D1B2A] text-[15px] font-bold text-white"
           style={{ background: color }}
         >
           {rank}
@@ -185,11 +192,11 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className="text-[16px] font-bold leading-tight tracking-[-0.01em] text-[#2f3037]">{result.name}</h3>
             <span className="flex-shrink-0 text-[13px] font-bold" style={{ color }}>
-              {result.confidence.toFixed(0)}%
+              {formatNumber(locale, Math.round(result.confidence))}%
             </span>
           </div>
-          <Link href={`/${locale}/disease/${result.orpha_code}`} className="mb-3 inline-block text-[12px] font-semibold text-[#20aeea] transition-colors hover:text-[#2536a0]">
-            ORPHA:{result.orpha_code} ↗
+          <Link href={`/${locale}/disease/${result.orpha_code}`} className="mb-3 inline-block text-[12px] font-semibold text-[#0AAFCE] transition-colors hover:text-[#0D1B2A]">
+            ORPHA:{formatNumber(locale, result.orpha_code)} ↗
           </Link>
           <ConfidenceBar value={result.confidence} color={color} delay={delay + 0.2} />
           {contributingTerms.length > 0 && (
@@ -213,7 +220,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
           )}
           {distinguishingTerms.length > 0 && (
             <div className="mt-2">
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#2536a0]">
+              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0D1B2A]">
                 {t("distinguishingFeatures")}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -229,7 +236,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
   );
 }
 
-// ── Agent suggestion banner ───────────────────────────────────────────────────
+// -- Agent suggestion banner ---------------------------------------------------
 
 function AgentBanner({
   suggestion,
@@ -255,28 +262,28 @@ function AgentBanner({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.35, ease }}
-      className="rounded-2xl border border-[oklch(0.52_0.21_255/0.25)] bg-[oklch(0.52_0.21_255/0.05)] p-4 flex items-start gap-3 mb-6"
+      className="rounded-sm border border-[rgba(13,27,42,0.15)] bg-[rgba(13,27,42,0.03)] p-4 flex items-start gap-3 mb-6"
     >
-      <div className="w-8 h-8 rounded-xl bg-[oklch(0.52_0.21_255/0.12)] flex items-center justify-center flex-shrink-0 mt-0.5">
-        <svg className="w-4 h-4 text-[oklch(0.52_0.21_255)]" fill="none" viewBox="0 0 16 16">
+      <div className="w-8 h-8 rounded-sm bg-[rgba(13,27,42,0.08)] flex items-center justify-center flex-shrink-0 mt-0.5">
+        <svg className="w-4 h-4 text-[var(--lumina-navy)]" fill="none" viewBox="0 0 16 16">
           <path d="M8 2l1.1 3.4H13l-2.9 2.1 1.1 3.4L8 8.8 4.8 10.9l1.1-3.4L3 5.4h3.9L8 2z"
             stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" fill="currentColor" fillOpacity="0.2" />
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[oklch(0.38_0.21_255)] mb-0.5">
+        <p className="text-[13px] font-semibold text-[#0D1B2A] mb-0.5">
           {t("aiSuggests", { modality: nextLabel })}
         </p>
         <p className="text-[12px] text-muted-foreground leading-relaxed">{suggestion.reasoning}</p>
         <div className="flex items-center gap-2 mt-3">
           <Link href={`/${locale}/new-case?addTo=${caseId}`}>
-            <button className="text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-[oklch(0.52_0.21_255)] text-white hover:bg-[oklch(0.46_0.21_255)] transition-colors">
+            <button className="text-[12px] font-semibold px-3 py-1.5 rounded-sm bg-[var(--lumina-navy)] text-white hover:bg-[#0D1B2A] transition-colors">
               {t("addNow")}
             </button>
           </Link>
           <button
             onClick={onDismiss}
-            className="text-[12px] text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-black/[0.05] transition-colors"
+            className="text-[12px] text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-sm hover:bg-black/[0.05] transition-colors"
           >
             {t("dismiss")}
           </button>
@@ -286,7 +293,7 @@ function AgentBanner({
   );
 }
 
-// ── Explainability panel ──────────────────────────────────────────────────────
+// -- Explainability panel ------------------------------------------------------
 
 function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseData: CaseData }) {
   const t = useTranslations("case");
@@ -296,22 +303,22 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
     notes: t("modalityNotes"),
     photo: t("modalityPhoto"),
     lab: t("modalityLab"),
-    genetic: "Genetic evidence",
-    vcf: "Genetic evidence",
+    genetic: t("geneticEvidence"),
+    vcf: t("geneticEvidence"),
   };
   const terms = getTermDetails(result, "contributing").slice(0, 5);
 
   const modalityColor: Record<string, string> = {
-    notes: "oklch(0.52 0.21 255)",
-    photo: "oklch(0.55 0.18 200)",
-    lab: "oklch(0.52 0.20 285)",
-    vcf: "oklch(0.46 0.19 160)",
+    notes: "var(--lumina-navy)",
+    photo: "#0AAFCE",
+    lab: "#0D1B2A",
+    vcf: "#1A7F4B",
   };
   const modalityBg: Record<string, string> = {
-    notes: "oklch(0.52 0.21 255 / 0.1)",
-    photo: "oklch(0.55 0.18 200 / 0.1)",
-    lab: "oklch(0.52 0.20 285 / 0.1)",
-    vcf: "oklch(0.46 0.19 160 / 0.1)",
+    notes: "rgba(13,27,42,0.1)",
+    photo: "rgba(10,175,206,0.1)",
+    lab: "rgba(13,27,42,0.1)",
+    vcf: "rgba(26,127,75,0.1)",
   };
 
   return (
@@ -319,7 +326,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease, delay: 0.35 }}
-      className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden"
+      className="bg-white rounded-sm border border-black/[0.06] overflow-hidden"
     >
       <div className="px-5 py-3 border-b border-black/[0.06]">
         <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
@@ -334,8 +341,8 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
           const patientHpoId = detail.matched_hpo_id ?? detail.hpo_id;
           const term = hpoMap.get(patientHpoId);
           const src = term?.source_type ?? "unknown";
-          const color = modalityColor[src] ?? "oklch(0.46 0 0)";
-          const bg = modalityBg[src] ?? "oklch(0.46 0 0 / 0.08)";
+          const color = modalityColor[src] ?? "#8A94A6";
+          const bg = modalityBg[src] ?? "rgba(138,148,166,0.08)";
           return (
             <motion.div
               key={`${result.orpha_code}-why-${patientHpoId}-${detail.hpo_id}`}
@@ -348,19 +355,19 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
                 {formatHpoLabel(detail, messages)}
               </span>
               <div className="flex-1 min-w-0">
-                <div className="h-1 bg-[oklch(0.95_0_0)] rounded-full overflow-hidden">
+                <div className="h-1 bg-[#F0F2F5] rounded-none overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.abs(term?.confidence ?? detail.patient_confidence ?? 0.5) * 100}%` }}
                     transition={{ duration: 0.8, ease, delay: 0.5 + i * 0.06 }}
-                    className="h-full rounded-full"
+                    className="h-full rounded-none"
                     style={{ background: color }}
                   />
                 </div>
               </div>
               {src !== "unknown" && (
                 <span
-                  className="text-[11px] font-medium px-2 py-0.5 rounded-full flex-shrink-0"
+                  className="text-[11px] font-medium px-2 py-0.5 rounded-none flex-shrink-0"
                   style={{ background: bg, color }}
                 >
                   {modalityLabel[src] ?? src}
@@ -379,6 +386,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
 
 function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
   const t = useTranslations("case");
+  const locale = useLocale();
   const messages = useMessages() as HpoLabelMessages;
   const [first, second] = rankings;
 
@@ -401,12 +409,12 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease, delay: 0.18 }}
-      className="bg-white rounded-2xl border border-black/[0.06] p-5"
+      className="bg-white rounded-sm border border-black/[0.06] p-5"
     >
       <div className="mb-4">
         <h2 className="text-[14px] font-semibold">{t("compareTopCandidates")}</h2>
         <p className="text-[12px] text-muted-foreground mt-1">
-          {t("compareTopCandidatesSub", { gap: gap.toFixed(0) })}
+          {t("compareTopCandidatesSub", { gap: formatNumber(locale, Math.round(gap)) })}
         </p>
       </div>
 
@@ -415,7 +423,7 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
           const highlights = getTermDetails(result, "distinguishing").slice(0, 3);
           const missing = getTermDetails(result, "missing").slice(0, 2);
           return (
-            <div key={result.orpha_code} className="rounded-xl border border-black/[0.06] bg-[oklch(0.99_0_0)] p-4">
+            <div key={result.orpha_code} className="rounded-sm border border-black/[0.06] bg-[#FAFBFC] p-4">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -424,13 +432,13 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
                   <h3 className="text-[14px] font-semibold leading-tight">{result.name}</h3>
                 </div>
                 <span className="text-[12px] font-semibold text-muted-foreground">
-                  {result.confidence.toFixed(0)}%
+                  {formatNumber(locale, Math.round(result.confidence))}%
                 </span>
               </div>
 
               {highlights.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-[10px] font-semibold text-[oklch(0.52_0.21_255/0.7)] uppercase tracking-wider mb-1.5">
+                  <p className="text-[10px] font-semibold text-[rgba(13,27,42,0.65)] uppercase tracking-wider mb-1.5">
                     {t("distinguishingFeatures")}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -480,7 +488,7 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
   );
 }
 
-// ── PubMed citations ──────────────────────────────────────────────────────────
+// -- PubMed citations ----------------------------------------------------------
 
 interface PubMedArticle {
   pmid: string;
@@ -540,7 +548,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
       initial={{ opacity: 0, x: 12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, ease, delay: 0.35 }}
-      className="bg-white rounded-2xl border border-black/[0.06] p-4"
+      className="bg-white rounded-sm border border-black/[0.06] p-4"
     >
       <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
         {t("pubmedReferences")}
@@ -548,7 +556,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 rounded-lg shimmer" />
+            <div key={i} className="h-10 rounded-sm shimmer" />
           ))}
         </div>
       ) : (
@@ -564,7 +572,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
               transition={{ delay: i * 0.07 }}
               className="block group"
             >
-              <p className="text-[12px] font-medium leading-snug group-hover:text-[oklch(0.52_0.21_255)] transition-colors line-clamp-2">
+              <p className="text-[12px] font-medium leading-snug group-hover:text-[var(--lumina-navy)] transition-colors line-clamp-2">
                 {a.title}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -578,7 +586,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
   );
 }
 
-// ── Letter view ───────────────────────────────────────────────────────────────
+// -- Letter view ---------------------------------------------------------------
 
 function LetterView({
   letter,
@@ -590,7 +598,9 @@ function LetterView({
   onChangeLetter: (value: string) => void;
 }) {
   const t = useTranslations("case");
+  const tc = useTranslations("common");
   const letterT = useTranslations("letter");
+  const locale = useLocale();
   const endRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
   const isEditing = editing && !streaming && Boolean(letter);
@@ -614,12 +624,12 @@ function LetterView({
   }, [letter]);
 
   return (
-    <div className="relative bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
+    <div className="relative bg-white rounded-sm border border-black/[0.06] overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.06] print:hidden">
         <h3 className="text-[14px] font-semibold">{t("clinicalReferralLetter")}</h3>
         {streaming && (
-          <span className="flex items-center gap-1.5 text-[12px] text-[oklch(0.52_0.21_255)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.52_0.21_255)] animate-pulse" />
+          <span className="flex items-center gap-1.5 text-[12px] text-[var(--lumina-navy)]">
+            <span className="w-1.5 h-1.5 rounded-none bg-[var(--lumina-navy)] animate-pulse" />
             {t("generating")}
           </span>
         )}
@@ -663,7 +673,7 @@ function LetterView({
           <textarea
             value={letter}
             onChange={(e) => onChangeLetter(e.target.value)}
-            className="w-full min-h-[420px] rounded-xl border border-black/[0.06] bg-[oklch(0.99_0_0)] px-4 py-3 text-[14px] leading-relaxed font-serif resize-none outline-none"
+            className="w-full min-h-[420px] rounded-sm border border-black/[0.06] bg-[#FAFBFC] px-4 py-3 text-[14px] leading-relaxed font-sans resize-none outline-none"
           />
         ) : (
           <div className="prose prose-sm max-w-none text-[14px] leading-relaxed text-foreground whitespace-pre-wrap font-sans print:text-[11pt] print:leading-[1.6] print:font-[Arial,sans-serif]">
@@ -672,12 +682,17 @@ function LetterView({
           </div>
         )}
         <div className="hidden print:block mt-12 pt-8 border-t border-black/10">
-          <p className="font-sans italic text-muted-foreground">Signed,</p>
+          <p className="font-sans italic text-muted-foreground">{t("signed")},</p>
           <div className="mt-8 border-b border-black/40 w-64" />
-          <p className="mt-2 font-bold font-sans">{doctorProfile?.name || "Dr. ________________________"}</p>
-          <p className="text-[10pt] text-muted-foreground font-sans">{doctorProfile?.degree ? `${doctorProfile.degree} · ` : ""}{doctorProfile?.specialization || "Clinical Specialist"}</p>
+          <p className="mt-2 font-bold font-sans">{doctorProfile?.name || t("drBlank")}</p>
+          <p className="text-[10pt] text-muted-foreground font-sans">{doctorProfile?.degree ? `${doctorProfile.degree} · ` : ""}{doctorProfile?.specialization || t("clinicalSpecialist")}</p>
           {doctorProfile?.clinic && <p className="text-[10pt] text-muted-foreground font-sans">{doctorProfile.clinic}</p>}
-          <p className="text-[8pt] text-muted-foreground mt-4 font-sans italic">Document generated by Lumina • {new Date().toLocaleDateString()}</p>
+          <p className="text-[8pt] text-muted-foreground mt-4 font-sans italic">
+            {t("docGeneratedBy", {
+              brandName: tc("brandName"),
+              date: formatDateTime(locale, new Date(), { dateStyle: "medium" }),
+            })}
+          </p>
         </div>
         <div ref={endRef} />
       </div>
@@ -687,11 +702,12 @@ function LetterView({
 }
 
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// -- Page ----------------------------------------------------------------------
 
 export default function CasePage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations("case");
   const locale = useLocale();
+  const messages = useMessages() as HpoLabelMessages;
   const { id } = use(params);
   const [caseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
@@ -754,16 +770,17 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           case_id: caseId,
+          lang: locale,
           diagnoses: data.rankings.slice(0, 5).map((r) => ({
             orpha_code: r.orpha_code,
             name: r.name,
             confidence: r.confidence,
             contributing_terms: r.contributing_terms,
           })),
-          hpo_terms: data.hpoTerms.map((t) => ({
-            hpo_id: t.hpo_id,
-            label: t.hpo_id,
-            confidence: t.confidence,
+          hpo_terms: data.hpoTerms.map((term) => ({
+            hpo_id: term.hpo_id,
+            label: localizeHpoLabel(term.hpo_id, term.label, messages) || term.hpo_id,
+            confidence: term.confidence,
           })),
         }),
       });
@@ -783,7 +800,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
 
   if (!caseData) {
     return (
-      <div className="min-h-screen bg-[oklch(0.975_0_0)]">
+      <div className="min-h-screen bg-[#F7F8FA]">
         <DashboardNav />
         <main className="max-w-3xl mx-auto px-6 pt-24 pb-16 text-center">
           <motion.div
@@ -795,7 +812,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             <h2 className="text-[20px] font-semibold mb-2">{t("notFound")}</h2>
             <p className="text-muted-foreground text-[14px] mb-6">{t("notFoundSub")}</p>
             <Link href={`/${locale}/dashboard`}>
-              <Button variant="outline" className="rounded-full">{t("backToDashboard")}</Button>
+              <Button variant="outline" className="rounded-none">{t("backToDashboard")}</Button>
             </Link>
           </motion.div>
         </main>
@@ -859,11 +876,11 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease }}
-          className="mb-8 rounded-lg border border-[#e6eaf2] bg-white p-6 shadow-[0_10px_30px_rgba(34,45,74,0.05)] print:hidden sm:p-8"
+          className="mb-8 rounded-sm border border-[#e6eaf2] bg-white p-6 shadow-[0_10px_30px_rgba(34,45,74,0.05)] print:hidden sm:p-8"
         >
 
           <div className="flex items-center gap-2 mb-3">
-            <Link href={`/${locale}/cases`} className="flex items-center gap-1 text-[13px] font-semibold text-[#20aeea] transition-colors hover:text-[#2536a0]">
+            <Link href={`/${locale}/cases`} className="flex items-center gap-1 text-[13px] font-semibold text-[#0AAFCE] transition-colors hover:text-[#0D1B2A]">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                 <path d="M10 4l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -884,20 +901,20 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   {caseData.patientContext.patientName}
                 </p>
               )}
-              <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor-reviewed scorecard</p>
-              <h1 className="mb-3 mt-2 text-[34px] font-bold leading-tight tracking-[-0.04em] sm:text-[44px]">{topRank.name}</h1>
+              <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("reviewedScorecard")}</p>
+              <h1 className="mb-3 mt-2 text-[34px] font-[800] leading-tight tracking-[-0.02em] sm:text-[44px]">{topRank.name}</h1>
               <div className="flex items-center gap-2 flex-wrap mb-4">
                 <ConfidenceTooltip confidence={topRank.confidence} modalities={caseData.modalities.length}>
                   <span
-                    className="cursor-help whitespace-nowrap rounded-full bg-[#f2fbff] px-3 py-1 text-[12px] font-bold text-[#2536a0] sm:text-[13px]"
+                    className="cursor-help whitespace-nowrap rounded-none bg-[#f2fbff] px-3 py-1 text-[12px] font-bold text-[#0D1B2A] sm:text-[13px]"
                   >
-                    {topRank.confidence.toFixed(0)}% {t("confidenceLabel")}
+                    {formatNumber(locale, Math.round(topRank.confidence))}% {t("confidenceLabel")}
                   </span>
                 </ConfidenceTooltip>
-                <span className="text-[12px] text-[#73798a] sm:text-[13px]">ORPHA:{topRank.orpha_code}</span>
+                <span className="text-[12px] text-[#73798a] sm:text-[13px]">ORPHA:{formatNumber(locale, topRank.orpha_code)}</span>
                 <div className="flex flex-wrap gap-1.5">
                   {caseData.modalities.map((m) => (
-                    <span key={m} className="whitespace-nowrap rounded-full border border-[#dfe5f0] bg-white px-2 py-0.5 text-[11px] text-[#62687a] sm:text-[12px]">
+                    <span key={m} className="whitespace-nowrap rounded-none border border-[#dfe5f0] bg-white px-2 py-0.5 text-[11px] text-[#62687a] sm:text-[12px]">
                       {modalityLabel[m] ?? m}
                     </span>
                   ))}
@@ -906,13 +923,13 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#73798a] sm:text-[12px]">
                 <time dateTime={analysisTimestamp.toISOString()}>{formattedAnalysisTimestamp}</time>
                 <span className="text-[#c8cfdd]">•</span>
-                <span className="inline-flex items-center rounded-full border border-[#dfe5f0] bg-[#fbfcfe] px-2 py-0.5 font-semibold text-[#343741]">
+                <span className="inline-flex items-center rounded-none border border-[#dfe5f0] bg-[#fbfcfe] px-2 py-0.5 font-semibold text-[#343741]">
                   {t("deterministicBadge")}
                 </span>
               </div>
             </>
           ) : (
-            <h1 className="text-[34px] font-bold tracking-[-0.04em] sm:text-[44px]">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
+            <h1 className="text-[34px] font-[800] tracking-[-0.02em] sm:text-[44px]">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
           )}
         </motion.div>
 
@@ -934,8 +951,8 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
           {/* Main column */}
           <div className="space-y-6">
             {(originalNotes || inputHistory.length > 0) && (
-              <section className="rounded-lg border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.04)] print:hidden">
-                <h2 className="mb-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">
+              <section className="rounded-sm border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.04)] print:hidden">
+                <h2 className="mb-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">
                   {t("originalInput")}
                 </h2>
                 {originalNotes && (
@@ -1037,14 +1054,14 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                     {t("customiseLetter")}
                   </button>
                   {showLetterForm && (
-                    <div className="grid gap-3 p-3 rounded-xl bg-[oklch(0.975_0_0)] border border-black/[0.06] sm:grid-cols-2">
+                    <div className="grid gap-3 p-3 rounded-sm bg-[#F7F8FA] border border-black/[0.06] sm:grid-cols-2">
                       <label className="grid gap-1.5">
                         <span className="text-[11px] font-medium text-muted-foreground">{t("patientDob")}</span>
                         <input
                           type="date"
                           value={letterDob}
                           onChange={(e) => setLetterDob(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                          className="w-full h-8 px-3 rounded-sm border border-black/10 text-[12px] outline-none bg-white"
                         />
                       </label>
                       <label className="grid gap-1.5">
@@ -1052,7 +1069,8 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         <input
                           value={referringPhysicianName}
                           onChange={(e) => setReferringPhysicianName(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                          placeholder={t("referringPhysicianPlaceholder")}
+                          className="w-full h-8 px-3 rounded-sm border border-black/10 text-[12px] outline-none bg-white"
                         />
                       </label>
                       <label className="grid gap-1.5">
@@ -1060,7 +1078,8 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         <input
                           value={referringClinic}
                           onChange={(e) => setReferringClinic(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                          placeholder={t("referringClinicPlaceholder")}
+                          className="w-full h-8 px-3 rounded-sm border border-black/10 text-[12px] outline-none bg-white"
                         />
                       </label>
                       <label className="grid gap-1.5">
@@ -1068,7 +1087,8 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         <input
                           value={recipientSpecialist}
                           onChange={(e) => setRecipientSpecialist(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                          placeholder={t("recipientSpecialistPlaceholder")}
+                          className="w-full h-8 px-3 rounded-sm border border-black/10 text-[12px] outline-none bg-white"
                         />
                       </label>
                       <label className="grid gap-1.5 sm:col-span-2">
@@ -1076,7 +1096,8 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         <input
                           value={recipientHospital}
                           onChange={(e) => setRecipientHospital(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                          placeholder={t("recipientHospitalPlaceholder")}
+                          className="w-full h-8 px-3 rounded-sm border border-black/10 text-[12px] outline-none bg-white"
                         />
                       </label>
                       <label className="grid gap-1.5 sm:col-span-2">
@@ -1084,7 +1105,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         <select
                           value={letterUrgency}
                           onChange={(e) => setLetterUrgency(e.target.value)}
-                          className="w-full h-8 px-3 rounded-lg border border-black/10 text-[12px] outline-none bg-white"
+                          className="w-full h-8 px-3 rounded-sm border border-black/10 text-[12px] outline-none bg-white"
                         >
                           <option value="routine">{t("urgencyRoutine")}</option>
                           <option value="urgent">{t("urgencyUrgent")}</option>
@@ -1099,9 +1120,9 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 <Button
                   onClick={handleGenerateLetter}
                   disabled={streaming}
-                  className="rounded-full bg-foreground text-background h-8 px-4 text-[13px]"
+                  className="rounded-none bg-foreground text-background h-8 px-4 text-[13px]"
                 >
-                  {t("generateLetter")}
+                  {t("finalizeAndGenerate")}
                 </Button>
               )}
               {letterStarted && (
@@ -1112,9 +1133,9 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="bg-white rounded-2xl border border-dashed border-black/10 p-10 text-center mt-3"
+                  className="bg-white rounded-sm border border-dashed border-black/10 p-10 text-center mt-3"
                 >
-                  <div className="w-12 h-12 rounded-full bg-[oklch(0.97_0_0)] flex items-center justify-center mx-auto mb-3 float">
+                  <div className="w-12 h-12 rounded-none bg-[#F7F8FA] flex items-center justify-center mx-auto mb-3 float">
                     <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24">
                       <path d="M9 12h6M9 16h4M7 8h10M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
@@ -1134,7 +1155,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, ease, delay: 0.15 }}
-              className="bg-white rounded-2xl border border-black/[0.06] p-4"
+              className="bg-white rounded-sm border border-black/[0.06] p-4"
             >
               <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 {t("hpoPhenotypes")} ({caseData.hpoTerms.length})
@@ -1175,15 +1196,15 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, ease, delay: 0.2 }}
-              className="bg-white rounded-2xl border border-black/[0.06] p-4"
+              className="bg-white rounded-sm border border-black/[0.06] p-4"
             >
               <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("evidence")}</h3>
               <div className="space-y-2">
                 {[
-                  { label: t("hpoExtracted"), value: caseData.hpoTerms.length.toString() },
-                  { label: t("modalitiesUsed"), value: caseData.modalities.length.toString() },
-                  { label: t("diseasesRanked"), value: caseData.rankings.length.toString() },
-                  { label: t("topConfidence"), value: topRank ? `${topRank.confidence.toFixed(1)}%` : "—" },
+                  { label: t("hpoExtracted"), value: formatNumber(locale, caseData.hpoTerms.length) },
+                  { label: t("modalitiesUsed"), value: formatNumber(locale, caseData.modalities.length) },
+                  { label: t("diseasesRanked"), value: formatNumber(locale, caseData.rankings.length) },
+                  { label: t("topConfidence"), value: topRank ? `${formatNumber(locale, topRank.confidence, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : "—" },
                 ].map((row) => (
                   <div key={row.label} className="flex justify-between items-center">
                     <span className="text-[12px] text-muted-foreground">{row.label}</span>
@@ -1202,7 +1223,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, ease, delay: 0.25 }}
-                className="bg-white rounded-2xl border border-black/[0.06] p-4"
+                className="bg-white rounded-sm border border-black/[0.06] p-4"
               >
                 <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("patient")}</h3>
                 <div className="space-y-2">
@@ -1231,7 +1252,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             >
               {caseData.modalities.length < 4 && (
                 <Link href={`/${locale}/new-case?addTo=${id}`} className="block">
-                  <Button variant="outline" size="sm" className="w-full rounded-xl h-9 text-[13px] border-black/10 gap-1.5">
+                  <Button variant="outline" size="sm" className="w-full rounded-sm h-9 text-[13px] border-black/10 gap-1.5">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                       <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                     </svg>
@@ -1241,18 +1262,18 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               )}
               <Button
                 variant="outline"
-                className="w-full rounded-xl h-9 text-[13px] border-black/10"
+                className="w-full rounded-sm h-9 text-[13px] border-black/10"
                 onClick={() => handleExportFHIR(caseData, id)}
               >
                 {t("exportFhir")}
               </Button>
               <Link href={`/${locale}/new-case`} className="block">
-                <Button variant="outline" className="w-full rounded-xl h-9 text-[13px] border-black/10">
+                <Button variant="outline" className="w-full rounded-sm h-9 text-[13px] border-black/10">
                   {t("newCase")}
                 </Button>
               </Link>
               <Link href={`/${locale}/cases`} className="block">
-                <Button variant="ghost" className="w-full rounded-xl h-9 text-[13px]">
+                <Button variant="ghost" className="w-full rounded-sm h-9 text-[13px]">
                   {t("allCases")}
                 </Button>
               </Link>

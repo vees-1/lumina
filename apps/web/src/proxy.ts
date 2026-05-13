@@ -12,20 +12,27 @@ const isProtectedRoute = createRouteMatcher([
   "/:locale/results(.*)",
   "/:locale/intake(.*)",
   "/:locale/case(.*)",
-  "/:locale/patient(.*)",
+  "/:locale/patient",
+  "/:locale/patient/new(.*)",
+  "/:locale/patient/reports(.*)",
+  "/:locale/patient/submissions(.*)",
+  "/:locale/settings(.*)",
   "/dashboard(.*)",
   "/cases(.*)",
   "/new-case(.*)",
   "/results(.*)",
   "/intake(.*)",
   "/case(.*)",
-  "/patient(.*)",
+  "/patient",
+  "/patient/new(.*)",
+  "/patient/reports(.*)",
+  "/patient/submissions(.*)",
+  "/settings(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  const intlResponse = intlMiddleware(req);
-  if (intlResponse) return intlResponse;
   if (isProtectedRoute(req)) await auth.protect();
+  return intlMiddleware(req);
 });
 
 export const config = {

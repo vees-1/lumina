@@ -7,8 +7,10 @@ import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import { useLocale, useMessages, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
+import { RoleGuard } from "@/components/lumina/role-guard";
 import { Button } from "@/components/ui/button";
 import { localizeHpoLabel, type HpoLabelMessages } from "@/lib/hpo";
+import { formatFileSize, formatNumber } from "@/lib/formatters";
 import { getCaseById, saveCaseToStorage, scoreCase, suggestLab, suggestNotes, suggestPhoto, updateCaseInStorage } from "@/lib/api";
 import type { GeneticEvidence, HPOTerm } from "@/types/lumina";
 
@@ -149,6 +151,7 @@ function DropZone({
   accept: string; label: string; hint: string;
   file: File | null; onFile: (f: File) => void; onClear: () => void;
 }) {
+  const locale = useLocale();
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -164,19 +167,19 @@ function DropZone({
       <motion.div
         initial={{ opacity: 0, scale: 0.97 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex items-center gap-3 p-4 rounded-xl border border-[oklch(0.52_0.21_255/0.3)] bg-[oklch(0.52_0.21_255/0.04)]"
+        className="flex items-center gap-3 p-4 rounded-sm border border-[rgba(13,27,42,0.18)] bg-[rgba(13,27,42,0.02)]"
       >
-        <div className="w-10 h-10 rounded-lg bg-[oklch(0.52_0.21_255/0.1)] flex items-center justify-center flex-shrink-0">
-          <svg className="w-5 h-5 text-[oklch(0.52_0.21_255)]" fill="none" viewBox="0 0 20 20">
+        <div className="w-10 h-10 rounded-sm bg-[rgba(13,27,42,0.07)] flex items-center justify-center flex-shrink-0">
+          <svg className="w-5 h-5 text-[var(--lumina-navy)]" fill="none" viewBox="0 0 20 20">
             <path d="M4 4a2 2 0 012-2h5l5 5v9a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" stroke="currentColor" strokeWidth="1.5" />
             <path d="M13 2v5h5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
           </svg>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[14px] font-medium truncate">{file.name}</p>
-          <p className="text-[12px] text-muted-foreground">{(file.size / 1024).toFixed(0)} KB</p>
+          <p className="text-[12px] text-muted-foreground">{formatFileSize(locale, file.size)}</p>
         </div>
-        <button onClick={onClear} className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-lg hover:bg-black/5">
+        <button onClick={onClear} className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-sm hover:bg-black/5">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 16 16">
             <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
@@ -187,16 +190,16 @@ function DropZone({
 
   return (
     <motion.div
-      animate={dragging ? { scale: 1.01, borderColor: "oklch(0.52 0.21 255)" } : { scale: 1 }}
+      animate={dragging ? { scale: 1.01, borderColor: "var(--lumina-navy)" } : { scale: 1 }}
       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
-      className="relative flex flex-col items-center justify-center gap-3 p-10 rounded-xl border-2 border-dashed border-black/10 hover:border-black/20 hover:bg-black/[0.01] transition-all cursor-pointer group"
+      className="relative flex flex-col items-center justify-center gap-3 rounded border border-dashed border-[#d9dfeb] p-6 transition-all hover:border-[#bfc8d8] hover:bg-black/[0.01] cursor-pointer group"
     >
       <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }} />
-      <div className="w-12 h-12 rounded-full bg-[oklch(0.97_0_0)] group-hover:bg-[oklch(0.94_0_0)] flex items-center justify-center transition-colors">
-        <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24">
+      <div className="flex h-10 w-10 items-center justify-center rounded-none bg-[#F7F8FA] transition-colors group-hover:bg-[#EEF0F4]">
+        <svg className="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24">
           <path d="M12 16V8m0-4l4 4m-4-4L8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
@@ -215,17 +218,17 @@ function ProgressStep({ label, active, done }: { label: string; active: boolean;
       animate={{ opacity: active || done ? 1 : 0.4 }}
       className="flex items-center gap-2"
     >
-      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-        done ? "bg-[oklch(0.52_0.19_160)]" :
-        active ? "bg-[oklch(0.52_0.21_255)] ring-4 ring-[oklch(0.52_0.21_255/0.2)]" :
-        "bg-[oklch(0.92_0_0)]"
+      <div className={`w-5 h-5 rounded-none flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+        done ? "bg-[#1A7F4B]" :
+        active ? "bg-[var(--lumina-navy)] ring-4 ring-[rgba(13,27,42,0.12)]" :
+        "bg-[#E5E8EE]"
       }`}>
         {done ? (
           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
             <path d="M2.5 6l2.5 2.5 4.5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         ) : active ? (
-          <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+          <div className="w-2 h-2 rounded-none bg-white animate-pulse" />
         ) : null}
       </div>
       <span className="text-[13px] font-medium">{label}</span>
@@ -235,6 +238,7 @@ function ProgressStep({ label, active, done }: { label: string; active: boolean;
 
 export default function IntakePage() {
   const t = useTranslations("intake");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const messages = useMessages() as HpoLabelMessages;
   const router = useRouter();
@@ -521,7 +525,8 @@ export default function IntakePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#fbfcfe] text-[#2f3037]">
+    <RoleGuard allowed={["doctor"]} redirectTo="/patient">
+      <div className="min-h-screen bg-[#fbfcfe] text-[#2f3037]">
       <DashboardNav />
 
       <main className="mx-auto max-w-6xl px-5 pb-28 pt-24 sm:px-6">
@@ -529,30 +534,30 @@ export default function IntakePage() {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease }}
-          className="rounded-lg border border-[#e6eaf2] bg-white px-6 py-7 shadow-[0_10px_30px_rgba(34,45,74,0.05)] sm:px-8"
+          className="rounded-sm border border-[#e6eaf2] bg-white px-6 py-7 shadow-[0_10px_30px_rgba(34,45,74,0.05)] sm:px-8"
         >
-          <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Doctor workspace</p>
+          <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("doctorWorkspace")}</p>
           <div className="mt-3 grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
             <div>
               <h1 className="max-w-2xl text-[38px] font-bold leading-[1.05] tracking-[-0.04em] sm:text-[46px]">
-                {addToId && existingCase ? t("titleAdd") : "Start rare disease case"}
+                {addToId && existingCase ? t("titleAdd") : t("startRareDiseaseCase")}
               </h1>
               <p className="mt-4 max-w-2xl text-[16px] leading-7 text-[#5d6474]">
-                Enter consultation notes, photos, lab reports, and genetic evidence. Lumina suggests HPO terms only for doctor review before scoring.
+                {t("startRareDiseaseCaseDesc", { brandName: tCommon("brandName") })}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 rounded-lg border border-[#e6eaf2] bg-[#fbfcfe] p-3">
+            <div className="grid grid-cols-3 gap-2 rounded-sm border border-[#e6eaf2] bg-[#fbfcfe] p-3">
               <div>
-                <p className="text-[24px] font-bold text-[#2536a0]">{activeModalities}/4</p>
-                <p className="text-[12px] text-[#667085]">inputs</p>
+                <p className="text-[24px] font-bold text-[#0D1B2A]">{formatNumber(locale, activeModalities)}/4</p>
+                <p className="text-[12px] text-[#667085]">{t("inputsLabel")}</p>
               </div>
               <div>
-                <p className="text-[24px] font-bold text-[#2536a0]">{pendingTerms.length}</p>
-                <p className="text-[12px] text-[#667085]">pending</p>
+                <p className="text-[24px] font-bold text-[#0D1B2A]">{pendingTerms.length}</p>
+                <p className="text-[12px] text-[#667085]">{t("pendingLabel")}</p>
               </div>
               <div>
-                <p className="text-[24px] font-bold text-[#2536a0]">{acceptedTerms.length}</p>
-                <p className="text-[12px] text-[#667085]">accepted</p>
+                <p className="text-[24px] font-bold text-[#0D1B2A]">{acceptedTerms.length}</p>
+                <p className="text-[12px] text-[#667085]">{t("acceptedLabel")}</p>
               </div>
             </div>
           </div>
@@ -564,7 +569,7 @@ export default function IntakePage() {
                 value={patientName}
                 onChange={(event) => setPatientName(event.target.value)}
                 placeholder={t("patientNamePlaceholder")}
-                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#0AAFCE] focus:ring-2 focus:ring-[#0AAFCE]/15"
               />
             </label>
             <label className="block">
@@ -573,7 +578,7 @@ export default function IntakePage() {
                 value={age}
                 onChange={(event) => setAge(event.target.value)}
                 placeholder={t("agePlaceholder")}
-                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#0AAFCE] focus:ring-2 focus:ring-[#0AAFCE]/15"
               />
             </label>
             <label className="block">
@@ -581,7 +586,7 @@ export default function IntakePage() {
               <select
                 value={sex}
                 onChange={(event) => setSex(event.target.value)}
-                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+                className="h-11 w-full rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none transition focus:border-[#0AAFCE] focus:ring-2 focus:ring-[#0AAFCE]/15"
               >
                 <option value="">{t("sexUnknown")}</option>
                 <option value="male">{t("sexMale")}</option>
@@ -597,25 +602,22 @@ export default function IntakePage() {
           </div>
         )}
 
-        <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-          <div className="rounded-lg border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
-            <div className="flex flex-col gap-4 border-b border-[#edf0f5] p-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">
-                  {TABS.find((item) => item.id === tab)?.label}
-                </p>
-                <h2 className="mt-1 text-[26px] font-bold tracking-[-0.03em]">Input evidence</h2>
+        <section className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_340px]">
+          <div className="self-start rounded-sm border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
+            <div className="flex flex-col gap-3 border-b border-[#edf0f5] p-5 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex shrink-0 items-center">
+                <h2 className="text-[20px] font-bold tracking-[-0.03em]">{t("inputEvidence")}</h2>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex min-w-0 gap-1.5 overflow-x-auto pb-1 xl:justify-end xl:pb-0">
                 {TABS.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => setTab(item.id)}
-                    className={`inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-semibold ${
+                    className={`inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-none border px-2.5 text-[12px] font-semibold ${
                       tab === item.id
-                        ? "border-[#2536a0] bg-[#2536a0] text-white"
-                        : "border-[#d9dfeb] bg-white text-[#50576a] hover:border-[#38b6e8]"
+                        ? "border-[#0D1B2A] bg-[#0D1B2A] text-white"
+                        : "border-[#d9dfeb] bg-white text-[#50576a] hover:border-[#0AAFCE]"
                     }`}
                   >
                     {TAB_ICONS[item.id]}
@@ -625,7 +627,7 @@ export default function IntakePage() {
               </div>
             </div>
 
-            <div className="p-5 sm:p-6">
+            <div className="p-5">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={tab}
@@ -640,7 +642,7 @@ export default function IntakePage() {
                         <button
                           type="button"
                           onClick={() => setShowChecklist((value) => !value)}
-                          className="rounded border border-[#d9dfeb] px-4 py-2 text-[13px] font-bold text-[#343741] hover:border-[#38b6e8]"
+                          className="rounded border border-[#d9dfeb] px-4 py-2 text-[13px] font-bold text-[#343741] hover:border-[#0AAFCE]"
                         >
                           {showChecklist ? t("hideChecklist") : t("quickAdd")}
                         </button>
@@ -648,7 +650,7 @@ export default function IntakePage() {
                           type="button"
                           onClick={startVoiceInput}
                           className={`rounded px-4 py-2 text-[13px] font-bold ${
-                            isListening ? "bg-emerald-600 text-white" : "bg-[#38b6e8] text-white"
+                            isListening ? "bg-emerald-600 text-white" : "bg-[#0AAFCE] text-white"
                           }`}
                         >
                           {isListening ? t("voiceListening") : t("voice")}
@@ -660,7 +662,7 @@ export default function IntakePage() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="max-h-[420px] overflow-auto rounded-lg border border-[#e6eaf2] bg-[#f8fbff] p-4"
+                          className="max-h-[420px] overflow-auto rounded-sm border border-[#e6eaf2] bg-[#f8fbff] p-4"
                         >
                           <p className="mb-4 text-[13px] leading-6 text-[#5d6474]">{t("checklistDesc")}</p>
                           <div className="space-y-4">
@@ -669,7 +671,7 @@ export default function IntakePage() {
                                 <button
                                   type="button"
                                   onClick={() => toggleCategory(category.id)}
-                                  className="flex w-full items-center justify-between text-left text-[13px] font-bold uppercase tracking-[0.04em] text-[#2536a0]"
+                                  className="flex w-full items-center justify-between text-left text-[13px] font-bold uppercase tracking-[0.04em] text-[#0D1B2A]"
                                 >
                                   {t(category.i18nKey)}
                                   <span>{openCategories.has(category.id) ? "-" : "+"}</span>
@@ -687,7 +689,7 @@ export default function IntakePage() {
                                             <button
                                               type="button"
                                               onClick={() => appendSymptom(categoryLabel, symptomLabel, "present")}
-                                              className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                                              className={`rounded-none px-2.5 py-1 text-[11px] font-bold ${
                                                 state === "present" ? "bg-emerald-600 text-white" : "border border-[#d9dfeb] bg-white text-[#50576a]"
                                               }`}
                                             >
@@ -696,7 +698,7 @@ export default function IntakePage() {
                                             <button
                                               type="button"
                                               onClick={() => appendSymptom(categoryLabel, symptomLabel, "absent")}
-                                              className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                                              className={`rounded-none px-2.5 py-1 text-[11px] font-bold ${
                                                 state === "absent" ? "bg-slate-700 text-white" : "border border-[#d9dfeb] bg-white text-[#50576a]"
                                               }`}
                                             >
@@ -719,7 +721,7 @@ export default function IntakePage() {
                         onChange={(event) => setNotes(event.target.value)}
                         placeholder={t("notesPlaceholder")}
                         rows={12}
-                        className="w-full resize-none rounded-lg border border-[#d9dfeb] bg-white px-4 py-4 text-[15px] leading-7 outline-none transition placeholder:text-[#adb5c3] focus:border-[#38b6e8] focus:ring-2 focus:ring-[#38b6e8]/15"
+                        className="w-full resize-none rounded-sm border border-[#d9dfeb] bg-white px-4 py-4 text-[15px] leading-7 outline-none transition placeholder:text-[#adb5c3] focus:border-[#0AAFCE] focus:ring-2 focus:ring-[#0AAFCE]/15"
                       />
                       <p className="text-[12px] text-[#73798a]">{notes.length} {t("charCount")}</p>
                     </div>
@@ -729,8 +731,8 @@ export default function IntakePage() {
                     <div className="space-y-4">
                       <p className="text-[14px] leading-6 text-[#5d6474]">{t("photoDesc")}</p>
                       <DropZone accept="image/*" label={t("photoDropLabel")} hint={t("photoDropHint")} file={photo} onFile={setPhoto} onClear={() => setPhoto(null)} />
-                      <label className="flex items-center gap-2 text-[14px] font-semibold text-[#50576a]">
-                        <input type="checkbox" checked={isFacial} onChange={(event) => setIsFacial(event.target.checked)} className="h-4 w-4 accent-[#38b6e8]" />
+                      <label className="flex items-center gap-2 text-[14px] font-normal leading-6 text-[#5d6474]">
+                        <input type="checkbox" checked={isFacial} onChange={(event) => setIsFacial(event.target.checked)} className="h-4 w-4 accent-[#0AAFCE]" />
                         {t("photoFacialToggle")}
                       </label>
                     </div>
@@ -747,16 +749,16 @@ export default function IntakePage() {
                     <div className="space-y-5">
                       <p className="text-[14px] leading-6 text-[#5d6474]">{t("geneticDesc")}</p>
                       <div className="grid gap-4 sm:grid-cols-2">
-                        <input value={geneSymbol} onChange={(event) => setGeneSymbol(event.target.value)} placeholder={t("genePlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#38b6e8]" />
-                        <input value={variant} onChange={(event) => setVariant(event.target.value)} placeholder={t("variantPlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#38b6e8]" />
-                        <select value={classification} onChange={(event) => setClassification(event.target.value)} className="h-12 rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none focus:border-[#38b6e8]">
+                        <input value={geneSymbol} onChange={(event) => setGeneSymbol(event.target.value)} placeholder={t("genePlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#0AAFCE]" />
+                        <input value={variant} onChange={(event) => setVariant(event.target.value)} placeholder={t("variantPlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#0AAFCE]" />
+                        <select value={classification} onChange={(event) => setClassification(event.target.value)} className="h-12 rounded border border-[#d9dfeb] bg-white px-3 text-[14px] outline-none focus:border-[#0AAFCE]">
                           <option value="unknown">{t("classificationUnknown")}</option>
                           <option value="pathogenic">{t("classificationPathogenic")}</option>
                           <option value="likely_pathogenic">{t("classificationLikelyPathogenic")}</option>
-                          <option value="vus">VUS</option>
+                          <option value="vus">{t("classificationVus")}</option>
                           <option value="benign">{t("classificationBenign")}</option>
                         </select>
-                        <input value={zygosity} onChange={(event) => setZygosity(event.target.value)} placeholder={t("zygosityPlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#38b6e8]" />
+                        <input value={zygosity} onChange={(event) => setZygosity(event.target.value)} placeholder={t("zygosityPlaceholder")} className="h-12 rounded border border-[#d9dfeb] px-3 text-[14px] outline-none focus:border-[#0AAFCE]" />
                       </div>
                     </div>
                   )}
@@ -766,28 +768,28 @@ export default function IntakePage() {
           </div>
 
           <aside className="space-y-5">
-            <div className="rounded-lg border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
-              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">{t("sidebarInputs")}</h3>
+            <div className="rounded-sm border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
+              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("sidebarInputs")}</h3>
               <div className="mt-4 space-y-3">
                 {modalityCards.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => setTab(item.id)}
-                    className="flex w-full items-center justify-between rounded border border-[#edf0f5] px-3 py-3 text-left hover:border-[#38b6e8]"
+                    className="flex w-full items-center justify-between rounded border border-[#edf0f5] px-3 py-3 text-left hover:border-[#0AAFCE]"
                   >
                     <span className="flex items-center gap-2 text-[14px] font-semibold text-[#343741]">
                       {TAB_ICONS[item.id]}
                       {item.label}
                     </span>
-                    <span className={`h-2.5 w-2.5 rounded-full ${item.complete ? "bg-emerald-500" : "bg-[#c8cfdd]"}`} />
+                    <span className={`h-2.5 w-2.5 rounded-none ${item.complete ? "bg-emerald-500" : "bg-[#c8cfdd]"}`} />
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-lg border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
-              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">{t("reviewFindings")}</h3>
+            <div className="rounded-sm border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
+              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("reviewFindings")}</h3>
               <div className="mt-4 space-y-5">
                 <div>
                   <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("pendingSuggestions")} ({pendingTerms.length})</p>
@@ -811,7 +813,7 @@ export default function IntakePage() {
                   <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("acceptedFindings")} ({acceptedTerms.length})</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {acceptedTerms.map((term) => (
-                      <span key={term.hpo_id} className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800">
+                      <span key={term.hpo_id} className="rounded-none border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800">
                         {localizeHpoLabel(term.hpo_id, term.label, messages)}
                       </span>
                     ))}
@@ -820,7 +822,7 @@ export default function IntakePage() {
                 <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("rejectedFindings")} ({rejectedTerms.length})</p>
                 {geneticEvidence.length > 0 && (
                   <div className="rounded bg-[#f8fbff] p-3 text-[13px]">
-                    <p className="font-bold text-[#2536a0]">{geneticEvidence[0].gene_symbol} · {geneticEvidence[0].classification}</p>
+                    <p className="font-bold text-[#0D1B2A]">{geneticEvidence[0].gene_symbol} · {geneticEvidence[0].classification}</p>
                     {geneticEvidence[0].variant && <p className="mt-1 text-[#5d6474]">{geneticEvidence[0].variant}</p>}
                   </div>
                 )}
@@ -828,8 +830,8 @@ export default function IntakePage() {
             </div>
 
             {analyzing && (
-              <div className="rounded-lg border border-[#cfe6f5] bg-[#f3fbff] p-5">
-                <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">{t("sidebarProgress")}</h3>
+              <div className="rounded-sm border border-[#cfe6f5] bg-[#f3fbff] p-5">
+                <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("sidebarProgress")}</h3>
                 <div className="mt-4 space-y-2">
                   {progress.map((step) => (
                     <ProgressStep key={step} label={step} active={step === activeStep} done={step !== activeStep} />
@@ -845,26 +847,27 @@ export default function IntakePage() {
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e6eaf2] bg-white/95 px-5 py-3 shadow-[0_-8px_28px_rgba(34,45,74,0.08)] backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-[13px] text-[#5d6474]">
-            {activeModalities} of 4 evidence streams added · {pendingTerms.length} pending · {acceptedTerms.length} accepted
+            {t("modalitiesActive", { active: activeModalities, total: 4 })} · {t("pendingLabel")} {formatNumber(locale, pendingTerms.length)} · {t("acceptedLabel")} {formatNumber(locale, acceptedTerms.length)}
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button
               onClick={handleSuggest}
               disabled={!hasAnyInput || analyzing}
-              className="h-11 rounded bg-[#38b6e8] px-6 text-[14px] font-bold text-white hover:bg-[#24a6dc] disabled:opacity-60"
+              className="h-11 rounded bg-[#0AAFCE] px-6 text-[14px] font-bold text-white hover:bg-[#24a6dc] disabled:opacity-60"
             >
               {analyzing ? t("analyzing") : t("suggestFindings")}
             </Button>
             <Button
               onClick={handleAnalyze}
               disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
-              className="h-11 rounded bg-[#2536a0] px-6 text-[14px] font-bold text-white hover:bg-[#1f2d86] disabled:opacity-60"
+              className="h-11 rounded bg-[#0D1B2A] px-6 text-[14px] font-bold text-white hover:bg-[#1f2d86] disabled:opacity-60"
             >
               {t("runDifferential")}
             </Button>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </RoleGuard>
   );
 }

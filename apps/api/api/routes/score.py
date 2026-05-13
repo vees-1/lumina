@@ -13,6 +13,8 @@ class ScoreRequest(BaseModel):
     top_k: int = 10
     modalities: int = 1
     genetic_evidence: list[GeneticEvidence] = []
+    lang: str | None = None
+    locale: str | None = None
 
 
 @router.post("", response_model=list[RankResult])

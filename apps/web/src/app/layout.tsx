@@ -1,30 +1,36 @@
-import type { Metadata } from "next";
-import { Geist, DM_Serif_Display, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import { Inter, Newsreader } from "next/font/google";
 
-const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-const dmSerif = DM_Serif_Display({ variable: "--font-serif", subsets: ["latin"], weight: "400", style: ["normal", "italic"] });
+import { ThemeProvider } from "@/components/theme-provider";
 
-export const metadata: Metadata = {
-  title: "Lumina — Rare Disease Diagnosis",
-  description: "Multimodal AI clinical assistant for rare disease diagnosis. HPO-powered, precision-first.",
-};
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: 'swap',
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-serif",
+  style: ["normal", "italic"],
+  display: 'swap',
+});
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider
-      signInForceRedirectUrl="/dashboard"
-      signUpForceRedirectUrl="/dashboard"
-    >
-      <html lang="en" className={`${geist.variable} ${geistMono.variable} ${dmSerif.variable} h-full`}>
-        <body className="min-h-full flex flex-col antialiased bg-background text-foreground">
+    <html lang="en" className={`${inter.variable} ${newsreader.variable} h-full`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col antialiased bg-background text-foreground font-sans">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          forcedTheme="light"
+          disableTransitionOnChange
+        >
           {children}
           <Toaster position="bottom-right" richColors />
-        </body>
-      </html>
-    </ClerkProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

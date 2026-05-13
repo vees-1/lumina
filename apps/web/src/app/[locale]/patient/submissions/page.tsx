@@ -2,14 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
+import { RoleGuard } from "@/components/lumina/role-guard";
 import { getPatientSubmissions, updatePatientSubmission } from "@/lib/api";
 import type { PatientSubmission } from "@/types/lumina";
+import { Plus, Inbox } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function PatientSubmissionsPage() {
   const locale = useLocale();
+  const t = useTranslations("patientSubmissions");
   const [submissions, setSubmissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
+
+  function statusBadge(status: string) {
+    if (status === "approved" || status === "scorecard_ready") {
+      const label = status === "approved" ? t("statusApproved") : t("statusScorecardReady");
+      return <span className="badge badge-accepted">{label}</span>;
+    }
+    if (status === "doctor_review_pending") return <span className="badge badge-amber">{t("reviewPending")}</span>;
+    return <span className="badge badge-cyan">{t("statusSubmitted")}</span>;
+  }
 
   function markApproved(id: string) {
     updatePatientSubmission(id, { status: "approved" });
@@ -17,51 +30,85 @@ export default function PatientSubmissionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#2f3037]">
-      <DashboardNav />
-      <main className="mx-auto max-w-6xl px-6 pb-24 pt-28">
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Patient submissions</p>
-            <h1 className="mt-2 text-[40px] font-bold tracking-[-0.04em]">Submitted evidence</h1>
-          </div>
-          <Link href={`/${locale}/patient/new`} className="rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">New submission</Link>
-        </div>
-        <div className="overflow-hidden rounded-lg border border-[#e5e8f0]">
-          {submissions.length ? (
-            <table className="w-full min-w-[720px] text-left text-[14px]">
-              <thead className="bg-[#f7f9fc] text-[12px] uppercase tracking-[0.04em] text-[#73798a]">
-                <tr><th className="px-5 py-3">Submission</th><th className="px-5 py-3">Patient</th><th className="px-5 py-3">Evidence</th><th className="px-5 py-3">Status</th><th className="px-5 py-3">Updated</th><th className="px-5 py-3">Action</th></tr>
-              </thead>
-              <tbody className="divide-y divide-[#eef1f6]">
-                {submissions.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-5 py-4 font-bold text-[#2536a0]">{item.id.slice(0, 8)}</td>
-                    <td className="px-5 py-4">{item.patientName ?? "Unnamed patient"}</td>
-                    <td className="px-5 py-4">{[item.notes && "notes", item.photoFileName && "photo", item.labFileName && "lab", item.geneticEvidence && "genetic"].filter(Boolean).join(", ")}</td>
-                    <td className="px-5 py-4"><span className="rounded-full bg-[#eaf6ff] px-3 py-1 text-[12px] font-bold text-[#2536a0]">{item.status.replaceAll("_", " ")}</span></td>
-                    <td className="px-5 py-4 text-[#6a7080]">{new Intl.DateTimeFormat("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.timestamp))}</td>
-                    <td className="px-5 py-4">
-                      {item.status === "approved" || item.status === "scorecard_ready" ? (
-                        <Link href={`/${locale}/patient/reports`} className="font-bold text-[#20aeea]">View report</Link>
-                      ) : (
-                        <button type="button" onClick={() => markApproved(item.id)} className="rounded border border-[#cfd5e2] px-3 py-2 text-[12px] font-bold text-[#2536a0]">
-                          Doctor approve
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="p-10 text-center">
-              <h2 className="text-[24px] font-bold">No submissions yet</h2>
-              <Link href={`/${locale}/patient/new`} className="mt-6 inline-flex rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">Create submission</Link>
+    <RoleGuard allowed={["patient"]} redirectTo="/dashboard">
+      <div className="min-h-screen bg-[#F7F8FA] text-[#0D1B2A]">
+        <DashboardNav />
+        <main className="mx-auto max-w-[1200px] px-6 pb-24 pt-28">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <p className="section-label mb-2">{t("title")}</p>
+              <h1 className="text-[36px] font-[800] tracking-[-0.03em]">{t("headline")}</h1>
             </div>
-          )}
-        </div>
-      </main>
-    </div>
+            <Link
+              href={`/${locale}/patient/new`}
+              className="inline-flex h-10 items-center gap-2 rounded bg-[#0AAFCE] px-5 text-[13px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              {t("newSubmission")}
+            </Link>
+          </div>
+
+          <div className="overflow-hidden rounded border border-[#DDE3ED] bg-white">
+            {submissions.length ? (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-left">
+                  <thead className="border-b border-[#DDE3ED] bg-[#F7F8FA]">
+                    <tr>
+                      {[t("colSubmission"), t("colPatient"), t("colEvidence"), t("colStatus"), t("colSubmitted"), t("colAction")].map((h) => (
+                        <th key={h} className="px-5 py-3 text-[11px] font-[700] uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F0F2F5]">
+                    {submissions.map((item) => (
+                      <tr key={item.id} className={cn("transition-colors hover:bg-[#F7F8FA]")}>
+                        <td className="px-5 py-4 font-[700] text-[#0AAFCE]">{item.id.slice(0, 8)}</td>
+                        <td className="px-5 py-4 text-[13.5px] text-[#0D1B2A]">{item.patientName ?? t("unnamedPatient")}</td>
+                        <td className="px-5 py-4 text-[13px] text-[#4A5568]">
+                          {[item.notes && t("notes"), item.photoFileName && t("photo"), item.labFileName && t("lab"), item.geneticEvidence && t("genetic")].filter(Boolean).join(", ") || "—"}
+                        </td>
+                        <td className="px-5 py-4">{statusBadge(item.status)}</td>
+                        <td className="px-5 py-4 text-[12.5px] text-[#8A94A6]">
+                          {new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.timestamp))}
+                        </td>
+                        <td className="px-5 py-4">
+                          {item.status === "approved" || item.status === "scorecard_ready" ? (
+                            <Link href={`/${locale}/patient/reports`} className="text-[13px] font-[700] text-[#0AAFCE] hover:underline">
+                              {t("viewReport")}
+                            </Link>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => markApproved(item.id)}
+                              className="rounded border border-[#DDE3ED] px-3 py-1 text-[12px] font-[700] text-[#4A5568] transition-colors hover:border-[#0AAFCE] hover:text-[#0D1B2A]"
+                            >
+                              {t("doctorApprove")}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center py-16 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-[#F0F2F5]">
+                  <Inbox className="h-6 w-6 text-[#8A94A6]" />
+                </div>
+                <h2 className="mt-4 text-[20px] font-[800]">{t("noSubmissions")}</h2>
+                <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("noSubmissionsDesc")}</p>
+                <Link
+                  href={`/${locale}/patient/new`}
+                  className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                >
+                  {t("createSubmission")}
+                </Link>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </RoleGuard>
   );
 }

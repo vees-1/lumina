@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import Link from "next/link";
@@ -5,24 +6,30 @@ import { motion } from "framer-motion";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { DEMO_CASES, type DemoCase } from "@/lib/demo-cases";
+import { formatNumber } from "@/lib/formatters";
+import { useLocale, useTranslations } from "next-intl";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
-const MODALITY_LABEL: Record<string, string> = {
-  notes: "Clinical Notes",
-  photo: "Photo",
-  lab: "Lab",
-  vcf: "Genomic",
-};
-
-const MODALITY_COLORS: Record<string, { bg: string; color: string }> = {
-  notes: { bg: "oklch(0.52 0.21 255 / 0.08)", color: "oklch(0.38 0.21 255)" },
-  photo: { bg: "oklch(0.55 0.18 200 / 0.08)", color: "oklch(0.38 0.18 200)" },
-  lab: { bg: "oklch(0.52 0.20 285 / 0.08)", color: "oklch(0.38 0.20 285)" },
-  vcf: { bg: "oklch(0.46 0.19 160 / 0.08)", color: "oklch(0.32 0.19 160)" },
-};
-
 function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
+  const t = useTranslations("demoPage");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+
+  const MODALITY_LABEL: Record<string, string> = {
+    notes: tc("modalityNotes"),
+    photo: tc("modalityPhoto"),
+    lab: tc("modalityLab"),
+    vcf: tc("modalityVcf"),
+  };
+
+  const MODALITY_COLORS: Record<string, { bg: string; color: string }> = {
+    notes: { bg: "oklch(0.52 0.21 255 / 0.08)", color: "oklch(0.38 0.21 255)" },
+    photo: { bg: "oklch(0.55 0.18 200 / 0.08)", color: "oklch(0.38 0.18 200)" },
+    lab: { bg: "oklch(0.52 0.20 285 / 0.08)", color: "oklch(0.38 0.20 285)" },
+    vcf: { bg: "oklch(0.46 0.19 160 / 0.08)", color: "oklch(0.32 0.19 160)" },
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -35,19 +42,19 @@ function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
       {/* ORPHA badge */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-[11px] font-mono text-muted-foreground px-2 py-0.5 rounded-full bg-[oklch(0.97_0_0)] border border-black/[0.06]">
-          ORPHA:{demo.orpha_code}
+          ORPHA:{formatNumber(locale, demo.orpha_code)}
         </span>
         <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[oklch(0.52_0.21_255/0.08)] text-[oklch(0.38_0.21_255)]">
-          {demo.confidence_expected}% match
+          {t("match", { percent: demo.confidence_expected })}
         </span>
       </div>
 
       {/* Title + description */}
       <h3 className="serif text-[18px] tracking-tight mb-2 leading-snug">
-        {demo.title}
+        {t(`caseTitles.${demo.id}`)}
       </h3>
       <p className="text-[13px] text-muted-foreground leading-relaxed flex-1 mb-4">
-        {demo.description}
+        {t(`caseDescriptions.${demo.id}`)}
       </p>
 
       {/* Modalities */}
@@ -69,10 +76,10 @@ function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
       {/* Teaching point */}
       <div className="rounded-xl bg-[oklch(0.975_0_0)] border border-black/[0.05] p-3 mb-5">
         <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-          Teaching point
+          {t("teachingPoint")}
         </p>
         <p className="text-[12px] text-foreground leading-relaxed">
-          {demo.teaching_point}
+          {t(`caseTeaching.${demo.id}`)}
         </p>
       </div>
 
@@ -82,7 +89,7 @@ function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
           variant="outline"
           className="w-full rounded-xl h-9 text-[13px] border-black/10 hover:bg-[oklch(0.52_0.21_255/0.05)] hover:border-[oklch(0.52_0.21_255/0.3)] transition-colors"
         >
-          View case walkthrough
+          {t("viewWalkthrough")}
         </Button>
       </Link>
     </motion.div>
@@ -90,6 +97,7 @@ function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
 }
 
 function EmptyDemoCases() {
+  const t = useTranslations("demoPage");
   return (
     <div className="col-span-3 flex flex-col items-center justify-center py-20 text-center">
       <div className="w-14 h-14 rounded-2xl bg-white border border-black/[0.06] flex items-center justify-center mb-4">
@@ -97,13 +105,18 @@ function EmptyDemoCases() {
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h3 className="text-[16px] font-semibold mb-1">Demo cases coming soon</h3>
-      <p className="text-[13px] text-muted-foreground">Check back after data ingestion is complete.</p>
+      <h3 className="text-[16px] font-semibold mb-1">{t("emptyTitle")}</h3>
+      <p className="text-[13px] text-muted-foreground">{t("emptyDesc")}</p>
     </div>
   );
 }
 
 export default function DemoPage() {
+  const t = useTranslations("demoPage");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+  const brandName = tc("brandName");
+
   return (
     <div className="relative min-h-screen bg-[oklch(0.975_0_0)] overflow-hidden">
       {/* Background orbs */}
@@ -130,14 +143,14 @@ export default function DemoPage() {
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[oklch(0.52_0.21_255/0.08)] border border-[oklch(0.52_0.21_255/0.2)] text-[12px] font-medium text-[oklch(0.38_0.21_255)] mb-6"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.52_0.21_255)] animate-pulse" />
-            Interactive demo
+            {t("badge")}
           </motion.div>
 
           <h1 className="serif text-[42px] md:text-[52px] tracking-tight leading-[1.1] mb-4">
-            See Lumina in action
+            {t("heroTitle", { brandName })}
           </h1>
           <p className="text-[16px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Real rare disease cases, step by step. Explore how Lumina combines multimodal clinical data to reach a diagnosis.
+            {t("heroSubtitle", { brandName })}
           </p>
 
           <motion.div
@@ -146,14 +159,14 @@ export default function DemoPage() {
             transition={{ delay: 0.2, duration: 0.4, ease }}
             className="flex items-center justify-center gap-3 mt-8"
           >
-            <Link href="/sign-up">
+            <Link href={`/${locale}/sign-up`}>
               <Button className="rounded-full bg-foreground text-background h-10 px-6 text-[14px]">
-                Get started free
+                {t("getStarted")}
               </Button>
             </Link>
-            <Link href="/sign-in">
+            <Link href={`/${locale}/sign-in`}>
               <Button variant="outline" className="rounded-full h-10 px-6 text-[14px] border-black/10">
-                Sign in
+                {t("signIn")}
               </Button>
             </Link>
           </motion.div>
@@ -168,22 +181,25 @@ export default function DemoPage() {
             className="grid grid-cols-3 gap-4 mb-12 max-w-lg mx-auto"
           >
             {[
-              { label: "Demo cases", value: DEMO_CASES.length.toString() },
-              { label: "Modalities", value: "4" },
+              { label: t("statsCases"), value: DEMO_CASES.length },
+              { label: t("statsModalities"), value: 4 },
               {
-                label: "Avg confidence",
-                value:
-                  Math.round(
-                    DEMO_CASES.reduce((s, c) => s + c.confidence_expected, 0) /
-                      DEMO_CASES.length
-                  ) + "%",
+                label: t("statsConfidence"),
+                value: Math.round(
+                  DEMO_CASES.reduce((s, c) => s + c.confidence_expected, 0) /
+                    DEMO_CASES.length
+                ),
               },
             ].map((s) => (
               <div
                 key={s.label}
                 className="bg-white/70 backdrop-blur-sm rounded-2xl border border-black/[0.06] px-4 py-3 text-center"
               >
-                <div className="text-[20px] font-bold tracking-tight">{s.value}</div>
+                <div className="text-[20px] font-bold tracking-tight">
+                  {s.label === t("statsConfidence")
+                    ? `${formatNumber(locale, s.value)}%`
+                    : formatNumber(locale, s.value)}
+                </div>
                 <div className="text-[12px] text-muted-foreground">{s.label}</div>
               </div>
             ))}
@@ -211,14 +227,14 @@ export default function DemoPage() {
             className="text-center mt-16"
           >
             <h2 className="serif text-[26px] tracking-tight mb-3">
-              Ready to analyse your own cases?
+              {t("footerTitle")}
             </h2>
             <p className="text-[14px] text-muted-foreground mb-6">
-              Sign up and run your first case in under 2 minutes.
+              {t("footerDesc")}
             </p>
-            <Link href="/sign-up">
+            <Link href={`/${locale}/sign-up`}>
               <Button className="rounded-full bg-foreground text-background h-10 px-8 text-[14px]">
-                Start for free
+                {t("footerBtn")}
               </Button>
             </Link>
           </motion.div>

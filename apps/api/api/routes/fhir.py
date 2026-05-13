@@ -7,6 +7,104 @@ from pydantic import BaseModel
 
 router = APIRouter(prefix="/fhir", tags=["fhir"])
 
+_LANG_ALIASES = {
+    "en": "en",
+    "en-us": "en",
+    "en-gb": "en",
+    "fr": "fr",
+    "fr-fr": "fr",
+    "es": "es",
+    "es-es": "es",
+    "de": "de",
+    "de-de": "de",
+    "hi": "hi",
+    "hi-in": "hi",
+    "ja": "ja",
+    "ja-jp": "ja",
+    "zh": "zh",
+    "zh-cn": "zh",
+    "zh-tw": "zh",
+}
+
+_FHIR_TEXT = {
+    "en": {
+        "unconfirmed": "Unconfirmed",
+        "lab_report": "Laboratory report",
+        "diagnosis": "Diagnosis",
+        "vital_signs": "Vital signs",
+        "title": "Lumina Rare Disease Differential Diagnosis Report",
+        "differential": "Differential Diagnoses",
+        "phenotypes": "Observed Phenotypes (HPO)",
+    },
+    "fr": {
+        "unconfirmed": "Non confirmé",
+        "lab_report": "Compte rendu de laboratoire",
+        "diagnosis": "Diagnostic",
+        "vital_signs": "Constantes vitales",
+        "title": "Rapport de diagnostic différentiel des maladies rares Lumina",
+        "differential": "Diagnostics différentiels",
+        "phenotypes": "Phénotypes observés (HPO)",
+    },
+    "es": {
+        "unconfirmed": "No confirmado",
+        "lab_report": "Informe de laboratorio",
+        "diagnosis": "Diagnóstico",
+        "vital_signs": "Signos vitales",
+        "title": "Informe de diagnóstico diferencial de enfermedades raras de Lumina",
+        "differential": "Diagnósticos diferenciales",
+        "phenotypes": "Fenotipos observados (HPO)",
+    },
+    "de": {
+        "unconfirmed": "Nicht bestätigt",
+        "lab_report": "Laborbericht",
+        "diagnosis": "Diagnose",
+        "vital_signs": "Vitalzeichen",
+        "title": "Lumina Bericht zur Differenzialdiagnose seltener Erkrankungen",
+        "differential": "Differenzialdiagnosen",
+        "phenotypes": "Beobachtete Phänotypen (HPO)",
+    },
+    "hi": {
+        "unconfirmed": "अपुष्ट",
+        "lab_report": "प्रयोगशाला रिपोर्ट",
+        "diagnosis": "निदान",
+        "vital_signs": "महत्वपूर्ण संकेत",
+        "title": "Lumina दुर्लभ रोग विभेदक निदान रिपोर्ट",
+        "differential": "विभेदक निदान",
+        "phenotypes": "देखे गए फेनोटाइप (HPO)",
+    },
+    "ja": {
+        "unconfirmed": "未確認",
+        "lab_report": "検査報告書",
+        "diagnosis": "診断",
+        "vital_signs": "バイタルサイン",
+        "title": "Lumina 希少疾患鑑別診断レポート",
+        "differential": "鑑別診断",
+        "phenotypes": "観察された表現型 (HPO)",
+    },
+    "zh": {
+        "unconfirmed": "未确认",
+        "lab_report": "实验室报告",
+        "diagnosis": "诊断",
+        "vital_signs": "生命体征",
+        "title": "Lumina 罕见病鉴别诊断报告",
+        "differential": "鉴别诊断",
+        "phenotypes": "观察到的表型（HPO）",
+    },
+}
+
+
+def _normalize_lang(lang: str | None) -> str:
+    if not lang:
+        return "en"
+    return _LANG_ALIASES.get(
+        lang.strip().lower(), _LANG_ALIASES.get(lang.strip().lower().split("-")[0], "en")
+    )
+
+
+def _t(lang: str, key: str) -> str:
+    bundle = _FHIR_TEXT.get(lang, _FHIR_TEXT["en"])
+    return bundle.get(key, _FHIR_TEXT["en"].get(key, key))
+
 
 class DiagnosisItem(BaseModel):
     orpha_code: int
@@ -25,6 +123,8 @@ class FHIRExportRequest(BaseModel):
     diagnoses: list[DiagnosisItem]
     hpo_terms: list[HPOTermItem]
     case_id: str
+    lang: str | None = None
+    locale: str | None = None
 
 
 def _uuid() -> str:
@@ -40,6 +140,7 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
     now = _now()
     bundle_id = _uuid()
     composition_id = _uuid()
+    lang = _normalize_lang(body.lang or body.locale)
 
     # Build Condition resources
     condition_entries = []
@@ -76,7 +177,7 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
                             {
                                 "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
                                 "code": "unconfirmed",
-                                "display": "Unconfirmed",
+                                "display": _t(lang, "unconfirmed"),
                             }
                         ]
                     },
@@ -140,12 +241,12 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
                     {
                         "system": "http://loinc.org",
                         "code": "11502-2",
-                        "display": "Laboratory report",
+                        "display": _t(lang, "lab_report"),
                     }
                 ]
             },
             "date": now,
-            "title": "Lumina Rare Disease Differential Diagnosis Report",
+            "title": _t(lang, "title"),
             "identifier": {
                 "system": "http://lumina.ai/cases",
                 "value": body.case_id,
@@ -157,26 +258,26 @@ async def export_fhir(body: FHIRExportRequest) -> JSONResponse:
             ],
             "section": [
                 {
-                    "title": "Differential Diagnoses",
+                    "title": _t(lang, "differential"),
                     "code": {
                         "coding": [
                             {
                                 "system": "http://loinc.org",
                                 "code": "29548-5",
-                                "display": "Diagnosis",
+                                "display": _t(lang, "diagnosis"),
                             }
                         ]
                     },
                     "entry": condition_refs,
                 },
                 {
-                    "title": "Observed Phenotypes (HPO)",
+                    "title": _t(lang, "phenotypes"),
                     "code": {
                         "coding": [
                             {
                                 "system": "http://loinc.org",
                                 "code": "8716-3",
-                                "display": "Vital signs",
+                                "display": _t(lang, "vital_signs"),
                             }
                         ]
                     },

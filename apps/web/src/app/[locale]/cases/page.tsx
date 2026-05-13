@@ -2,72 +2,136 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
+import { RoleGuard } from "@/components/lumina/role-guard";
 import { exportAllCases, getCaseSummaries } from "@/lib/api";
+import { formatDateTime, formatNumber } from "@/lib/formatters";
 import type { CaseSummary } from "@/types/lumina";
+import { Download, Plus, ClipboardList } from "lucide-react";
+
+function confidenceColor(pct: number) {
+  if (pct >= 70) return "bg-[#1A7F4B]";
+  if (pct >= 40) return "bg-[#D4860A]";
+  return "bg-[#C0392B]";
+}
 
 export default function CasesPage() {
   const locale = useLocale();
+  const t = useTranslations("dashboard");
   const [cases] = useState<CaseSummary[]>(() => getCaseSummaries());
+  const pending = cases.filter((item) => item.status === "pending").length;
+  const confirmed = cases.filter((item) => item.status === "confirmed").length;
 
   return (
-    <div className="min-h-screen bg-white text-[#2f3037]">
-      <DashboardNav />
-      <main className="mx-auto max-w-6xl px-6 pb-24 pt-28">
-        <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#2536a0]">Cases</p>
-            <h1 className="mt-2 text-[40px] font-bold tracking-[-0.04em]">My cases</h1>
-            <p className="mt-2 text-[16px] text-[#62687a]">Every completed diagnostic workflow appears here after scoring.</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button type="button" onClick={exportAllCases} className="rounded border border-[#cfd5e2] px-5 py-3 text-[14px] font-bold text-[#343741]">Export JSON</button>
-            <Link href={`/${locale}/new-case`} className="rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">New case</Link>
-          </div>
-        </div>
+    <RoleGuard allowed={["doctor"]} redirectTo="/patient">
+      <div className="min-h-screen bg-[#F7F8FA] text-[#0D1B2A]">
+        <DashboardNav />
+        <main className="mx-auto max-w-[1200px] px-6 pb-24 pt-28">
 
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <div className="border border-[#e5e8f0] p-5"><p className="text-[32px] font-bold text-[#2536a0]">{cases.length}</p><p className="text-[14px] text-[#62687a]">Total cases</p></div>
-          <div className="border border-[#e5e8f0] p-5"><p className="text-[32px] font-bold text-[#2536a0]">{cases.filter((item) => item.status === "pending").length}</p><p className="text-[14px] text-[#62687a]">Pending review</p></div>
-          <div className="border border-[#e5e8f0] p-5"><p className="text-[32px] font-bold text-[#2536a0]">{cases.filter((item) => item.status === "confirmed").length}</p><p className="text-[14px] text-[#62687a]">Confirmed outputs</p></div>
-        </div>
-
-        <div className="overflow-hidden rounded-lg border border-[#e5e8f0] bg-white">
-          {cases.length ? (
-            <table className="w-full min-w-[760px] text-left text-[14px]">
-              <thead className="bg-[#f7f9fc] text-[12px] uppercase tracking-[0.04em] text-[#73798a]">
-                <tr>
-                  <th className="px-5 py-3">Case</th>
-                  <th className="px-5 py-3">Patient</th>
-                  <th className="px-5 py-3">Top result</th>
-                  <th className="px-5 py-3">Confidence</th>
-                  <th className="px-5 py-3">HPO</th>
-                  <th className="px-5 py-3">Updated</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#eef1f6]">
-                {cases.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#fbfcfe]">
-                    <td className="px-5 py-4"><Link href={`/${locale}/case/${item.id}`} className="font-bold text-[#2536a0]">{item.id.slice(0, 8)}</Link></td>
-                    <td className="px-5 py-4">{item.patientName ?? "Unnamed patient"}</td>
-                    <td className="px-5 py-4">{item.topDiagnosis}</td>
-                    <td className="px-5 py-4">{item.confidence.toFixed(0)}%</td>
-                    <td className="px-5 py-4">{item.hpoCount}</td>
-                    <td className="px-5 py-4 text-[#6a7080]">{new Intl.DateTimeFormat("en", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.timestamp))}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="p-10 text-center">
-              <h2 className="text-[24px] font-bold">No cases yet</h2>
-              <p className="mt-2 text-[#62687a]">Run a new case to populate the case history.</p>
-              <Link href={`/${locale}/new-case`} className="mt-6 inline-flex rounded bg-[#38b6e8] px-5 py-3 text-[14px] font-bold text-white">Start first case</Link>
+          {/* Header */}
+          <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="section-label mb-2">{t("title")}</p>
+              <h1 className="text-[36px] font-[800] tracking-[-0.03em]">{t("title")}</h1>
+              <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("subtitle")}</p>
             </div>
-          )}
-        </div>
-      </main>
-    </div>
+            <div className="flex flex-wrap gap-2.5">
+              <button
+                type="button"
+                onClick={exportAllCases}
+                className="inline-flex h-10 items-center gap-2 rounded-none border border-[#DDE3ED] bg-white px-5 text-[13px] font-[700] text-[#4A5568] transition-colors hover:border-[#0D1B2A] hover:text-[#0D1B2A]"
+              >
+                <Download className="h-3.5 w-3.5" />
+                {t("exportAll")}
+              </button>
+              <Link
+                href={`/${locale}/new-case`}
+                className="inline-flex h-10 items-center gap-2 rounded-none bg-[#0AAFCE] px-5 text-[13px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                {t("newCase")}
+              </Link>
+            </div>
+          </div>
+
+          {/* Summary metrics */}
+          <div className="mb-6 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: t("totalCases"), value: cases.length },
+              { label: t("statusPending"), value: pending },
+              { label: t("confirmed"), value: confirmed },
+            ].map((m) => (
+              <div key={m.label} className="rounded-sm border border-[#DDE3ED] bg-white p-5 shadow-[0_2px_8px_rgba(13,27,42,0.04)]">
+                <p className="text-[30px] font-[800] tracking-[-0.04em] text-[#0D1B2A]">{formatNumber(locale, m.value)}</p>
+                <p className="mt-0.5 text-[12.5px] font-[600] text-[#8A94A6]">{m.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Cases table */}
+          <div className="overflow-hidden rounded-sm border border-[#DDE3ED] bg-white">
+            {cases.length ? (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[780px] text-left">
+                  <thead className="border-b border-[#DDE3ED] bg-[#F7F8FA]">
+                    <tr>
+                      {[t("thCaseId"), t("thPatient"), t("thTopResult"), t("thConfidence"), t("thHpoCount"), t("thUpdated")].map((h) => (
+                        <th key={h} className="px-5 py-3 text-[11px] font-[700] uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F0F2F5]">
+                    {cases.map((item) => {
+                      const pct = Math.round(item.confidence);
+                      return (
+                        <tr key={item.id} className="transition-colors hover:bg-[#F7F8FA]">
+                          <td className="px-5 py-4">
+                            <Link href={`/${locale}/case/${item.id}`} className="font-[700] text-[#0AAFCE] hover:underline">
+                              {item.id.slice(0, 8)}
+                            </Link>
+                          </td>
+                          <td className="px-5 py-4 text-[13.5px] text-[#0D1B2A]">{item.patientName ?? t("unnamedPatient")}</td>
+                          <td className="px-5 py-4 text-[13.5px] text-[#0D1B2A]">{item.topDiagnosis}</td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-2.5">
+                              <div className="h-1.5 w-20 overflow-hidden rounded-none bg-[#F0F2F5]">
+                                <div
+                                  className={`h-full bar-fill ${confidenceColor(pct)}`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                              <span className="text-[12.5px] font-[700] text-[#0D1B2A]">{formatNumber(locale, pct)}%</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4 text-[13.5px] text-[#0D1B2A]">{formatNumber(locale, item.hpoCount)}</td>
+                          <td className="px-5 py-4 text-[12.5px] text-[#8A94A6]">
+                            {formatDateTime(locale, item.timestamp, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center py-16 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-[#F0F2F5]">
+                  <ClipboardList className="h-6 w-6 text-[#8A94A6]" />
+                </div>
+                <h2 className="mt-4 text-[20px] font-[800]">{t("noCases")}</h2>
+                <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("emptyStateDesc")}</p>
+                <Link
+                  href={`/${locale}/new-case`}
+                  className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                >
+                  {t("startFirst")}
+                </Link>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </RoleGuard>
   );
 }

@@ -57,7 +57,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         }
         setDone(true);
       } catch {
-        setError("Letter generation failed — is the API running?");
+        setError(t("errorApi"));
       } finally {
         setStreaming(false);
       }
@@ -78,7 +78,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `referral_letter_${id}.txt`;
+    a.download = t("filename", { id: id.slice(0, 8).toUpperCase() });
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -107,7 +107,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
       <html lang="${locale}">
       <head>
         <meta charset="utf-8">
-        <title>Referral Letter - ${caseData?.patientContext?.patientName || id}</title>
+        <title>${t("printTitle", { name: caseData?.patientContext?.patientName || id.slice(0, 8).toUpperCase() })}</title>
         <style>
           @page {
             size: A4;
@@ -156,21 +156,21 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
         <div class="letter-wrapper">
           <div class="letter-header">
             <div>
-              <strong>${caseData?.patientContext?.referringPhysicianName || "Practitioner"}</strong><br />
-              ${caseData?.patientContext?.referringClinic || "Clinical Dept"}<br />
+              <strong>${caseData?.patientContext?.referringPhysicianName || t("practitioner")}</strong><br />
+              ${caseData?.patientContext?.referringClinic || t("clinicalDept")}<br />
               ${new Date().toLocaleDateString(locale, { dateStyle: 'long' })}
             </div>
             <div style="text-align: right;">
-              To: <strong>${caseData?.patientContext?.recipientSpecialist || "Consultant"}</strong><br />
-              ${caseData?.patientContext?.recipientHospital || "Medical Center"}
+              ${t("toLabel")} <strong>${caseData?.patientContext?.recipientSpecialist || t("consultant")}</strong><br />
+              ${caseData?.patientContext?.recipientHospital || t("medicalCenter")}
             </div>
           </div>
 
           <div class="patient-box">
-            <div><strong>${tc("patient")}:</strong> ${caseData?.patientContext?.patientName || "Anonymous"}</div>
-            <div><strong>${tc("age")}:</strong> ${caseData?.patientContext?.age || "N/A"}</div>
-            <div><strong>${tc("sex")}:</strong> ${caseData?.patientContext?.sex || "N/A"}</div>
-            <div><strong>Ref:</strong> ${id.slice(0, 8).toUpperCase()}</div>
+            <div><strong>${tc("patient")}:</strong> ${caseData?.patientContext?.patientName || t("anonymous")}</div>
+            <div><strong>${tc("age")}:</strong> ${caseData?.patientContext?.age || tc("notApplicable")}</div>
+            <div><strong>${tc("sex")}:</strong> ${caseData?.patientContext?.sex || tc("notApplicable")}</div>
+            <div><strong>${t("ref")}:</strong> ${id.slice(0, 8).toUpperCase()}</div>
           </div>
 
           <div class="letter-content">
@@ -184,7 +184,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
     win.document.close();
   };
 
-  const topDx = caseData?.rankings?.[0]?.name ?? "Unknown";
+  const topDx = caseData?.rankings?.[0]?.name ?? t("unknown");
   const wordCount = letter.split(/\s+/).filter(Boolean).length;
 
   return (
@@ -200,7 +200,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h1 className="text-xl font-semibold tracking-tight">{t("title")}</h1>
+              <h1 className="text-xl font-editorial">{t("title")}</h1>
               <p className="text-[13px] text-muted-foreground mt-0.5">{topDx}</p>
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
                   onClick={() => window.location.reload()}
                   className="mt-2 text-blue-600"
                 >
-                  Try again
+                  {t("tryAgain")}
                 </Button>
               </div>
             ) : streaming && letter === "" ? (
@@ -296,7 +296,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
                 <p className="text-[13px] text-muted-foreground font-medium">{t("generating")}</p>
               </div>
             ) : (
-              <div className="max-w-none">
+              <div className="max-w-none font-document">
                 {editing ? (
                   <textarea
                     value={letter}

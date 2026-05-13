@@ -7,6 +7,216 @@ from sqlmodel import Session, col, select
 
 router = APIRouter(prefix="/disease", tags=["disease"])
 
+_LANG_ALIASES = {
+    "en": "en",
+    "en-us": "en",
+    "en-gb": "en",
+    "fr": "fr",
+    "fr-fr": "fr",
+    "es": "es",
+    "es-es": "es",
+    "de": "de",
+    "de-de": "de",
+    "hi": "hi",
+    "hi-in": "hi",
+    "ja": "ja",
+    "ja-jp": "ja",
+    "zh": "zh",
+    "zh-cn": "zh",
+    "zh-tw": "zh",
+}
+
+_SUMMARY_TEXT = {
+    "en": {
+        "x-linked dominant": "X-linked dominant",
+        "x-linked recessive": "X-linked recessive",
+        "x-linked": "X-linked",
+        "autosomal dominant": "Autosomal dominant",
+        "autosomal recessive": "Autosomal recessive",
+        "mitochondrial": "Mitochondrial",
+        "prenatal": "Prenatal",
+        "congenital": "Congenital",
+        "neonatal": "Neonatal",
+        "infancy": "Infancy",
+        "childhood": "Childhood",
+        "juvenile": "Juvenile",
+        "adolescence": "Adolescence",
+        "adult": "Adult",
+        "late onset": "Late onset",
+        "early onset": "Early onset",
+        "targeted": "Targeted molecular confirmation of {genes}",
+        "panel": "Targeted molecular panel including {genes}",
+        "phenotype_panel": "Phenotype-directed molecular panel including {genes}",
+        "clinical_workup": "Clinical genetics workup with phenotype-directed molecular confirmation",
+        "prevalence_value": "{type}: {value}{suffix}",
+        "prevalence_class": "{type}: {value}{suffix}",
+        "prevalence_type": "{type}{suffix}",
+    },
+    "fr": {
+        "x-linked dominant": "Liée à l'X dominante",
+        "x-linked recessive": "Liée à l'X récessive",
+        "x-linked": "Liée à l'X",
+        "autosomal dominant": "Autosomique dominante",
+        "autosomal recessive": "Autosomique récessive",
+        "mitochondrial": "Mitochondriale",
+        "prenatal": "Prénatale",
+        "congenital": "Congénitale",
+        "neonatal": "Néonatale",
+        "infancy": "Petite enfance",
+        "childhood": "Enfance",
+        "juvenile": "Juvénile",
+        "adolescence": "Adolescence",
+        "adult": "Adulte",
+        "late onset": "Début tardif",
+        "early onset": "Début précoce",
+        "targeted": "Confirmation moléculaire ciblée de {genes}",
+        "panel": "Panel moléculaire ciblé incluant {genes}",
+        "phenotype_panel": "Panel moléculaire orienté par le phénotype incluant {genes}",
+        "clinical_workup": "Bilan de génétique clinique avec confirmation moléculaire orientée par le phénotype",
+        "prevalence_value": "{type}: {value}{suffix}",
+        "prevalence_class": "{type}: {value}{suffix}",
+        "prevalence_type": "{type}{suffix}",
+    },
+    "es": {
+        "x-linked dominant": "Ligada al X dominante",
+        "x-linked recessive": "Ligada al X recesiva",
+        "x-linked": "Ligada al X",
+        "autosomal dominant": "Autosómica dominante",
+        "autosomal recessive": "Autosómica recesiva",
+        "mitochondrial": "Mitocondrial",
+        "prenatal": "Prenatal",
+        "congenital": "Congénita",
+        "neonatal": "Neonatal",
+        "infancy": "Lactancia",
+        "childhood": "Infancia",
+        "juvenile": "Juvenil",
+        "adolescence": "Adolescencia",
+        "adult": "Adulto",
+        "late onset": "Inicio tardío",
+        "early onset": "Inicio temprano",
+        "targeted": "Confirmación molecular dirigida de {genes}",
+        "panel": "Panel molecular dirigido que incluye {genes}",
+        "phenotype_panel": "Panel molecular dirigido por el fenotipo que incluye {genes}",
+        "clinical_workup": "Estudio de genética clínica con confirmación molecular dirigida por el fenotipo",
+        "prevalence_value": "{type}: {value}{suffix}",
+        "prevalence_class": "{type}: {value}{suffix}",
+        "prevalence_type": "{type}{suffix}",
+    },
+    "de": {
+        "x-linked dominant": "X-chromosomal-dominant",
+        "x-linked recessive": "X-chromosomal-rezessiv",
+        "x-linked": "X-chromosomal",
+        "autosomal dominant": "Autosomal-dominant",
+        "autosomal recessive": "Autosomal-rezessiv",
+        "mitochondrial": "Mitochondrial",
+        "prenatal": "Pränatal",
+        "congenital": "Kongenital",
+        "neonatal": "Neonatal",
+        "infancy": "Säuglingsalter",
+        "childhood": "Kindheit",
+        "juvenile": "Juvenil",
+        "adolescence": "Adoleszenz",
+        "adult": "Erwachsen",
+        "late onset": "Später Beginn",
+        "early onset": "Früher Beginn",
+        "targeted": "Gezielte molekulare Bestätigung von {genes}",
+        "panel": "Gezieltes molekulares Panel einschließlich {genes}",
+        "phenotype_panel": "Phänotypgesteuertes molekulares Panel einschließlich {genes}",
+        "clinical_workup": "Klinisch-genetische Abklärung mit phänotypgesteuerter molekularer Bestätigung",
+        "prevalence_value": "{type}: {value}{suffix}",
+        "prevalence_class": "{type}: {value}{suffix}",
+        "prevalence_type": "{type}{suffix}",
+    },
+    "hi": {
+        "x-linked dominant": "X-लिंक्ड प्रभावी",
+        "x-linked recessive": "X-लिंक्ड अप्रभावी",
+        "x-linked": "X-लिंक्ड",
+        "autosomal dominant": "ऑटोसोमल प्रभावी",
+        "autosomal recessive": "ऑटोसोमल अप्रभावी",
+        "mitochondrial": "माइटोकॉन्ड्रियल",
+        "prenatal": "जन्म-पूर्व",
+        "congenital": "जन्मजात",
+        "neonatal": "नवजात",
+        "infancy": "शैशवावस्था",
+        "childhood": "बचपन",
+        "juvenile": "किशोरावस्था",
+        "adolescence": "किशोरावस्था",
+        "adult": "वयस्क",
+        "late onset": "देर से शुरू",
+        "early onset": "जल्दी शुरू",
+        "targeted": "{genes} की लक्षित आणविक पुष्टि",
+        "panel": "{genes} सहित लक्षित आणविक पैनल",
+        "phenotype_panel": "फेनोटाइप-निर्देशित आणविक पैनल जिसमें {genes} शामिल हैं",
+        "clinical_workup": "फेनोटाइप-निर्देशित आणविक पुष्टि के साथ नैदानिक आनुवंशिकी मूल्यांकन",
+        "prevalence_value": "{type}: {value}{suffix}",
+        "prevalence_class": "{type}: {value}{suffix}",
+        "prevalence_type": "{type}{suffix}",
+    },
+    "ja": {
+        "x-linked dominant": "X連鎖優性",
+        "x-linked recessive": "X連鎖劣性",
+        "x-linked": "X連鎖",
+        "autosomal dominant": "常染色体優性",
+        "autosomal recessive": "常染色体劣性",
+        "mitochondrial": "ミトコンドリア",
+        "prenatal": "出生前",
+        "congenital": "先天性",
+        "neonatal": "新生児期",
+        "infancy": "乳児期",
+        "childhood": "小児期",
+        "juvenile": "若年期",
+        "adolescence": "思春期",
+        "adult": "成人",
+        "late onset": "遅発",
+        "early onset": "早発",
+        "targeted": "{genes}の標的分子確認",
+        "panel": "{genes}を含む標的分子パネル",
+        "phenotype_panel": "{genes}を含む表現型主導の分子パネル",
+        "clinical_workup": "表現型主導の分子確認を伴う臨床遺伝学的評価",
+        "prevalence_value": "{type}: {value}{suffix}",
+        "prevalence_class": "{type}: {value}{suffix}",
+        "prevalence_type": "{type}{suffix}",
+    },
+    "zh": {
+        "x-linked dominant": "X连锁显性",
+        "x-linked recessive": "X连锁隐性",
+        "x-linked": "X连锁",
+        "autosomal dominant": "常染色体显性",
+        "autosomal recessive": "常染色体隐性",
+        "mitochondrial": "线粒体",
+        "prenatal": "产前",
+        "congenital": "先天性",
+        "neonatal": "新生儿期",
+        "infancy": "婴儿期",
+        "childhood": "儿童期",
+        "juvenile": "少年期",
+        "adolescence": "青春期",
+        "adult": "成人",
+        "late onset": "迟发",
+        "early onset": "早发",
+        "targeted": "{genes}的靶向分子确认",
+        "panel": "包含{genes}的靶向分子面板",
+        "phenotype_panel": "包含{genes}的表型导向分子面板",
+        "clinical_workup": "进行表型导向分子确认的临床遗传学评估",
+        "prevalence_value": "{type}: {value}{suffix}",
+        "prevalence_class": "{type}: {value}{suffix}",
+        "prevalence_type": "{type}{suffix}",
+    },
+}
+
+
+def _normalize_lang(lang: str | None) -> str:
+    if not lang:
+        return "en"
+    return _LANG_ALIASES.get(
+        lang.strip().lower(), _LANG_ALIASES.get(lang.strip().lower().split("-")[0], "en")
+    )
+
+
+def _text(lang: str, key: str) -> str:
+    bundle = _SUMMARY_TEXT.get(lang, _SUMMARY_TEXT["en"])
+    return bundle.get(key, _SUMMARY_TEXT["en"].get(key, key))
+
 
 class DiseaseSummary(BaseModel):
     orpha_code: int
@@ -29,6 +239,7 @@ async def search_diseases(
     disorder_type: str = Query(default="", description="Filter by disorder type"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=50, ge=1, le=200),
+    lang: str | None = Query(default=None, description="Optional locale for human-readable labels"),
 ) -> DiseaseSearchResult:
     engine = request.app.state.db_engine
     with Session(engine) as s:
@@ -138,7 +349,7 @@ def _dedupe_preserve_order(values: list[str]) -> list[str]:
     return ordered
 
 
-def _derive_inheritance(disease: Disease, phenotypes: list[PhenotypeItem]) -> str | None:
+def _derive_inheritance(disease: Disease, phenotypes: list[PhenotypeItem], lang: str) -> str | None:
     haystacks = [
         disease.name,
         disease.disorder_type,
@@ -149,16 +360,16 @@ def _derive_inheritance(disease: Disease, phenotypes: list[PhenotypeItem]) -> st
         lowered = text.lower()
         for needle, label in _INHERITANCE_PATTERNS:
             if needle in lowered:
-                return label
+                return _text(lang, label.lower())
     return None
 
 
-def _derive_age_of_onset(phenotypes: list[PhenotypeItem]) -> str | None:
+def _derive_age_of_onset(phenotypes: list[PhenotypeItem], lang: str) -> str | None:
     for phenotype in phenotypes:
         lowered = phenotype.hpo_term.lower()
         for pattern, label in _ONSET_PATTERNS:
             if pattern.search(lowered):
-                return label
+                return _text(lang, label.lower())
     return None
 
 
@@ -170,17 +381,17 @@ def _join_gene_symbols(symbols: list[str]) -> str:
     return f"{', '.join(symbols[:-1])}, and {symbols[-1]}"
 
 
-def _derive_confirmatory_workup(genes: list[GeneItem], omim: list[str]) -> str | None:
+def _derive_confirmatory_workup(genes: list[GeneItem], omim: list[str], lang: str) -> str | None:
     gene_symbols = _dedupe_preserve_order([gene.gene_symbol for gene in genes if gene.gene_symbol])
     if gene_symbols:
         if len(gene_symbols) == 1:
-            return f"Targeted molecular confirmation of {gene_symbols[0]}"
+            return _text(lang, "targeted").format(genes=gene_symbols[0])
         focus = gene_symbols[:3]
         if len(gene_symbols) > 3:
-            return f"Phenotype-directed molecular panel including {_join_gene_symbols(focus)}"
-        return f"Targeted molecular panel including {_join_gene_symbols(focus)}"
+            return _text(lang, "phenotype_panel").format(genes=_join_gene_symbols(focus))
+        return _text(lang, "panel").format(genes=_join_gene_symbols(focus))
     if omim:
-        return "Clinical genetics workup with phenotype-directed molecular confirmation"
+        return _text(lang, "clinical_workup")
     return None
 
 
@@ -206,21 +417,33 @@ def _prevalence_sort_key(item: PrevalenceItem) -> tuple[int, int, int, float]:
     )
 
 
-def _derive_prevalence_summary(prevalence: list[PrevalenceItem]) -> str | None:
+def _derive_prevalence_summary(prevalence: list[PrevalenceItem], lang: str) -> str | None:
     if not prevalence:
         return None
 
     best = sorted(prevalence, key=_prevalence_sort_key)[0]
     suffix = f" ({best.geographic})" if best.geographic else ""
     if best.val_moy is not None and best.val_moy > 0:
-        return f"{best.prevalence_type}: {best.val_moy:g}{suffix}"
+        return _text(lang, "prevalence_value").format(
+            type=best.prevalence_type, value=f"{best.val_moy:g}", suffix=suffix
+        )
     if best.prevalence_class:
-        return f"{best.prevalence_type}: {best.prevalence_class}{suffix}"
-    return f"{best.prevalence_type}{suffix}" if best.prevalence_type else None
+        return _text(lang, "prevalence_class").format(
+            type=best.prevalence_type, value=best.prevalence_class, suffix=suffix
+        )
+    return (
+        _text(lang, "prevalence_type").format(type=best.prevalence_type, suffix=suffix)
+        if best.prevalence_type
+        else None
+    )
 
 
 @router.get("/{orpha_code}", response_model=DiseaseDetail)
-async def get_disease(orpha_code: int, request: Request) -> DiseaseDetail:
+async def get_disease(
+    orpha_code: int,
+    request: Request,
+    lang: str | None = Query(default=None, description="Optional locale for human-readable labels"),
+) -> DiseaseDetail:
     engine = request.app.state.db_engine
     with Session(engine) as s:
         disease = s.get(Disease, orpha_code)
@@ -260,11 +483,12 @@ async def get_disease(orpha_code: int, request: Request) -> DiseaseDetail:
             for p in s.exec(select(Prevalence).where(Prevalence.orpha_code == orpha_code)).all()
         ]
 
+        lang = _normalize_lang(lang or request.query_params.get("locale"))
         clinical_summary = ClinicalSummary(
-            inheritance=_derive_inheritance(disease, phenotypes),
-            confirmatory_workup=_derive_confirmatory_workup(genes, omim),
-            typical_age_of_onset=_derive_age_of_onset(phenotypes),
-            prevalence_summary=_derive_prevalence_summary(prevalence),
+            inheritance=_derive_inheritance(disease, phenotypes, lang),
+            confirmatory_workup=_derive_confirmatory_workup(genes, omim, lang),
+            typical_age_of_onset=_derive_age_of_onset(phenotypes, lang),
+            prevalence_summary=_derive_prevalence_summary(prevalence, lang),
         )
 
     return DiseaseDetail(
