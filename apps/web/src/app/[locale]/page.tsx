@@ -240,7 +240,7 @@ export default function LandingPage() {
 
             {/* Right — text + buttons */}
             <div className="flex flex-col justify-center bg-[#0D1B2A] px-8 py-10 sm:px-10 sm:py-12 lg:px-12">
-              <p className="mb-3 text-[11px] font-[700] uppercase tracking-[0.14em] text-[#0AAFCE]">
+              <p className="mb-3 text-[11px] font-[500] uppercase tracking-[0.14em] text-[#0AAFCE]">
                 {t("ctaHeadline")}
               </p>
               <h2 className="text-[26px] font-[500] leading-tight tracking-[-0.03em] text-white sm:text-[32px] lg:text-[36px]">
