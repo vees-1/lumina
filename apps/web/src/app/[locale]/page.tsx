@@ -83,7 +83,7 @@ export default function LandingPage() {
               <p className="section-label mb-3 justify-center lg:justify-start">
                 {t("betaPill", { brandName })}
               </p>
-              <h1 className="text-[36px] font-[500] leading-[1.08] text-[#0D1B2A] sm:text-[46px] lg:text-[58px] whitespace-pre-line">
+              <h1 className="text-[36px] font-normal leading-[1.08] text-[#0D1B2A] sm:text-[46px] lg:text-[58px] whitespace-pre-line">
                 {t("heroHeadline", { brandName })}
               </h1>
               <p className="mx-auto mt-4 max-w-[480px] text-[15px] leading-7 text-[#4A5568] lg:mx-0">
@@ -92,13 +92,13 @@ export default function LandingPage() {
               <div className="mt-7 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start">
                 <Link
                   href={`/${locale}/new-case`}
-                  className="flex w-full items-center justify-center rounded-lg bg-[#0AAFCE] px-7 py-3.5 text-[15px] font-[700] text-white transition-colors hover:bg-[#0997B3] sm:w-auto"
+                  className="flex w-full items-center justify-center rounded-lg bg-[#0AAFCE] px-7 py-3.5 text-[15px] font-normal text-white transition-colors hover:bg-[#0997B3] sm:w-auto"
                 >
                   {t("getStartedFree")}
                 </Link>
                 <Link
                   href={`/${locale}/how-it-works`}
-                  className="flex w-full items-center justify-center rounded-lg border border-[#DDE3ED] bg-white px-7 py-3.5 text-[15px] font-[700] text-[#0D1B2A] transition-colors hover:border-[#0D1B2A] sm:w-auto"
+                  className="flex w-full items-center justify-center rounded-lg border border-[#DDE3ED] bg-white px-7 py-3.5 text-[15px] font-normal text-[#0D1B2A] transition-colors hover:border-[#0D1B2A] sm:w-auto"
                 >
                   {t("howItWorks")}
                 </Link>
@@ -119,7 +119,7 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/60 via-transparent to-transparent" />
               {/* Badge — always visible, slightly smaller text on mobile */}
               <div className="absolute bottom-3 left-3 rounded-lg bg-white px-3 py-2.5 shadow-[0_8px_24px_rgba(13,27,42,0.18)] sm:bottom-6 sm:left-6 sm:px-4 sm:py-3">
-                <p className="text-[12px] font-[800] text-[#0D1B2A] sm:text-[13px]">{t("poweredBy")}</p>
+                <p className="text-[12px] font-normal text-[#0D1B2A] sm:text-[13px]">{t("poweredBy")}</p>
                 <p className="text-[11px] text-[#4A5568] sm:text-[12px]">{t("poweredByDesc")}</p>
               </div>
             </div>
@@ -143,7 +143,7 @@ export default function LandingPage() {
             <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="section-label mb-2">{t("workflowLabel", { brandName })}</p>
-                <h2 className="text-[20px] font-[500] leading-snug tracking-[-0.01em] text-[#0D1B2A] sm:text-[24px] lg:text-[26px]">
+                <h2 className="text-[20px] font-normal leading-snug tracking-[-0.01em] text-[#0D1B2A] sm:text-[24px] lg:text-[26px]">
                   {t("workflowHeadline", { brandName })}
                 </h2>
                 <p className="mt-1.5 text-[13px] text-[#4A5568] sm:text-[14px]">
@@ -152,7 +152,7 @@ export default function LandingPage() {
               </div>
               <Link
                 href={`/${locale}/new-case`}
-                className="shrink-0 self-start rounded-lg border border-[#0AAFCE] px-5 py-2.5 text-[13px] font-[700] text-[#0AAFCE] transition-colors hover:bg-[#E5F8FC] sm:self-auto"
+                className="shrink-0 self-start rounded-lg border border-[#0AAFCE] px-5 py-2.5 text-[13px] font-normal text-[#0AAFCE] transition-colors hover:bg-[#E5F8FC] sm:self-auto"
               >
                 {t("newCase")}
               </Link>
@@ -170,7 +170,7 @@ export default function LandingPage() {
         <section className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6 sm:py-20">
           <div className="mb-10 text-center sm:mb-12">
             <p className="section-label mb-3">{t("technologyLabel")}</p>
-            <h2 className="text-[26px] font-[500] tracking-[-0.03em] text-[#0D1B2A] sm:text-[32px] lg:text-[38px]">
+            <h2 className="text-[26px] font-normal tracking-[-0.03em] text-[#0D1B2A] sm:text-[32px] lg:text-[38px]">
               {t("technologyHeadline")}
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-[14px] leading-7 text-[#4A5568] sm:text-[15px]">
@@ -181,9 +181,9 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-5">
             {workflowSteps.map((step) => (
               <div key={step.n} className="flex gap-4 rounded-xl border border-[#DDE3ED] bg-white p-5 sm:block sm:gap-0">
-                <p className="shrink-0 text-[13px] font-[800] tabular-nums text-[#0AAFCE] sm:shrink">{step.n}</p>
+                <p className="shrink-0 text-[13px] font-normal tabular-nums text-[#0AAFCE] sm:shrink">{step.n}</p>
                 <div>
-                  <h3 className="text-[14px] font-[700] leading-snug text-[#0D1B2A] sm:mt-3">{step.title}</h3>
+                  <h3 className="text-[14px] font-normal leading-snug text-[#0D1B2A] sm:mt-3">{step.title}</h3>
                   <p className="mt-1.5 text-[12.5px] leading-5 text-[#4A5568] sm:mt-2">{step.body}</p>
                 </div>
               </div>
@@ -201,7 +201,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {trustPoints.map((point) => (
                 <div key={point.label} className="rounded-xl border border-white/10 px-4 py-4 text-center">
-                  <p className="text-[13px] font-[800] text-white sm:text-[14px]">{point.label}</p>
+                  <p className="text-[13px] font-normal text-white sm:text-[14px]">{point.label}</p>
                   <p className="mt-1 text-[11px] text-white/50 sm:text-[12px]">{point.desc}</p>
                 </div>
               ))}
@@ -215,7 +215,7 @@ export default function LandingPage() {
               ].map(([title, text]) => (
                 <div key={title} className="rounded-xl border border-white/10 p-5 text-left sm:p-6">
                   <p className="text-[13px] leading-6 text-white/65">{text}</p>
-                  <p className="mt-4 text-[13px] font-[700] text-[#0AAFCE]">{title}</p>
+                  <p className="mt-4 text-[13px] font-normal text-[#0AAFCE]">{title}</p>
                 </div>
               ))}
             </div>
@@ -240,10 +240,10 @@ export default function LandingPage() {
 
             {/* Right — text + buttons */}
             <div className="flex flex-col justify-center bg-[#0D1B2A] px-8 py-10 sm:px-10 sm:py-12 lg:px-12">
-              <p className="mb-3 text-[11px] font-[500] uppercase tracking-[0.14em] text-[#0AAFCE]">
+              <p className="mb-3 text-[11px] font-normal uppercase tracking-[0.14em] text-[#0AAFCE]">
                 {t("ctaHeadline")}
               </p>
-              <h2 className="text-[26px] font-[500] leading-tight tracking-[-0.03em] text-white sm:text-[32px] lg:text-[36px]">
+              <h2 className="text-[26px] font-normal leading-tight tracking-[-0.03em] text-white sm:text-[32px] lg:text-[36px]">
                 {t("ctaSub", { brandName })}
               </h2>
               <p className="mt-4 max-w-sm text-[14px] leading-7 text-white/60 sm:text-[15px]">
@@ -253,13 +253,13 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
                   href={`/${locale}/new-case`}
-                  className="flex items-center justify-center rounded-lg bg-[#0AAFCE] px-8 py-3.5 text-[15px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                  className="flex items-center justify-center rounded-lg bg-[#0AAFCE] px-8 py-3.5 text-[15px] font-normal text-white transition-colors hover:bg-[#0997B3]"
                 >
                   {t("newCase")}
                 </Link>
                 <Link
                   href={`/${locale}/about`}
-                  className="flex items-center justify-center rounded-lg border border-white/20 px-8 py-3.5 text-[15px] font-[700] text-white transition-colors hover:border-white/50"
+                  className="flex items-center justify-center rounded-lg border border-white/20 px-8 py-3.5 text-[15px] font-normal text-white transition-colors hover:border-white/50"
                 >
                   {t("about.title", { brandName })}
                 </Link>

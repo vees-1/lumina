@@ -57,20 +57,20 @@ export default function DashboardPage() {
           <section className="grid items-center gap-10 lg:grid-cols-[1fr_auto]">
             <div>
               <p className="section-label mb-3">{t("title")}</p>
-              <h1 className="text-[36px] font-[800] leading-tight tracking-[-0.02em] sm:text-[42px]" dangerouslySetInnerHTML={{ __html: t("runWorkflow", { brandName: tCommon("brandName") }) }}></h1>
+              <h1 className="text-[36px] font-normal leading-tight tracking-[-0.02em] sm:text-[42px]" dangerouslySetInnerHTML={{ __html: t("runWorkflow", { brandName: tCommon("brandName") }) }}></h1>
               <p className="mt-4 max-w-xl text-[15px] leading-7 text-[#4A5568]">
                 {t("desc")}
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
                   href={`/${locale}/new-case`}
-                  className="inline-flex h-10 items-center rounded bg-[#0AAFCE] px-6 text-[13.5px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                  className="inline-flex h-10 items-center rounded bg-[#0AAFCE] px-6 text-[13.5px] font-normal text-white transition-colors hover:bg-[#0997B3]"
                 >
                   {t("startNewCase")}
                 </Link>
                 <Link
                   href={`/${locale}/cases`}
-                  className="inline-flex h-10 items-center rounded border border-[#DDE3ED] bg-white px-6 text-[13.5px] font-[700] text-[#0D1B2A] transition-colors hover:border-[#0D1B2A]"
+                  className="inline-flex h-10 items-center rounded border border-[#DDE3ED] bg-white px-6 text-[13.5px] font-normal text-[#0D1B2A] transition-colors hover:border-[#0D1B2A]"
                 >
                   {t("viewCases")}
                 </Link>
@@ -83,9 +83,9 @@ export default function DashboardPage() {
                 <div key={stat.label} className="rounded border border-[#DDE3ED] bg-white p-5 shadow-[0_2px_8px_rgba(13,27,42,0.04)]">
                   <div className="mb-2 flex items-center gap-2 text-[#8A94A6]">
                     {stat.icon}
-                    <p className="text-[11px] font-[700] uppercase tracking-[0.08em]">{stat.label}</p>
+                    <p className="text-[11px] font-normal uppercase tracking-[0.08em]">{stat.label}</p>
                   </div>
-                  <p className="text-[34px] font-[800] tracking-[-0.04em] text-[#0D1B2A]">{stat.value}</p>
+                  <p className="text-[34px] font-normal tracking-[-0.04em] text-[#0D1B2A]">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -102,9 +102,9 @@ export default function DashboardPage() {
                 <div className="mb-4 flex h-9 w-9 items-center justify-center rounded bg-[#E5F8FC]">
                   {action.icon}
                 </div>
-                <h2 className="text-[18px] font-[800] tracking-[-0.02em]">{action.title}</h2>
+                <h2 className="text-[18px] font-normal tracking-[-0.02em]">{action.title}</h2>
                 <p className="mt-2 text-[13.5px] leading-6 text-[#4A5568]">{action.text}</p>
-                <span className="mt-5 inline-flex items-center gap-1 text-[13px] font-[700] text-[#0AAFCE]">
+                <span className="mt-5 inline-flex items-center gap-1 text-[13px] font-normal text-[#0AAFCE]">
                   {t("open")}
                   <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10m-4-4 4 4-4 4" />
@@ -119,7 +119,7 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-[18px] font-[800] tracking-[-0.02em]">{t("patientReviewQueue")}</h2>
+                  <h2 className="text-[18px] font-normal tracking-[-0.02em]">{t("patientReviewQueue")}</h2>
                   {submissions.filter((s) => s.status === "doctor_review_pending").length > 0 && (
                     <span className="badge badge-amber">
                       {submissions.filter((s) => s.status === "doctor_review_pending").length} {t("pending")}
@@ -132,7 +132,7 @@ export default function DashboardPage() {
               </div>
               <Link
                 href={`/${locale}/patient/submissions`}
-                className="shrink-0 inline-flex h-10 items-center rounded bg-[#0D1B2A] px-6 text-[13.5px] font-[700] text-white transition-colors hover:bg-[#1C3352]"
+                className="shrink-0 inline-flex h-10 items-center rounded bg-[#0D1B2A] px-6 text-[13.5px] font-normal text-white transition-colors hover:bg-[#1C3352]"
               >
                 {t("openQueue")}
               </Link>

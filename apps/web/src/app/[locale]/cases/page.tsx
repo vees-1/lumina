@@ -33,21 +33,21 @@ export default function CasesPage() {
           <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="section-label mb-2">{t("title")}</p>
-              <h1 className="text-[36px] font-[800] tracking-[-0.03em]">{t("title")}</h1>
+              <h1 className="text-[36px] font-normal tracking-[-0.03em]">{t("title")}</h1>
               <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("subtitle")}</p>
             </div>
             <div className="flex flex-wrap gap-2.5">
               <button
                 type="button"
                 onClick={exportAllCases}
-                className="inline-flex h-10 items-center gap-2 rounded-none border border-[#DDE3ED] bg-white px-5 text-[13px] font-[700] text-[#4A5568] transition-colors hover:border-[#0D1B2A] hover:text-[#0D1B2A]"
+                className="inline-flex h-10 items-center gap-2 rounded-none border border-[#DDE3ED] bg-white px-5 text-[13px] font-normal text-[#4A5568] transition-colors hover:border-[#0D1B2A] hover:text-[#0D1B2A]"
               >
                 <Download className="h-3.5 w-3.5" />
                 {t("exportAll")}
               </button>
               <Link
                 href={`/${locale}/new-case`}
-                className="inline-flex h-10 items-center gap-2 rounded-none bg-[#0AAFCE] px-5 text-[13px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                className="inline-flex h-10 items-center gap-2 rounded-none bg-[#0AAFCE] px-5 text-[13px] font-normal text-white transition-colors hover:bg-[#0997B3]"
               >
                 <Plus className="h-3.5 w-3.5" />
                 {t("newCase")}
@@ -63,8 +63,8 @@ export default function CasesPage() {
               { label: t("confirmed"), value: confirmed },
             ].map((m) => (
               <div key={m.label} className="rounded-sm border border-[#DDE3ED] bg-white p-5 shadow-[0_2px_8px_rgba(13,27,42,0.04)]">
-                <p className="text-[30px] font-[800] tracking-[-0.04em] text-[#0D1B2A]">{formatNumber(locale, m.value)}</p>
-                <p className="mt-0.5 text-[12.5px] font-[600] text-[#8A94A6]">{m.label}</p>
+                <p className="text-[30px] font-normal tracking-[-0.04em] text-[#0D1B2A]">{formatNumber(locale, m.value)}</p>
+                <p className="mt-0.5 text-[12.5px] font-normal text-[#8A94A6]">{m.label}</p>
               </div>
             ))}
           </div>
@@ -77,7 +77,7 @@ export default function CasesPage() {
                   <thead className="border-b border-[#DDE3ED] bg-[#F7F8FA]">
                     <tr>
                       {[t("thCaseId"), t("thPatient"), t("thTopResult"), t("thConfidence"), t("thHpoCount"), t("thUpdated")].map((h) => (
-                        <th key={h} className="px-5 py-3 text-[11px] font-[700] uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
+                        <th key={h} className="px-5 py-3 text-[11px] font-normal uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -87,7 +87,7 @@ export default function CasesPage() {
                       return (
                         <tr key={item.id} className="transition-colors hover:bg-[#F7F8FA]">
                           <td className="px-5 py-4">
-                            <Link href={`/${locale}/case/${item.id}`} className="font-[700] text-[#0AAFCE] hover:underline">
+                            <Link href={`/${locale}/case/${item.id}`} className="font-normal text-[#0AAFCE] hover:underline">
                               {item.id.slice(0, 8)}
                             </Link>
                           </td>
@@ -101,7 +101,7 @@ export default function CasesPage() {
                                   style={{ width: `${pct}%` }}
                                 />
                               </div>
-                              <span className="text-[12.5px] font-[700] text-[#0D1B2A]">{formatNumber(locale, pct)}%</span>
+                              <span className="text-[12.5px] font-normal text-[#0D1B2A]">{formatNumber(locale, pct)}%</span>
                             </div>
                           </td>
                           <td className="px-5 py-4 text-[13.5px] text-[#0D1B2A]">{formatNumber(locale, item.hpoCount)}</td>
@@ -119,11 +119,11 @@ export default function CasesPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-[#F0F2F5]">
                   <ClipboardList className="h-6 w-6 text-[#8A94A6]" />
                 </div>
-                <h2 className="mt-4 text-[20px] font-[800]">{t("noCases")}</h2>
+                <h2 className="mt-4 text-[20px] font-normal">{t("noCases")}</h2>
                 <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("emptyStateDesc")}</p>
                 <Link
                   href={`/${locale}/new-case`}
-                  className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                  className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-normal text-white transition-colors hover:bg-[#0997B3]"
                 >
                   {t("startFirst")}
                 </Link>

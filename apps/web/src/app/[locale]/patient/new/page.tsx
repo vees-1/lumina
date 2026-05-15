@@ -11,7 +11,7 @@ import { savePatientSubmission } from "@/lib/api";
 import { AlertTriangle, Upload, Dna } from "lucide-react";
 
 const inputClass = "h-11 w-full rounded-sm border border-[#DDE3ED] bg-white px-3.5 text-[13.5px] text-[#0D1B2A] placeholder:text-[#8A94A6] outline-none focus:border-[#0AAFCE] focus:ring-2 focus:ring-[#0AAFCE]/15 transition-colors";
-const labelClass = "block text-[12px] font-[700] uppercase tracking-[0.08em] text-[#8A94A6] mb-1.5";
+const labelClass = "block text-[12px] font-normal uppercase tracking-[0.08em] text-[#8A94A6] mb-1.5";
 
 export default function PatientNewSubmissionPage() {
   const locale = useLocale();
@@ -55,7 +55,7 @@ export default function PatientNewSubmissionPage() {
         <main className="mx-auto max-w-[1200px] px-6 pb-24 pt-28">
           <div className="mb-8">
             <p className="section-label mb-2">{t("title")}</p>
-            <h1 className="text-[36px] font-[800] tracking-[-0.03em]">{t("headline")}</h1>
+            <h1 className="text-[36px] font-normal tracking-[-0.03em]">{t("headline")}</h1>
           </div>
 
           {/* Warning banner */}
@@ -70,7 +70,7 @@ export default function PatientNewSubmissionPage() {
             <div className="space-y-5">
               {/* Patient context */}
               <div className="rounded-sm border border-[#DDE3ED] bg-white p-6">
-                <h2 className="mb-5 text-[16px] font-[800] tracking-[-0.02em]">{t("contextTitle")}</h2>
+                <h2 className="mb-5 text-[16px] font-normal tracking-[-0.02em]">{t("contextTitle")}</h2>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <label>
                     <span className={labelClass}>{t("fullName")}</span>
@@ -93,7 +93,7 @@ export default function PatientNewSubmissionPage() {
 
               {/* Evidence */}
               <div className="rounded-sm border border-[#DDE3ED] bg-white p-6">
-                <h2 className="mb-5 text-[16px] font-[800] tracking-[-0.02em]">{t("evidenceTitle")}</h2>
+                <h2 className="mb-5 text-[16px] font-normal tracking-[-0.02em]">{t("evidenceTitle")}</h2>
                 <label className="block">
                   <span className={labelClass}>{t("notes")}</span>
                   <textarea
@@ -111,7 +111,7 @@ export default function PatientNewSubmissionPage() {
                   ].map(({ label, accept, state, setter }) => (
                     <label key={label} className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-[#DDE3ED] bg-[#F7F8FA] px-5 py-6 text-center transition-colors hover:border-[#0AAFCE]">
                       <Upload className="h-5 w-5 text-[#8A94A6]" />
-                      <span className="text-[13px] font-[700] text-[#0D1B2A]">{label}</span>
+                      <span className="text-[13px] font-normal text-[#0D1B2A]">{label}</span>
                       {state ? (
                         <span className="text-[12px] text-[#1A7F4B]">{(state as File).name}</span>
                       ) : (
@@ -145,7 +145,7 @@ export default function PatientNewSubmissionPage() {
 
             {/* Sidebar */}
             <aside className="rounded-sm border border-[#DDE3ED] bg-white p-6">
-              <h2 className="text-[15px] font-[800] tracking-[-0.02em]">{t("gateTitle")}</h2>
+              <h2 className="text-[15px] font-normal tracking-[-0.02em]">{t("gateTitle")}</h2>
               <p className="mt-3 text-[13.5px] leading-6 text-[#4A5568]">
                 {t("gateDesc")}
               </p>
@@ -159,7 +159,7 @@ export default function PatientNewSubmissionPage() {
               <button
                 type="button"
                 onClick={submit}
-                className="mt-6 w-full rounded-none bg-[#0AAFCE] py-3 text-[14px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                className="mt-6 w-full rounded-none bg-[#0AAFCE] py-3 text-[14px] font-normal text-white transition-colors hover:bg-[#0997B3]"
               >
                 {t("submitBtn")}
               </button>

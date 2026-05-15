@@ -37,7 +37,7 @@ export default function TermsPage() {
       
       {/* Hero Section */}
       <div className="bg-slate-900 text-white py-24 lg:py-32 px-6 lg:px-8 text-center shadow-inner">
-        <h1 className="text-4xl lg:text-6xl font-bold mb-6">{t("heroHeadline")}</h1>
+        <h1 className="text-4xl lg:text-6xl font-normal mb-6">{t("heroHeadline")}</h1>
         <p className="text-lg lg:text-xl text-cyan-200 max-w-3xl mx-auto leading-relaxed">
           {t("heroSub", { brandName: tc("brandName") })}
         </p>
@@ -53,7 +53,7 @@ export default function TermsPage() {
               <div className="h-12 w-12 bg-[#E5F8FC] rounded-lg flex items-center justify-center mb-6">
                 {principle.icon}
               </div>
-              <h3 className="text-xl font-bold mb-3">{principle.title}</h3>
+              <h3 className="text-xl font-normal mb-3">{principle.title}</h3>
               <p className="text-slate-600 leading-relaxed">{principle.desc}</p>
             </div>
           ))}
@@ -61,25 +61,25 @@ export default function TermsPage() {
 
         {/* Detailed Terms Section */}
         <div className="bg-white rounded-xl border border-slate-200 p-8 md:p-12 shadow-sm max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">{t("detailedTermsTitle")}</h2>
+          <h2 className="text-3xl font-normal mb-8">{t("detailedTermsTitle")}</h2>
           
           <div className="space-y-8">
             <div>
-              <h3 className="text-xl font-bold mb-3">{t("s1Title")}</h3>
+              <h3 className="text-xl font-normal mb-3">{t("s1Title")}</h3>
               <p className="text-slate-600 leading-relaxed">
                 {t("s1Desc", { brandName: tc("brandName") })}
               </p>
             </div>
 
             <div>
-              <h3 className="text-xl font-bold mb-3">{t("s2Title")}</h3>
+              <h3 className="text-xl font-normal mb-3">{t("s2Title")}</h3>
               <p className="text-slate-600 leading-relaxed">
                 {t("s2Desc", { brandName: tc("brandName") })}
               </p>
             </div>
 
             <div>
-              <h3 className="text-xl font-bold mb-3">{t("s3Title")}</h3>
+              <h3 className="text-xl font-normal mb-3">{t("s3Title")}</h3>
               <p className="text-slate-600 leading-relaxed">
                 {t("s3Desc", { brandName: tc("brandName") })}
               </p>

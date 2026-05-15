@@ -56,10 +56,10 @@ function Dropdown({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-10 items-center gap-1 text-[13.5px] font-medium text-[#4A5568] transition-colors hover:text-[#0D1B2A]"
+        className="inline-flex h-10 items-center gap-1 text-[13.5px] font-normal text-[#4A5568] transition-colors hover:text-[#0D1B2A]"
       >
         {badge && (
-          <span className="rounded-sm bg-[#0AAFCE] px-1.5 py-0.5 text-[9px] font-bold leading-none text-white">
+          <span className="rounded-sm bg-[#0AAFCE] px-1.5 py-0.5 text-[9px] font-normal leading-none text-white">
             {badge}
           </span>
         )}
@@ -74,7 +74,7 @@ function Dropdown({
               href={toLocalePath(item.href)}
               onClick={() => setOpen(false)}
               className={cn(
-                "block px-4 py-2.5 text-[13.5px] font-medium text-[#4A5568] transition-colors hover:bg-[#F7F8FA] hover:text-[#0D1B2A]",
+                "block px-4 py-2.5 text-[13.5px] font-normal text-[#4A5568] transition-colors hover:bg-[#F7F8FA] hover:text-[#0D1B2A]",
                 item.disabled && "pointer-events-none text-[#8A94A6]"
               )}
             >
@@ -116,7 +116,7 @@ function LanguageDropdown() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex h-10 items-center gap-1.5 text-[13.5px] font-medium text-[#4A5568] transition-colors hover:text-[#0D1B2A]"
+        className="inline-flex h-10 items-center gap-1.5 text-[13.5px] font-normal text-[#4A5568] transition-colors hover:text-[#0D1B2A]"
       >
         <Globe className="h-4 w-4" />
         <span className="hidden sm:inline">
@@ -131,7 +131,7 @@ function LanguageDropdown() {
               key={locale.code}
               type="button"
               onClick={() => switchLocale(locale.code)}
-              className="flex w-full items-center justify-between px-4 py-2.5 text-left text-[13.5px] font-medium text-[#4A5568] transition-colors hover:bg-[#F7F8FA] hover:text-[#0D1B2A]"
+              className="flex w-full items-center justify-between px-4 py-2.5 text-left text-[13.5px] font-normal text-[#4A5568] transition-colors hover:bg-[#F7F8FA] hover:text-[#0D1B2A]"
             >
               {tc(locale.labelKey)}
               {activeLocale === locale.code && <Check className="h-3.5 w-3.5 text-[#0AAFCE]" />}
@@ -155,7 +155,7 @@ export function LuminaLogo() {
         <path d="M14 0L16.2 11.8L28 14L16.2 16.2L14 28L11.8 16.2L0 14L11.8 11.8L14 0Z" fill="#06B6D4"/>
         <circle cx="14" cy="14" r="3" fill="#FFFFFF"/>
       </svg>
-      <span className="text-[20px] font-[500] tracking-tight text-slate-900 dark:text-white leading-none">
+      <span className="text-[20px] font-normal tracking-tight text-slate-900 dark:text-white leading-none">
         {brandName}
       </span>
     </span>
@@ -179,7 +179,7 @@ function MobileLangPicker({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-lg border border-[#DDE3ED] px-4 py-3 text-[13.5px] font-[600] text-[#0D1B2A] transition-colors hover:border-[#0AAFCE]"
+        className="flex w-full items-center justify-between rounded-lg border border-[#DDE3ED] px-4 py-3 text-[13.5px] font-normal text-[#0D1B2A] transition-colors hover:border-[#0AAFCE]"
       >
         <span className="flex items-center gap-2">
           <Globe className="h-4 w-4 text-[#8A94A6]" />
@@ -199,7 +199,7 @@ function MobileLangPicker({
               type="button"
               onClick={() => { onSwitch(locale.code); setOpen(false); }}
               className={cn(
-                "flex items-center justify-between rounded-lg border px-3 py-2.5 text-left text-[13px] font-[500] transition-colors",
+                "flex items-center justify-between rounded-lg border px-3 py-2.5 text-left text-[13px] font-normal transition-colors",
                 activeLocale === locale.code
                   ? "border-[#0AAFCE] bg-[#E5F8FC] text-[#0D1B2A]"
                   : "border-[#DDE3ED] text-[#4A5568] hover:border-[#0AAFCE] hover:text-[#0D1B2A]"
@@ -266,7 +266,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
     setMobileOpen(false);
   }
 
-  const navLink = "inline-flex h-10 items-center text-[13.5px] font-medium text-[#4A5568] transition-colors hover:text-[#0D1B2A]";
+  const navLink = "inline-flex h-10 items-center text-[13.5px] font-normal text-[#4A5568] transition-colors hover:text-[#0D1B2A]";
 
   return (
     <header className="sticky top-0 z-50 border-b border-[#DDE3ED] bg-white/95 backdrop-blur-sm">
@@ -308,7 +308,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
           {!isSignedIn ? (
             <Link
               href={toLocalePath("/sign-in")}
-              className="inline-flex h-9 items-center rounded-lg border border-[#DDE3ED] px-5 text-[13.5px] font-semibold text-[#0D1B2A] transition-colors hover:border-[#0D1B2A] hover:bg-[#F7F8FA]"
+              className="inline-flex h-9 items-center rounded-lg border border-[#DDE3ED] px-5 text-[13.5px] font-normal text-[#0D1B2A] transition-colors hover:border-[#0D1B2A] hover:bg-[#F7F8FA]"
             >
               {t("loginSignup")}
             </Link>
@@ -316,7 +316,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
             <div className="flex items-center gap-3">
               <Link
                 href={toLocalePath(workspaceHref)}
-                className="inline-flex items-center gap-2 text-[13px] font-medium text-[#4A5568]"
+                className="inline-flex items-center gap-2 text-[13px] font-normal text-[#4A5568]"
               >
                 <span
                   className={cn(
@@ -336,7 +336,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
           {!isSignedIn ? (
             <Link
               href={toLocalePath("/sign-in")}
-              className="inline-flex h-8 items-center rounded-lg border border-[#DDE3ED] bg-white px-3.5 text-[13px] font-[600] text-[#0D1B2A] transition-colors hover:border-[#0AAFCE] hover:text-[#0AAFCE]"
+              className="inline-flex h-8 items-center rounded-lg border border-[#DDE3ED] bg-white px-3.5 text-[13px] font-normal text-[#0D1B2A] transition-colors hover:border-[#0AAFCE] hover:text-[#0AAFCE]"
             >
               {t("signIn")}
             </Link>
@@ -392,7 +392,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
               <Link
                 key={item.label}
                 href={toLocalePath(item.href)}
-                className="block rounded-lg px-3 py-3 text-[15px] font-medium text-[#0D1B2A] transition-colors hover:bg-[#F7F8FA]"
+                className="block rounded-lg px-3 py-3 text-[15px] font-normal text-[#0D1B2A] transition-colors hover:bg-[#F7F8FA]"
                 onClick={() => setMobileOpen(false)}
               >
                 {item.label}
@@ -410,7 +410,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
           <Link
             href={toLocalePath(isSignedIn ? workspaceHref : "/sign-in")}
             onClick={() => setMobileOpen(false)}
-            className="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-[#0D1B2A] text-[14px] font-[700] text-white transition-colors hover:bg-[#1C3352]"
+            className="mt-4 flex h-11 w-full items-center justify-center rounded-xl bg-[#0D1B2A] text-[14px] font-normal text-white transition-colors hover:bg-[#1C3352]"
           >
             {isSignedIn
               ? role === "patient" ? t("patientDashboard") : t("docDashboard")

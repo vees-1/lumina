@@ -18,13 +18,13 @@ function MarkdownRenderer({ content }: { content: string }) {
     <ReactMarkdown 
       remarkPlugins={[remarkGfm]}
       components={{
-        h1: ({ children }) => <h1 className="text-[20px] font-bold text-center mb-8 uppercase tracking-wide border-b-2 border-black pb-2">{children}</h1>,
-        h2: ({ children }) => <h2 className="text-[15px] font-bold mt-6 mb-2 text-foreground border-b border-black/10 pb-0.5 uppercase tracking-tight">{children}</h2>,
-        h3: ({ children }) => <h3 className="text-[14px] font-bold mt-4 mb-1 text-foreground uppercase tracking-tight">{children}</h3>,
+        h1: ({ children }) => <h1 className="text-[20px] font-normal text-center mb-8 uppercase tracking-wide border-b-2 border-black pb-2">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-[15px] font-normal mt-6 mb-2 text-foreground border-b border-black/10 pb-0.5 uppercase tracking-tight">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-[14px] font-normal mt-4 mb-1 text-foreground uppercase tracking-tight">{children}</h3>,
         p: ({ children }) => <p className="text-[14px] leading-relaxed text-foreground/90 mb-2">{children}</p>,
         ul: ({ children }) => <ul className="my-2 space-y-0.5">{children}</ul>,
         li: ({ children }) => <li className="ml-5 text-[14px] leading-snug text-foreground/90 list-disc mb-1">{children}</li>,
-        strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+        strong: ({ children }) => <strong className="font-normal text-foreground">{children}</strong>,
         hr: () => <hr className="my-6 border-black/20" />,
       }}
     >
@@ -200,7 +200,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
               <ArrowLeft className="w-4 h-4" />
             </Link>
             <div>
-              <h1 className="text-xl font-bold">{t("title")}</h1>
+              <h1 className="text-xl font-normal">{t("title")}</h1>
               <p className="text-[13px] text-muted-foreground mt-0.5">{topDx}</p>
             </div>
           </div>
@@ -211,7 +211,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
               size="sm"
               onClick={() => setEditing(!editing)}
               className={cn(
-                "h-9 rounded-full px-4 text-[13px] font-medium transition-all",
+                "h-9 rounded-full px-4 text-[13px] font-normal transition-all",
                 editing ? "bg-black text-white border-black hover:bg-black/90" : "bg-white"
               )}
             >
@@ -270,7 +270,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
               "w-1.5 h-1.5 rounded-full",
               streaming ? "bg-blue-500 animate-pulse" : done ? "bg-green-500" : "bg-gray-300"
             )} />
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+            <span className="text-[11px] font-normal text-muted-foreground uppercase tracking-wider">
               {streaming ? t("generating") : done ? t("complete") : t("waiting")}
             </span>
           </div>
@@ -293,7 +293,7 @@ export default function LetterPage({ params }: { params: Promise<{ id: string }>
             ) : streaming && letter === "" ? (
               <div className="flex flex-col items-center justify-center py-32 space-y-4">
                 <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
-                <p className="text-[13px] text-muted-foreground font-medium">{t("generating")}</p>
+                <p className="text-[13px] text-muted-foreground font-normal">{t("generating")}</p>
               </div>
             ) : (
               <div className="max-w-none font-document">

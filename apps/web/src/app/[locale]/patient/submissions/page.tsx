@@ -37,11 +37,11 @@ export default function PatientSubmissionsPage() {
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <p className="section-label mb-2">{t("title")}</p>
-              <h1 className="text-[36px] font-[800] tracking-[-0.03em]">{t("headline")}</h1>
+              <h1 className="text-[36px] font-normal tracking-[-0.03em]">{t("headline")}</h1>
             </div>
             <Link
               href={`/${locale}/patient/new`}
-              className="inline-flex h-10 items-center gap-2 rounded bg-[#0AAFCE] px-5 text-[13px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+              className="inline-flex h-10 items-center gap-2 rounded bg-[#0AAFCE] px-5 text-[13px] font-normal text-white transition-colors hover:bg-[#0997B3]"
             >
               <Plus className="h-3.5 w-3.5" />
               {t("newSubmission")}
@@ -55,14 +55,14 @@ export default function PatientSubmissionsPage() {
                   <thead className="border-b border-[#DDE3ED] bg-[#F7F8FA]">
                     <tr>
                       {[t("colSubmission"), t("colPatient"), t("colEvidence"), t("colStatus"), t("colSubmitted"), t("colAction")].map((h) => (
-                        <th key={h} className="px-5 py-3 text-[11px] font-[700] uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
+                        <th key={h} className="px-5 py-3 text-[11px] font-normal uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F2F5]">
                     {submissions.map((item) => (
                       <tr key={item.id} className={cn("transition-colors hover:bg-[#F7F8FA]")}>
-                        <td className="px-5 py-4 font-[700] text-[#0AAFCE]">{item.id.slice(0, 8)}</td>
+                        <td className="px-5 py-4 font-normal text-[#0AAFCE]">{item.id.slice(0, 8)}</td>
                         <td className="px-5 py-4 text-[13.5px] text-[#0D1B2A]">{item.patientName ?? t("unnamedPatient")}</td>
                         <td className="px-5 py-4 text-[13px] text-[#4A5568]">
                           {[item.notes && t("notes"), item.photoFileName && t("photo"), item.labFileName && t("lab"), item.geneticEvidence && t("genetic")].filter(Boolean).join(", ") || "—"}
@@ -73,14 +73,14 @@ export default function PatientSubmissionsPage() {
                         </td>
                         <td className="px-5 py-4">
                           {item.status === "approved" || item.status === "scorecard_ready" ? (
-                            <Link href={`/${locale}/patient/reports`} className="text-[13px] font-[700] text-[#0AAFCE] hover:underline">
+                            <Link href={`/${locale}/patient/reports`} className="text-[13px] font-normal text-[#0AAFCE] hover:underline">
                               {t("viewReport")}
                             </Link>
                           ) : (
                             <button
                               type="button"
                               onClick={() => markApproved(item.id)}
-                              className="rounded border border-[#DDE3ED] px-3 py-1 text-[12px] font-[700] text-[#4A5568] transition-colors hover:border-[#0AAFCE] hover:text-[#0D1B2A]"
+                              className="rounded border border-[#DDE3ED] px-3 py-1 text-[12px] font-normal text-[#4A5568] transition-colors hover:border-[#0AAFCE] hover:text-[#0D1B2A]"
                             >
                               {t("doctorApprove")}
                             </button>
@@ -96,11 +96,11 @@ export default function PatientSubmissionsPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-[#F0F2F5]">
                   <Inbox className="h-6 w-6 text-[#8A94A6]" />
                 </div>
-                <h2 className="mt-4 text-[20px] font-[800]">{t("noSubmissions")}</h2>
+                <h2 className="mt-4 text-[20px] font-normal">{t("noSubmissions")}</h2>
                 <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("noSubmissionsDesc")}</p>
                 <Link
                   href={`/${locale}/patient/new`}
-                  className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                  className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-normal text-white transition-colors hover:bg-[#0997B3]"
                 >
                   {t("createSubmission")}
                 </Link>

@@ -53,7 +53,7 @@ export function InfoPage({ namespace, icons }: InfoPageProps) {
       
       {/* Hero Section */}
       <section className="bg-slate-900 px-6 py-24 text-center text-white lg:px-8 lg:py-32 shadow-inner">
-        <h1 className="mb-6 text-4xl font-bold lg:text-6xl">
+        <h1 className="mb-6 text-4xl font-normal lg:text-6xl">
           {getT("heroTitle", "heroHeadline") || getT("title")}
         </h1>
         <p className="mx-auto max-w-3xl text-lg leading-relaxed text-cyan-200 lg:text-xl">
@@ -66,7 +66,7 @@ export function InfoPage({ namespace, icons }: InfoPageProps) {
         
         {/* Intro Section */}
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-3xl font-bold tracking-tight text-slate-900">{getT("overviewTitle")}</h2>
+          <h2 className="mb-4 text-3xl font-normal tracking-tight text-slate-900">{getT("overviewTitle")}</h2>
           <p className="mx-auto max-w-3xl text-[16px] leading-relaxed text-slate-600">
             {getT("overviewText")}
           </p>
@@ -85,7 +85,7 @@ export function InfoPage({ namespace, icons }: InfoPageProps) {
                 <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-[#E5F8FC] transition-colors group-hover:bg-[#0AAFCE]/20">
                   <Icon className="h-6 w-6 text-[#0AAFCE]" />
                 </div>
-                <h3 className="mb-3 text-xl font-bold tracking-tight text-slate-900">{feature.title}</h3>
+                <h3 className="mb-3 text-xl font-normal tracking-tight text-slate-900">{feature.title}</h3>
                 <p className="text-[15px] leading-relaxed text-slate-600">
                   {feature.description}
                 </p>

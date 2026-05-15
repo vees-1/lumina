@@ -23,7 +23,7 @@ export default function PatientReportsPage() {
         <main className="mx-auto max-w-[1200px] px-6 pb-24 pt-28">
           <div className="mb-8">
             <p className="section-label mb-2">{t("title")}</p>
-            <h1 className="text-[36px] font-[800] tracking-[-0.03em]">{t("headline")}</h1>
+            <h1 className="text-[36px] font-normal tracking-[-0.03em]">{t("headline")}</h1>
             <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#4A5568]">{t("subtitle")}</p>
           </div>
 
@@ -37,7 +37,7 @@ export default function PatientReportsPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-[16px] font-[800]">{report.patientName ?? t("defaultReportName")}</h2>
+                        <h2 className="text-[16px] font-normal">{report.patientName ?? t("defaultReportName")}</h2>
                         <span className="badge badge-accepted">{t("statusApproved")}</span>
                       </div>
                       <p className="mt-1 text-[13px] text-[#8A94A6]">
@@ -46,13 +46,13 @@ export default function PatientReportsPage() {
                       {report.linkedCaseId ? (
                         <Link
                           href={`/${locale}/case/${report.linkedCaseId}`}
-                          className="mt-4 inline-flex items-center gap-1.5 rounded-none bg-[#0AAFCE] px-5 py-2 text-[13px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-none bg-[#0AAFCE] px-5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[#0997B3]"
                         >
                           {t("openScorecard")}
                           <ExternalLink className="h-3.5 w-3.5" />
                         </Link>
                       ) : (
-                        <p className="mt-4 text-[13px] font-[700] text-[#1A7F4B]">{t("approvedByDoctor")}</p>
+                        <p className="mt-4 text-[13px] font-normal text-[#1A7F4B]">{t("approvedByDoctor")}</p>
                       )}
                     </div>
                   </div>
@@ -64,13 +64,13 @@ export default function PatientReportsPage() {
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-sm bg-[#F0F2F5]">
                 <FileText className="h-6 w-6 text-[#8A94A6]" />
               </div>
-              <h2 className="mt-4 text-[20px] font-[800]">{t("noReports")}</h2>
+              <h2 className="mt-4 text-[20px] font-normal">{t("noReports")}</h2>
               <p className="mx-auto mt-1.5 max-w-sm text-[14px] leading-6 text-[#4A5568]">
                 {t("noReportsDesc")}
               </p>
               <Link
                 href={`/${locale}/patient/new`}
-                className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-[700] text-white transition-colors hover:bg-[#0997B3]"
+                className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-normal text-white transition-colors hover:bg-[#0997B3]"
               >
                 {t("submitEvidence")}
               </Link>

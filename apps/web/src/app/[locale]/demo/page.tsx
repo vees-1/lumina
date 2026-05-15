@@ -44,7 +44,7 @@ function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
         <span className="text-[11px] font-mono text-muted-foreground px-2 py-0.5 rounded-full bg-[oklch(0.97_0_0)] border border-black/[0.06]">
           ORPHA:{formatNumber(locale, demo.orpha_code)}
         </span>
-        <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[oklch(0.52_0.21_255/0.08)] text-[oklch(0.38_0.21_255)]">
+        <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-[oklch(0.52_0.21_255/0.08)] text-[oklch(0.38_0.21_255)]">
           {t("match", { percent: demo.confidence_expected })}
         </span>
       </div>
@@ -64,7 +64,7 @@ function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
           return (
             <span
               key={m}
-              className="text-[11px] font-medium px-2 py-0.5 rounded-full"
+              className="text-[11px] font-normal px-2 py-0.5 rounded-full"
               style={{ background: colors.bg, color: colors.color }}
             >
               {MODALITY_LABEL[m] ?? m}
@@ -75,7 +75,7 @@ function DemoCaseCard({ demo, index }: { demo: DemoCase; index: number }) {
 
       {/* Teaching point */}
       <div className="rounded-xl bg-[oklch(0.975_0_0)] border border-black/[0.05] p-3 mb-5">
-        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+        <p className="text-[11px] font-normal text-muted-foreground uppercase tracking-wider mb-1">
           {t("teachingPoint")}
         </p>
         <p className="text-[12px] text-foreground leading-relaxed">
@@ -105,7 +105,7 @@ function EmptyDemoCases() {
           <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h3 className="text-[16px] font-semibold mb-1">{t("emptyTitle")}</h3>
+      <h3 className="text-[16px] font-normal mb-1">{t("emptyTitle")}</h3>
       <p className="text-[13px] text-muted-foreground">{t("emptyDesc")}</p>
     </div>
   );
@@ -140,7 +140,7 @@ export default function DemoPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease, delay: 0.05 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[oklch(0.52_0.21_255/0.08)] border border-[oklch(0.52_0.21_255/0.2)] text-[12px] font-medium text-[oklch(0.38_0.21_255)] mb-6"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[oklch(0.52_0.21_255/0.08)] border border-[oklch(0.52_0.21_255/0.2)] text-[12px] font-normal text-[oklch(0.38_0.21_255)] mb-6"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.52_0.21_255)] animate-pulse" />
             {t("badge")}
@@ -195,7 +195,7 @@ export default function DemoPage() {
                 key={s.label}
                 className="bg-white/70 backdrop-blur-sm rounded-2xl border border-black/[0.06] px-4 py-3 text-center"
               >
-                <div className="text-[20px] font-bold tracking-tight">
+                <div className="text-[20px] font-normal tracking-tight">
                   {s.label === t("statsConfidence")
                     ? `${formatNumber(locale, s.value)}%`
                     : formatNumber(locale, s.value)}

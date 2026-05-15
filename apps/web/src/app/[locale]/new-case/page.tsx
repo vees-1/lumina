@@ -176,7 +176,7 @@ function DropZone({
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-medium truncate">{file.name}</p>
+          <p className="text-[14px] font-normal truncate">{file.name}</p>
           <p className="text-[12px] text-muted-foreground">{formatFileSize(locale, file.size)}</p>
         </div>
         <button onClick={onClear} className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-sm hover:bg-black/5">
@@ -205,7 +205,7 @@ function DropZone({
         </svg>
       </div>
       <div className="text-center">
-        <p className="text-[14px] font-medium">{label}</p>
+        <p className="text-[14px] font-normal">{label}</p>
         <p className="text-[12px] text-muted-foreground mt-0.5">{hint}</p>
       </div>
     </motion.div>
@@ -231,7 +231,7 @@ function ProgressStep({ label, active, done }: { label: string; active: boolean;
           <div className="w-2 h-2 rounded-none bg-white animate-pulse" />
         ) : null}
       </div>
-      <span className="text-[13px] font-medium">{label}</span>
+      <span className="text-[13px] font-normal">{label}</span>
     </motion.div>
   );
 }
@@ -536,10 +536,10 @@ export default function IntakePage() {
           transition={{ duration: 0.45, ease }}
           className="rounded-sm border border-[#e6eaf2] bg-white px-6 py-7 shadow-[0_10px_30px_rgba(34,45,74,0.05)] sm:px-8"
         >
-          <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("doctorWorkspace")}</p>
+          <p className="text-[12px] font-normal uppercase tracking-[0.08em] text-[#0D1B2A]">{t("doctorWorkspace")}</p>
           <div className="mt-3 grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
             <div>
-              <h1 className="max-w-2xl text-[38px] font-bold leading-[1.05] tracking-[-0.04em] sm:text-[46px]">
+              <h1 className="max-w-2xl text-[38px] font-normal leading-[1.05] tracking-[-0.04em] sm:text-[46px]">
                 {addToId && existingCase ? t("titleAdd") : t("startRareDiseaseCase")}
               </h1>
               <p className="mt-4 max-w-2xl text-[16px] leading-7 text-[#5d6474]">
@@ -548,15 +548,15 @@ export default function IntakePage() {
             </div>
             <div className="grid grid-cols-3 gap-2 rounded-sm border border-[#e6eaf2] bg-[#fbfcfe] p-3">
               <div>
-                <p className="text-[24px] font-bold text-[#0D1B2A]">{formatNumber(locale, activeModalities)}/4</p>
+                <p className="text-[24px] font-normal text-[#0D1B2A]">{formatNumber(locale, activeModalities)}/4</p>
                 <p className="text-[12px] text-[#667085]">{t("inputsLabel")}</p>
               </div>
               <div>
-                <p className="text-[24px] font-bold text-[#0D1B2A]">{pendingTerms.length}</p>
+                <p className="text-[24px] font-normal text-[#0D1B2A]">{pendingTerms.length}</p>
                 <p className="text-[12px] text-[#667085]">{t("pendingLabel")}</p>
               </div>
               <div>
-                <p className="text-[24px] font-bold text-[#0D1B2A]">{acceptedTerms.length}</p>
+                <p className="text-[24px] font-normal text-[#0D1B2A]">{acceptedTerms.length}</p>
                 <p className="text-[12px] text-[#667085]">{t("acceptedLabel")}</p>
               </div>
             </div>
@@ -564,7 +564,7 @@ export default function IntakePage() {
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
             <label className="block">
-              <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("patientName")}</span>
+              <span className="mb-1.5 block text-[12px] font-normal text-[#6b7280]">{t("patientName")}</span>
               <input
                 value={patientName}
                 onChange={(event) => setPatientName(event.target.value)}
@@ -573,7 +573,7 @@ export default function IntakePage() {
               />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("age")}</span>
+              <span className="mb-1.5 block text-[12px] font-normal text-[#6b7280]">{t("age")}</span>
               <input
                 value={age}
                 onChange={(event) => setAge(event.target.value)}
@@ -582,7 +582,7 @@ export default function IntakePage() {
               />
             </label>
             <label className="block">
-              <span className="mb-1.5 block text-[12px] font-semibold text-[#6b7280]">{t("sex")}</span>
+              <span className="mb-1.5 block text-[12px] font-normal text-[#6b7280]">{t("sex")}</span>
               <select
                 value={sex}
                 onChange={(event) => setSex(event.target.value)}
@@ -606,7 +606,7 @@ export default function IntakePage() {
           <div className="self-start rounded-sm border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
             <div className="flex flex-col gap-3 border-b border-[#edf0f5] p-5">
               <div className="flex min-w-0 items-center">
-                <h2 className="text-[20px] font-bold tracking-[-0.03em]">{t("inputEvidence")}</h2>
+                <h2 className="text-[20px] font-normal tracking-[-0.03em]">{t("inputEvidence")}</h2>
               </div>
               <div className="grid min-w-0 grid-cols-2 gap-1.5 sm:grid-cols-4">
                 {TABS.map((item) => (
@@ -642,14 +642,14 @@ export default function IntakePage() {
                         <button
                           type="button"
                           onClick={() => setShowChecklist((value) => !value)}
-                          className="rounded border border-[#d9dfeb] px-4 py-2 text-[13px] font-bold text-[#343741] hover:border-[#0AAFCE]"
+                          className="rounded border border-[#d9dfeb] px-4 py-2 text-[13px] font-normal text-[#343741] hover:border-[#0AAFCE]"
                         >
                           {showChecklist ? t("hideChecklist") : t("quickAdd")}
                         </button>
                         <button
                           type="button"
                           onClick={startVoiceInput}
-                          className={`rounded px-4 py-2 text-[13px] font-bold ${
+                          className={`rounded px-4 py-2 text-[13px] font-normal ${
                             isListening ? "bg-emerald-600 text-white" : "bg-[#0AAFCE] text-white"
                           }`}
                         >
@@ -671,7 +671,7 @@ export default function IntakePage() {
                                 <button
                                   type="button"
                                   onClick={() => toggleCategory(category.id)}
-                                  className="flex w-full items-center justify-between text-left text-[13px] font-bold uppercase tracking-[0.04em] text-[#0D1B2A]"
+                                  className="flex w-full items-center justify-between text-left text-[13px] font-normal uppercase tracking-[0.04em] text-[#0D1B2A]"
                                 >
                                   {t(category.i18nKey)}
                                   <span>{openCategories.has(category.id) ? "-" : "+"}</span>
@@ -689,7 +689,7 @@ export default function IntakePage() {
                                             <button
                                               type="button"
                                               onClick={() => appendSymptom(categoryLabel, symptomLabel, "present")}
-                                              className={`rounded-none px-2.5 py-1 text-[11px] font-bold ${
+                                              className={`rounded-none px-2.5 py-1 text-[11px] font-normal ${
                                                 state === "present" ? "bg-emerald-600 text-white" : "border border-[#d9dfeb] bg-white text-[#50576a]"
                                               }`}
                                             >
@@ -698,7 +698,7 @@ export default function IntakePage() {
                                             <button
                                               type="button"
                                               onClick={() => appendSymptom(categoryLabel, symptomLabel, "absent")}
-                                              className={`rounded-none px-2.5 py-1 text-[11px] font-bold ${
+                                              className={`rounded-none px-2.5 py-1 text-[11px] font-normal ${
                                                 state === "absent" ? "bg-slate-700 text-white" : "border border-[#d9dfeb] bg-white text-[#50576a]"
                                               }`}
                                             >
@@ -769,7 +769,7 @@ export default function IntakePage() {
 
           <aside className="space-y-5">
             <div className="rounded-sm border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
-              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("sidebarInputs")}</h3>
+              <h3 className="text-[13px] font-normal uppercase tracking-[0.08em] text-[#0D1B2A]">{t("sidebarInputs")}</h3>
               <div className="mt-4 space-y-3">
                 {modalityCards.map((item) => (
                   <button
@@ -778,7 +778,7 @@ export default function IntakePage() {
                     onClick={() => setTab(item.id)}
                     className="flex w-full items-center justify-between rounded border border-[#edf0f5] px-3 py-3 text-left hover:border-[#0AAFCE]"
                   >
-                    <span className="flex items-center gap-2 text-[14px] font-semibold text-[#343741]">
+                    <span className="flex items-center gap-2 text-[14px] font-normal text-[#343741]">
                       {TAB_ICONS[item.id]}
                       {item.label}
                     </span>
@@ -789,40 +789,40 @@ export default function IntakePage() {
             </div>
 
             <div className="rounded-sm border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
-              <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("reviewFindings")}</h3>
+              <h3 className="text-[13px] font-normal uppercase tracking-[0.08em] text-[#0D1B2A]">{t("reviewFindings")}</h3>
               <div className="mt-4 space-y-5">
                 <div>
-                  <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("pendingSuggestions")} ({pendingTerms.length})</p>
+                  <p className="text-[12px] font-normal uppercase text-[#73798a]">{t("pendingSuggestions")} ({pendingTerms.length})</p>
                   <div className="mt-2 max-h-72 space-y-2 overflow-auto pr-1">
                     {pendingTerms.length === 0 && <p className="rounded border border-dashed border-[#d9dfeb] p-4 text-[13px] text-[#73798a]">{t("noPendingSuggestions")}</p>}
                     {pendingTerms.map((term) => (
                       <div key={term.hpo_id} className="rounded border border-[#e6eaf2] p-3">
-                        <p className="text-[13px] font-bold" title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`}>
+                        <p className="text-[13px] font-normal" title={`${term.hpo_id}\n${term.definition ?? ""}\nSource: ${term.source}`}>
                           {localizeHpoLabel(term.hpo_id, term.label, messages)}
                         </p>
                         <p className="mt-1 truncate text-[11px] text-[#73798a]">{term.hpo_id} · {term.source}</p>
                         <div className="mt-3 flex gap-2">
-                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "accepted")} className="rounded bg-emerald-600 px-3 py-1.5 text-[12px] font-bold text-white">{t("accept")}</button>
-                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "rejected")} className="rounded border border-[#d9dfeb] px-3 py-1.5 text-[12px] font-bold text-[#50576a]">{t("reject")}</button>
+                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "accepted")} className="rounded bg-emerald-600 px-3 py-1.5 text-[12px] font-normal text-white">{t("accept")}</button>
+                          <button type="button" onClick={() => updateSuggestion(term.hpo_id, "rejected")} className="rounded border border-[#d9dfeb] px-3 py-1.5 text-[12px] font-normal text-[#50576a]">{t("reject")}</button>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div>
-                  <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("acceptedFindings")} ({acceptedTerms.length})</p>
+                  <p className="text-[12px] font-normal uppercase text-[#73798a]">{t("acceptedFindings")} ({acceptedTerms.length})</p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {acceptedTerms.map((term) => (
-                      <span key={term.hpo_id} className="rounded-none border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800">
+                      <span key={term.hpo_id} className="rounded-none border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-normal text-emerald-800">
                         {localizeHpoLabel(term.hpo_id, term.label, messages)}
                       </span>
                     ))}
                   </div>
                 </div>
-                <p className="text-[12px] font-bold uppercase text-[#73798a]">{t("rejectedFindings")} ({rejectedTerms.length})</p>
+                <p className="text-[12px] font-normal uppercase text-[#73798a]">{t("rejectedFindings")} ({rejectedTerms.length})</p>
                 {geneticEvidence.length > 0 && (
                   <div className="rounded bg-[#f8fbff] p-3 text-[13px]">
-                    <p className="font-bold text-[#0D1B2A]">{geneticEvidence[0].gene_symbol} · {geneticEvidence[0].classification}</p>
+                    <p className="font-normal text-[#0D1B2A]">{geneticEvidence[0].gene_symbol} · {geneticEvidence[0].classification}</p>
                     {geneticEvidence[0].variant && <p className="mt-1 text-[#5d6474]">{geneticEvidence[0].variant}</p>}
                   </div>
                 )}
@@ -831,7 +831,7 @@ export default function IntakePage() {
 
             {analyzing && (
               <div className="rounded-sm border border-[#cfe6f5] bg-[#f3fbff] p-5">
-                <h3 className="text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("sidebarProgress")}</h3>
+                <h3 className="text-[13px] font-normal uppercase tracking-[0.08em] text-[#0D1B2A]">{t("sidebarProgress")}</h3>
                 <div className="mt-4 space-y-2">
                   {progress.map((step) => (
                     <ProgressStep key={step} label={step} active={step === activeStep} done={step !== activeStep} />
@@ -853,14 +853,14 @@ export default function IntakePage() {
             <Button
               onClick={handleSuggest}
               disabled={!hasAnyInput || analyzing}
-              className="h-11 rounded bg-[#0AAFCE] px-6 text-[14px] font-bold text-white hover:bg-[#24a6dc] disabled:opacity-60"
+              className="h-11 rounded bg-[#0AAFCE] px-6 text-[14px] font-normal text-white hover:bg-[#24a6dc] disabled:opacity-60"
             >
               {analyzing ? t("analyzing") : t("suggestFindings")}
             </Button>
             <Button
               onClick={handleAnalyze}
               disabled={(!acceptedTerms.length && !geneticEvidence.length) || analyzing}
-              className="h-11 rounded bg-[#0D1B2A] px-6 text-[14px] font-bold text-white hover:bg-[#1f2d86] disabled:opacity-60"
+              className="h-11 rounded bg-[#0D1B2A] px-6 text-[14px] font-normal text-white hover:bg-[#1f2d86] disabled:opacity-60"
             >
               {t("runDifferential")}
             </Button>

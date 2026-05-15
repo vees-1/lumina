@@ -74,7 +74,7 @@ function FreqBadge({ label }: { label: string }) {
 
   return (
     <span
-      className="text-[11px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
+      className="text-[11px] font-normal px-2 py-0.5 rounded-full whitespace-nowrap"
       style={{ background: colors.bg, color: colors.color }}
     >
       {labelMap[label] || label}
@@ -117,7 +117,7 @@ function ErrorState({ orpha, locale }: { orpha: string; locale: string }) {
           <path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h2 className="text-[18px] font-semibold mb-1">{t("notFound")}</h2>
+      <h2 className="text-[18px] font-normal mb-1">{t("notFound")}</h2>
       <p className="text-[13px] text-muted-foreground mb-6">
         {t("notFoundSub", { orpha: `ORPHA:${orpha}` })}
       </p>
@@ -194,13 +194,13 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 transition={{ duration: 0.45, ease }}
               >
                 <div className="mb-8">
-                  <h1 className="font-bold text-[30px] mb-3">{disease.name}</h1>
+                  <h1 className="font-normal text-[30px] mb-3">{disease.name}</h1>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[12px] font-mono font-medium px-2.5 py-1 rounded-full bg-[oklch(0.13_0_0/0.06)] text-foreground">
+                    <span className="text-[12px] font-mono font-normal px-2.5 py-1 rounded-full bg-[oklch(0.13_0_0/0.06)] text-foreground">
                       ORPHA:{disease.orpha_code}
                     </span>
                     {disease.disorder_type && (
-                      <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-[oklch(0.52_0.21_255/0.08)] text-[oklch(0.38_0.21_255)]">
+                      <span className="text-[12px] font-normal px-2.5 py-1 rounded-full bg-[oklch(0.52_0.21_255/0.08)] text-[oklch(0.38_0.21_255)]">
                         {disease.disorder_type}
                       </span>
                     )}
@@ -210,7 +210,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 {/* Clinical action summary */}
                 <div className="mb-6 rounded-2xl border border-black/[0.06] bg-white p-4 sm:p-5">
                   <div className="mb-4 flex items-center justify-between gap-3">
-                    <h2 className="text-[14px] font-semibold">{t("clinicalSummary")}</h2>
+                    <h2 className="text-[14px] font-normal">{t("clinicalSummary")}</h2>
                     <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                       {t("summaryAtGlance")}
                     </span>
@@ -238,7 +238,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                         key={item.label}
                         className="rounded-xl border border-black/[0.06] bg-[oklch(0.985_0_0)] px-4 py-3"
                       >
-                        <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                        <p className="mb-1 text-[11px] font-normal uppercase tracking-[0.08em] text-muted-foreground">
                           {item.label}
                         </p>
                         <p className="text-[13px] leading-5 text-foreground">
@@ -253,17 +253,17 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                 <div className="flex flex-wrap gap-2 mb-6">
                   {disease.disorder_type && (
                     <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
-                      <span className="font-medium text-foreground">{t("disorderType")}:</span> {disease.disorder_type}
+                      <span className="font-normal text-foreground">{t("disorderType")}:</span> {disease.disorder_type}
                     </span>
                   )}
                   {disease.disorder_group && (
                     <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
-                      <span className="font-medium text-foreground">{t("disorderGroup")}:</span> {disease.disorder_group}
+                      <span className="font-normal text-foreground">{t("disorderGroup")}:</span> {disease.disorder_group}
                     </span>
                   )}
                   {disease.omim.length > 0 && (
                     <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
-                      <span className="font-medium text-foreground">{t("omim")}:</span>{" "}
+                      <span className="font-normal text-foreground">{t("omim")}:</span>{" "}
                       {disease.omim.map((id, idx) => (
                         <a
                           key={id}
@@ -279,7 +279,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                   )}
                   {disease.icd10.length > 0 && (
                     <span className="text-[12px] px-3 py-1.5 rounded-full bg-white border border-black/[0.08] text-muted-foreground">
-                      <span className="font-medium text-foreground">{t("icd10")}:</span> {disease.icd10.join(", ")}
+                      <span className="font-normal text-foreground">{t("icd10")}:</span> {disease.icd10.join(", ")}
                     </span>
                   )}
                 </div>
@@ -325,8 +325,8 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                     ) : (
                       <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
                         <div className="px-5 py-3 border-b border-black/[0.06] flex items-center gap-3">
-                          <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("hpoTerm")}</span>
-                          <span className="ml-auto text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">{t("frequency")}</span>
+                          <span className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider">{t("hpoTerm")}</span>
+                          <span className="ml-auto text-[12px] font-normal text-muted-foreground uppercase tracking-wider">{t("frequency")}</span>
                         </div>
                         <div className="divide-y divide-black/[0.04] max-h-[500px] overflow-y-auto">
                           {[...disease.phenotypes]
@@ -340,7 +340,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                                 className="flex items-center justify-between px-5 py-3 gap-4"
                               >
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-[13px] font-medium">{localizeHpoLabel(p.hpo_id, p.hpo_term, messages)}</p>
+                                  <p className="text-[13px] font-normal">{localizeHpoLabel(p.hpo_id, p.hpo_term, messages)}</p>
                                   <p className="text-[11px] font-mono text-muted-foreground">{p.hpo_id}</p>
                                 </div>
                                 <FreqBadge label={p.frequency_label} />
@@ -361,7 +361,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                         ].map((row) => (
                           <div key={row.label} className="flex items-center justify-between px-5 py-4">
                             <span className="text-[13px] text-muted-foreground">{row.label}</span>
-                            <span className="text-[13px] font-medium">{row.value}</span>
+                            <span className="text-[13px] font-normal">{row.value}</span>
                           </div>
                         ))}
 
@@ -418,7 +418,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                     ) : (
                       <div className="bg-white rounded-2xl border border-black/[0.06] overflow-hidden">
                         <div className="px-5 py-3 border-b border-black/[0.06]">
-                          <span className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
+                          <span className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider">
                             {t("associatedGenes")}
                           </span>
                         </div>
@@ -432,7 +432,7 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                               className="flex items-center justify-between px-5 py-3.5 gap-4"
                             >
                               <div className="flex-1 min-w-0">
-                                <span className="text-[14px] font-semibold font-mono">{g.gene_symbol}</span>
+                                <span className="text-[14px] font-normal font-mono">{g.gene_symbol}</span>
                                 {g.gene_name && (
                                   <p className="text-[12px] text-muted-foreground mt-0.5 truncate">{g.gene_name}</p>
                                 )}
@@ -472,20 +472,20 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
                           >
                             <div className="flex items-start justify-between gap-4 mb-3">
                               <div>
-                                <p className="text-[14px] font-semibold">{p.prevalence_type}</p>
+                                <p className="text-[14px] font-normal">{p.prevalence_type}</p>
                                 {p.geographic && (
                                   <p className="text-[12px] text-muted-foreground mt-0.5">{p.geographic}</p>
                                 )}
                               </div>
                               {p.prevalence_class && (
-                                <span className="text-[12px] font-medium px-2.5 py-1 rounded-full bg-[oklch(0.97_0_0)] border border-black/[0.06] text-muted-foreground">
+                                <span className="text-[12px] font-normal px-2.5 py-1 rounded-full bg-[oklch(0.97_0_0)] border border-black/[0.06] text-muted-foreground">
                                   {p.prevalence_class}
                                 </span>
                               )}
                             </div>
                             {p.val_moy !== null && p.val_moy !== undefined && (
                               <p className="text-[13px] text-muted-foreground">
-                                {t("meanValue")} <span className="font-medium text-foreground">{p.val_moy}</span>
+                                {t("meanValue")} <span className="font-normal text-foreground">{p.val_moy}</span>
                               </p>
                             )}
                           </motion.div>

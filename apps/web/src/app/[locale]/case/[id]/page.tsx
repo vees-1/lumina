@@ -93,11 +93,11 @@ function HPOChip({ term }: { term: HPOTerm }) {
       animate={{ opacity: 1, scale: 1 }}
       className="group relative cursor-default rounded-none border border-[#dfe5f0] bg-[#fbfcfe] px-2.5 py-1 text-[11px] text-[#62687a] transition-colors hover:border-[#0AAFCE]/40 hover:bg-[#f2fbff]"
     >
-      <span className="font-medium">{label}</span>{" "}
+      <span className="font-normal">{label}</span>{" "}
       <span className="font-mono text-[10px] opacity-75">{term.hpo_id}</span>
       {term.source && (
         <span className="absolute bottom-full left-1/2 mb-2 w-60 max-w-[calc(100vw-2rem)] -translate-x-1/2 bg-foreground text-background text-[11px] leading-relaxed rounded-sm px-2.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-[100] pointer-events-none whitespace-normal font-sans shadow-xl">
-          <span className="font-semibold">{t("fromLabel")}</span> {term.source}
+          <span className="font-normal">{t("fromLabel")}</span> {term.source}
           <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
         </span>
       )}
@@ -127,7 +127,7 @@ function RankTermChip({
     <span className={`rounded px-2 py-1 text-[11px] ${toneClasses[tone]}`}>
       {label ? (
         <>
-          <span className="font-medium">{label}</span>{" "}
+          <span className="font-normal">{label}</span>{" "}
           <span className="font-mono text-[10px] opacity-75">{id}</span>
         </>
       ) : (
@@ -175,7 +175,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
     >
       {isTop && (
         <div className="absolute -top-2.5 left-4">
-          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-none text-white" style={{ background: color }}>
+          <span className="text-[11px] font-normal px-2.5 py-0.5 rounded-none text-white" style={{ background: color }}>
             {t("topMatch")}
           </span>
         </div>
@@ -183,19 +183,19 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
 
       <div className="flex items-start gap-4">
         <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded bg-[#0D1B2A] text-[15px] font-bold text-white"
+          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded bg-[#0D1B2A] text-[15px] font-normal text-white"
           style={{ background: color }}
         >
           {rank}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="text-[16px] font-bold leading-tight tracking-[-0.01em] text-[#2f3037]">{result.name}</h3>
-            <span className="flex-shrink-0 text-[13px] font-bold" style={{ color }}>
+            <h3 className="text-[16px] font-normal leading-tight tracking-[-0.01em] text-[#2f3037]">{result.name}</h3>
+            <span className="flex-shrink-0 text-[13px] font-normal" style={{ color }}>
               {formatNumber(locale, Math.round(result.confidence))}%
             </span>
           </div>
-          <Link href={`/${locale}/disease/${result.orpha_code}`} className="mb-3 inline-block text-[12px] font-semibold text-[#0AAFCE] transition-colors hover:text-[#0D1B2A]">
+          <Link href={`/${locale}/disease/${result.orpha_code}`} className="mb-3 inline-block text-[12px] font-normal text-[#0AAFCE] transition-colors hover:text-[#0D1B2A]">
             ORPHA:{formatNumber(locale, result.orpha_code)} ↗
           </Link>
           <ConfidenceBar value={result.confidence} color={color} delay={delay + 0.2} />
@@ -208,7 +208,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
           )}
           {missingTerms.length > 0 && (
             <div className="mt-3 border-t border-[#edf0f5] pt-3">
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#73798a]">
+              <p className="mb-1.5 text-[10px] font-normal uppercase tracking-wider text-[#73798a]">
                 {t("missingFindings")}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -220,7 +220,7 @@ function RankCard({ result, rank, delay }: { result: RankResult; rank: number; d
           )}
           {distinguishingTerms.length > 0 && (
             <div className="mt-2">
-              <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-[#0D1B2A]">
+              <p className="mb-1.5 text-[10px] font-normal uppercase tracking-wider text-[#0D1B2A]">
                 {t("distinguishingFeatures")}
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -271,13 +271,13 @@ function AgentBanner({
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[#0D1B2A] mb-0.5">
+        <p className="text-[13px] font-normal text-[#0D1B2A] mb-0.5">
           {t("aiSuggests", { modality: nextLabel })}
         </p>
         <p className="text-[12px] text-muted-foreground leading-relaxed">{suggestion.reasoning}</p>
         <div className="flex items-center gap-2 mt-3">
           <Link href={`/${locale}/new-case?addTo=${caseId}`}>
-            <button className="text-[12px] font-semibold px-3 py-1.5 rounded-sm bg-[var(--lumina-navy)] text-white hover:bg-[#0D1B2A] transition-colors">
+            <button className="text-[12px] font-normal px-3 py-1.5 rounded-sm bg-[var(--lumina-navy)] text-white hover:bg-[#0D1B2A] transition-colors">
               {t("addNow")}
             </button>
           </Link>
@@ -329,7 +329,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
       className="bg-white rounded-sm border border-black/[0.06] overflow-hidden"
     >
       <div className="px-5 py-3 border-b border-black/[0.06]">
-        <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
+        <h2 className="text-[13px] font-normal text-muted-foreground uppercase tracking-wider">
           {t("whyThis")}
         </h2>
         <p className="text-[12px] text-muted-foreground mt-0.5">
@@ -367,7 +367,7 @@ function ExplainabilityPanel({ result, caseData }: { result: RankResult; caseDat
               </div>
               {src !== "unknown" && (
                 <span
-                  className="text-[11px] font-medium px-2 py-0.5 rounded-none flex-shrink-0"
+                  className="text-[11px] font-normal px-2 py-0.5 rounded-none flex-shrink-0"
                   style={{ background: bg, color }}
                 >
                   {modalityLabel[src] ?? src}
@@ -412,7 +412,7 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
       className="bg-white rounded-sm border border-black/[0.06] p-5"
     >
       <div className="mb-4">
-        <h2 className="text-[14px] font-semibold">{t("compareTopCandidates")}</h2>
+        <h2 className="text-[14px] font-normal">{t("compareTopCandidates")}</h2>
         <p className="text-[12px] text-muted-foreground mt-1">
           {t("compareTopCandidatesSub", { gap: formatNumber(locale, Math.round(gap)) })}
         </p>
@@ -426,19 +426,19 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
             <div key={result.orpha_code} className="rounded-sm border border-black/[0.06] bg-[#FAFBFC] p-4">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[11px] font-normal uppercase tracking-wider text-muted-foreground">
                     #{index + 1}
                   </p>
-                  <h3 className="text-[14px] font-semibold leading-tight">{result.name}</h3>
+                  <h3 className="text-[14px] font-normal leading-tight">{result.name}</h3>
                 </div>
-                <span className="text-[12px] font-semibold text-muted-foreground">
+                <span className="text-[12px] font-normal text-muted-foreground">
                   {formatNumber(locale, Math.round(result.confidence))}%
                 </span>
               </div>
 
               {highlights.length > 0 && (
                 <div className="mb-3">
-                  <p className="text-[10px] font-semibold text-[rgba(13,27,42,0.65)] uppercase tracking-wider mb-1.5">
+                  <p className="text-[10px] font-normal text-[rgba(13,27,42,0.65)] uppercase tracking-wider mb-1.5">
                     {t("distinguishingFeatures")}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -451,7 +451,7 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
 
               {missing.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+                  <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-wider mb-1.5">
                     {t("missingFindings")}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -472,7 +472,7 @@ function CandidateComparisonPanel({ rankings }: { rankings: RankResult[] }) {
 
       {questions.length > 0 && (
         <div className="mt-4 pt-4 border-t border-black/[0.06]">
-          <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          <h3 className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider mb-2">
             {t("nextClinicalQuestions")}
           </h3>
           <div className="space-y-2">
@@ -550,7 +550,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
       transition={{ duration: 0.5, ease, delay: 0.35 }}
       className="bg-white rounded-sm border border-black/[0.06] p-4"
     >
-      <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+      <h3 className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider mb-3">
         {t("pubmedReferences")}
       </h3>
       {loading ? (
@@ -572,7 +572,7 @@ function PubMedCitations({ diseaseName }: { diseaseName: string }) {
               transition={{ delay: i * 0.07 }}
               className="block group"
             >
-              <p className="text-[12px] font-medium leading-snug group-hover:text-[var(--lumina-navy)] transition-colors line-clamp-2">
+              <p className="text-[12px] font-normal leading-snug group-hover:text-[var(--lumina-navy)] transition-colors line-clamp-2">
                 {a.title}
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -626,7 +626,7 @@ function LetterView({
   return (
     <div className="relative bg-white rounded-sm border border-black/[0.06] overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.06] print:hidden">
-        <h3 className="text-[14px] font-semibold">{t("clinicalReferralLetter")}</h3>
+        <h3 className="text-[14px] font-normal">{t("clinicalReferralLetter")}</h3>
         {streaming && (
           <span className="flex items-center gap-1.5 text-[12px] text-[var(--lumina-navy)]">
             <span className="w-1.5 h-1.5 rounded-none bg-[var(--lumina-navy)] animate-pulse" />
@@ -684,7 +684,7 @@ function LetterView({
         <div className="hidden print:block mt-12 pt-8 border-t border-black/10">
           <p className="font-sans italic text-muted-foreground">{t("signed")},</p>
           <div className="mt-8 border-b border-black/40 w-64" />
-          <p className="mt-2 font-bold font-sans">{doctorProfile?.name || t("drBlank")}</p>
+          <p className="mt-2 font-normal font-sans">{doctorProfile?.name || t("drBlank")}</p>
           <p className="text-[10pt] text-muted-foreground font-sans">{doctorProfile?.degree ? `${doctorProfile.degree} · ` : ""}{doctorProfile?.specialization || t("clinicalSpecialist")}</p>
           {doctorProfile?.clinic && <p className="text-[10pt] text-muted-foreground font-sans">{doctorProfile.clinic}</p>}
           <p className="text-[8pt] text-muted-foreground mt-4 font-sans italic">
@@ -809,7 +809,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             transition={{ duration: 0.4 }}
             className="py-16"
           >
-            <h2 className="text-[20px] font-semibold mb-2">{t("notFound")}</h2>
+            <h2 className="text-[20px] font-normal mb-2">{t("notFound")}</h2>
             <p className="text-muted-foreground text-[14px] mb-6">{t("notFoundSub")}</p>
             <Link href={`/${locale}/dashboard`}>
               <Button variant="outline" className="rounded-none">{t("backToDashboard")}</Button>
@@ -880,7 +880,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
         >
 
           <div className="flex items-center gap-2 mb-3">
-            <Link href={`/${locale}/cases`} className="flex items-center gap-1 text-[13px] font-semibold text-[#0AAFCE] transition-colors hover:text-[#0D1B2A]">
+            <Link href={`/${locale}/cases`} className="flex items-center gap-1 text-[13px] font-normal text-[#0AAFCE] transition-colors hover:text-[#0D1B2A]">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                 <path d="M10 4l-4 4 4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -893,7 +893,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
           {topRank ? (
             <>
               {caseData.patientContext?.patientName && (
-                <p className="mb-1 flex items-center gap-1.5 text-[13px] font-semibold text-[#62687a]">
+                <p className="mb-1 flex items-center gap-1.5 text-[13px] font-normal text-[#62687a]">
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
                     <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.3" />
                     <path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -901,12 +901,12 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   {caseData.patientContext.patientName}
                 </p>
               )}
-              <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">{t("reviewedScorecard")}</p>
-              <h1 className="mb-3 mt-2 text-[34px] font-[800] leading-tight tracking-[-0.02em] sm:text-[44px]">{topRank.name}</h1>
+              <p className="text-[12px] font-normal uppercase tracking-[0.08em] text-[#0D1B2A]">{t("reviewedScorecard")}</p>
+              <h1 className="mb-3 mt-2 text-[34px] font-normal leading-tight tracking-[-0.02em] sm:text-[44px]">{topRank.name}</h1>
               <div className="flex items-center gap-2 flex-wrap mb-4">
                 <ConfidenceTooltip confidence={topRank.confidence} modalities={caseData.modalities.length}>
                   <span
-                    className="cursor-help whitespace-nowrap rounded-none bg-[#f2fbff] px-3 py-1 text-[12px] font-bold text-[#0D1B2A] sm:text-[13px]"
+                    className="cursor-help whitespace-nowrap rounded-none bg-[#f2fbff] px-3 py-1 text-[12px] font-normal text-[#0D1B2A] sm:text-[13px]"
                   >
                     {formatNumber(locale, Math.round(topRank.confidence))}% {t("confidenceLabel")}
                   </span>
@@ -923,13 +923,13 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#73798a] sm:text-[12px]">
                 <time dateTime={analysisTimestamp.toISOString()}>{formattedAnalysisTimestamp}</time>
                 <span className="text-[#c8cfdd]">•</span>
-                <span className="inline-flex items-center rounded-none border border-[#dfe5f0] bg-[#fbfcfe] px-2 py-0.5 font-semibold text-[#343741]">
+                <span className="inline-flex items-center rounded-none border border-[#dfe5f0] bg-[#fbfcfe] px-2 py-0.5 font-normal text-[#343741]">
                   {t("deterministicBadge")}
                 </span>
               </div>
             </>
           ) : (
-            <h1 className="text-[34px] font-[800] tracking-[-0.02em] sm:text-[44px]">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
+            <h1 className="text-[34px] font-normal tracking-[-0.02em] sm:text-[44px]">{t("caseTitle", { id: id.slice(0, 8) })}</h1>
           )}
         </motion.div>
 
@@ -952,12 +952,12 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
           <div className="space-y-6">
             {(originalNotes || inputHistory.length > 0) && (
               <section className="rounded-sm border border-[#e6eaf2] bg-white p-5 shadow-[0_10px_30px_rgba(34,45,74,0.04)] print:hidden">
-                <h2 className="mb-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[#0D1B2A]">
+                <h2 className="mb-3 text-[13px] font-normal uppercase tracking-[0.08em] text-[#0D1B2A]">
                   {t("originalInput")}
                 </h2>
                 {originalNotes && (
                   <div className="mb-3">
-                    <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-[#73798a]">
+                    <p className="mb-1.5 text-[11px] font-normal uppercase tracking-wider text-[#73798a]">
                       {t("originalNotes")}
                     </p>
                     <p className="whitespace-pre-wrap rounded border border-[#e6eaf2] bg-[#fbfcfe] px-3 py-2 text-[13px] leading-6 text-[#343741]">
@@ -967,7 +967,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 )}
                 {!!Object.keys(modalityMetadataSummary).length && (
                   <div className="space-y-2">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#73798a]">
+                    <p className="text-[11px] font-normal uppercase tracking-wider text-[#73798a]">
                       {t("inputMetadata")}
                     </p>
                     {Object.entries(modalityMetadataSummary).map(([modality, values]) => (
@@ -984,7 +984,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 )}
                 {inputHistory.length > 1 && (
                   <div className="mt-3 pt-3 border-t border-black/[0.06] space-y-1">
-                    <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    <p className="text-[11px] font-normal text-muted-foreground uppercase tracking-wider">
                       {t("additions")}
                     </p>
                     {inputHistory.map((snapshot, idx) => (
@@ -1003,7 +1003,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider mb-3"
+                className="text-[13px] font-normal text-muted-foreground uppercase tracking-wider mb-3"
               >
                 {t("differentialDiagnosis")}
               </motion.h2>
@@ -1028,7 +1028,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
             {/* Letter */}
             <section className="print:m-0">
               <div className="flex items-center justify-between mb-3 print:hidden">
-                <h2 className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <h2 className="text-[13px] font-normal text-muted-foreground uppercase tracking-wider">
                   {t("clinicalLetter")}
                 </h2>
               </div>
@@ -1056,7 +1056,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   {showLetterForm && (
                     <div className="grid gap-3 p-3 rounded-sm bg-[#F7F8FA] border border-black/[0.06] sm:grid-cols-2">
                       <label className="grid gap-1.5">
-                        <span className="text-[11px] font-medium text-muted-foreground">{t("patientDob")}</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">{t("patientDob")}</span>
                         <input
                           type="date"
                           value={letterDob}
@@ -1065,7 +1065,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         />
                       </label>
                       <label className="grid gap-1.5">
-                        <span className="text-[11px] font-medium text-muted-foreground">{t("referringPhysicianName")}</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">{t("referringPhysicianName")}</span>
                         <input
                           value={referringPhysicianName}
                           onChange={(e) => setReferringPhysicianName(e.target.value)}
@@ -1074,7 +1074,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         />
                       </label>
                       <label className="grid gap-1.5">
-                        <span className="text-[11px] font-medium text-muted-foreground">{t("referringClinic")}</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">{t("referringClinic")}</span>
                         <input
                           value={referringClinic}
                           onChange={(e) => setReferringClinic(e.target.value)}
@@ -1083,7 +1083,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         />
                       </label>
                       <label className="grid gap-1.5">
-                        <span className="text-[11px] font-medium text-muted-foreground">{t("recipientSpecialist")}</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">{t("recipientSpecialist")}</span>
                         <input
                           value={recipientSpecialist}
                           onChange={(e) => setRecipientSpecialist(e.target.value)}
@@ -1092,7 +1092,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         />
                       </label>
                       <label className="grid gap-1.5 sm:col-span-2">
-                        <span className="text-[11px] font-medium text-muted-foreground">{t("recipientHospital")}</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">{t("recipientHospital")}</span>
                         <input
                           value={recipientHospital}
                           onChange={(e) => setRecipientHospital(e.target.value)}
@@ -1101,7 +1101,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                         />
                       </label>
                       <label className="grid gap-1.5 sm:col-span-2">
-                        <span className="text-[11px] font-medium text-muted-foreground">{t("urgency")}</span>
+                        <span className="text-[11px] font-normal text-muted-foreground">{t("urgency")}</span>
                         <select
                           value={letterUrgency}
                           onChange={(e) => setLetterUrgency(e.target.value)}
@@ -1157,12 +1157,12 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               transition={{ duration: 0.5, ease, delay: 0.15 }}
               className="bg-white rounded-sm border border-black/[0.06] p-4"
             >
-              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+              <h3 className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider mb-3">
                 {t("hpoPhenotypes")} ({caseData.hpoTerms.length})
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+                  <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-wider mb-1.5">
                     {t("presentFindings")} ({presentTerms.length})
                   </p>
                   <div className="flex flex-wrap gap-1.5 overflow-visible">
@@ -1176,7 +1176,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
 
                 {absentTerms.length > 0 && (
                   <div className="pt-3 border-t border-black/[0.06]">
-                    <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">
+                    <p className="text-[10px] font-normal text-muted-foreground/60 uppercase tracking-wider mb-1.5">
                       {t("excludedFindings")} ({absentTerms.length})
                     </p>
                     <div className="flex flex-wrap gap-1.5 overflow-visible">
@@ -1198,7 +1198,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
               transition={{ duration: 0.5, ease, delay: 0.2 }}
               className="bg-white rounded-sm border border-black/[0.06] p-4"
             >
-              <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("evidence")}</h3>
+              <h3 className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider mb-3">{t("evidence")}</h3>
               <div className="space-y-2">
                 {[
                   { label: t("hpoExtracted"), value: formatNumber(locale, caseData.hpoTerms.length) },
@@ -1208,7 +1208,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 ].map((row) => (
                   <div key={row.label} className="flex justify-between items-center">
                     <span className="text-[12px] text-muted-foreground">{row.label}</span>
-                    <span className="text-[13px] font-semibold">{row.value}</span>
+                    <span className="text-[13px] font-normal">{row.value}</span>
                   </div>
                 ))}
               </div>
@@ -1225,18 +1225,18 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 transition={{ duration: 0.5, ease, delay: 0.25 }}
                 className="bg-white rounded-sm border border-black/[0.06] p-4"
               >
-                <h3 className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("patient")}</h3>
+                <h3 className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider mb-3">{t("patient")}</h3>
                 <div className="space-y-2">
                   {caseData.patientContext?.age && (
                     <div className="flex justify-between">
                       <span className="text-[12px] text-muted-foreground">{t("age")}</span>
-                      <span className="text-[13px] font-medium">{caseData.patientContext.age}</span>
+                      <span className="text-[13px] font-normal">{caseData.patientContext.age}</span>
                     </div>
                   )}
                   {caseData.patientContext?.sex && (
                     <div className="flex justify-between">
                       <span className="text-[12px] text-muted-foreground">{t("sex")}</span>
-                      <span className="text-[13px] font-medium capitalize">{caseData.patientContext.sex}</span>
+                      <span className="text-[13px] font-normal capitalize">{caseData.patientContext.sex}</span>
                     </div>
                   )}
                 </div>

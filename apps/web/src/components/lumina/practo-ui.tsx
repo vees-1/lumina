@@ -28,7 +28,7 @@ export function LuminaLogo({ className, footer = false }: { className?: string; 
         <circle cx="14" cy="14" r="3" fill={footer ? "#0f172a" : "#FFFFFF"}/>
       </svg>
       <span className={cn(
-        "font-[500] tracking-tight leading-none",
+        "font-normal tracking-tight leading-none",
         footer ? "text-white text-[24px]" : "text-slate-900 dark:text-white text-[20px]"
       )}>
         {brandName}
@@ -136,7 +136,7 @@ export function MarketingFooter() {
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-6">
           {groups.map((group) => (
             <div key={group.title}>
-              <h3 className="mb-4 text-[13px] font-[600] leading-tight text-white sm:text-[13.5px]">{group.title}</h3>
+              <h3 className="mb-4 text-[13px] font-normal leading-tight text-white sm:text-[13.5px]">{group.title}</h3>
               <ul className="space-y-2.5 text-[13px] leading-tight text-white/75 sm:text-[13.5px]">
                 {group.links.map((link) => (
                   <li key={link.label}>
@@ -191,9 +191,9 @@ export function ServiceCard({
         />
       </div>
       <div className="p-4 sm:p-5">
-        <h3 className="text-[14px] font-[700] leading-snug tracking-[-0.01em] text-[#0D1B2A] sm:text-[15px]">{title}</h3>
+        <h3 className="text-[14px] font-normal leading-snug tracking-[-0.01em] text-[#0D1B2A] sm:text-[15px]">{title}</h3>
         <p className="mt-2 text-[12px] leading-5 text-[#4A5568] sm:text-[13px]">{description}</p>
-        <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-[600] text-[#0AAFCE] sm:mt-4 sm:text-[12.5px]">
+        <span className="mt-3 inline-flex items-center gap-1 text-[12px] font-normal text-[#0AAFCE] sm:mt-4 sm:text-[12.5px]">
           {tl("howItWorks")}
           <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h10m-4-4 4 4-4 4" />
@@ -320,10 +320,10 @@ export function EvidenceModuleCard({
           {icon}
         </span>
       </div>
-      <span className="mt-3 flex h-10 w-full max-w-[150px] items-start justify-center text-[12px] font-[700] leading-tight text-[#343741] sm:mt-4 sm:h-[34px] sm:text-[14px]">
+      <span className="mt-3 flex h-10 w-full max-w-[150px] items-start justify-center text-[12px] font-normal leading-tight text-[#343741] sm:mt-4 sm:h-[34px] sm:text-[14px]">
         {title}
       </span>
-      <span className="mt-2 text-[12px] font-[600] leading-tight text-[#14AEEF] sm:text-[14px]">{action}</span>
+      <span className="mt-2 text-[12px] font-normal leading-tight text-[#14AEEF] sm:text-[14px]">{action}</span>
     </div>
   );
 }
@@ -348,7 +348,7 @@ export function DashboardShell({
   return (
     <main className="mx-auto max-w-[1200px] px-6 pb-24 pt-28">
       <div className="mb-8 flex flex-col gap-1.5">
-        <h1 className="text-[36px] font-[800] tracking-[-0.03em] text-[#0D1B2A]">{title}</h1>
+        <h1 className="text-[36px] font-normal tracking-[-0.03em] text-[#0D1B2A]">{title}</h1>
         <p className="max-w-2xl text-[15px] leading-7 text-[#4A5568]">{subtitle}</p>
       </div>
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
@@ -358,7 +358,7 @@ export function DashboardShell({
               key={tab}
               onClick={() => onTabChange(tab)}
               className={cn(
-                "mb-0.5 flex w-full items-center rounded-lg px-4 py-2.5 text-left text-[13.5px] font-[600] transition-colors",
+                "mb-0.5 flex w-full items-center rounded-lg px-4 py-2.5 text-left text-[13.5px] font-normal transition-colors",
                 activeTab === tab
                   ? "bg-[#E5F8FC] text-[#0D1B2A]"
                   : "text-[#4A5568] hover:bg-[#F7F8FA] hover:text-[#0D1B2A]"
@@ -388,14 +388,14 @@ export function CaseTable({
         <thead className="border-b border-[#DDE3ED] bg-[#F7F8FA]">
           <tr>
             {headers.map((h) => (
-              <th key={h} className="px-5 py-3 text-[11px] font-[700] uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
+              <th key={h} className="px-5 py-3 text-[11px] font-normal uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
             ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-[#F0F2F5]">
           {rows.map((row) => (
             <tr key={row.id} className="transition-colors hover:bg-[#F7F8FA]">
-              <td className="px-5 py-4 font-[700] text-[#0AAFCE]">{row.id}</td>
+              <td className="px-5 py-4 font-normal text-[#0AAFCE]">{row.id}</td>
               <td className="px-5 py-4 text-[#0D1B2A]">{row.patient}</td>
               <td className="px-5 py-4">
                 <span className="badge badge-cyan">{row.status}</span>
@@ -455,14 +455,14 @@ export function HpoApprovalQueue() {
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-[14px] font-[700] text-[#0D1B2A]">{item.term}</h3>
+                  <h3 className="text-[14px] font-normal text-[#0D1B2A]">{item.term}</h3>
                   {isAccepted && <span className="badge badge-accepted">{t("accepted")}</span>}
                   {isRejected && <span className="badge badge-rejected">{t("rejected")}</span>}
                 </div>
                 <p className="mt-1 text-[12.5px] text-[#8A94A6]">
                   {item.source} ·{" "}
                   <span className={cn(
-                    "font-[600]",
+                    "font-normal",
                     item.confidence === "High" ? "text-[#1A7F4B]" : item.confidence === "Medium" ? "text-[#D4860A]" : "text-[#8A94A6]"
                   )}>
                     {confidenceLabels[item.confidence]} {t("confidence")}
@@ -473,14 +473,14 @@ export function HpoApprovalQueue() {
                 <button
                   type="button"
                   onClick={() => mark(item.term, "accepted")}
-                  className="rounded-lg border border-[#1A7F4B] px-4 py-1.5 text-[12.5px] font-[700] text-[#1A7F4B] transition-colors hover:bg-[#EDFAF3]"
+                  className="rounded-lg border border-[#1A7F4B] px-4 py-1.5 text-[12.5px] font-normal text-[#1A7F4B] transition-colors hover:bg-[#EDFAF3]"
                 >
                   {t("accept")}
                 </button>
                 <button
                   type="button"
                   onClick={() => mark(item.term, "rejected")}
-                  className="rounded-lg border border-[#C0392B] px-4 py-1.5 text-[12.5px] font-[700] text-[#C0392B] transition-colors hover:bg-[#FDEEEC]"
+                  className="rounded-lg border border-[#C0392B] px-4 py-1.5 text-[12.5px] font-normal text-[#C0392B] transition-colors hover:bg-[#FDEEEC]"
                 >
                   {t("reject")}
                 </button>
@@ -493,7 +493,7 @@ export function HpoApprovalQueue() {
                       items.map((s) => (s.term === item.term ? { ...s, term: next } : s))
                     );
                   }}
-                  className="rounded-lg border border-[#DDE3ED] px-4 py-1.5 text-[12.5px] font-[700] text-[#4A5568] transition-colors hover:bg-[#F7F8FA]"
+                  className="rounded-lg border border-[#DDE3ED] px-4 py-1.5 text-[12.5px] font-normal text-[#4A5568] transition-colors hover:bg-[#F7F8FA]"
                 >
                   {t("edit")}
                 </button>
@@ -523,7 +523,7 @@ export function PatientStatusTimeline({ status }: { status?: string }) {
             <div key={step} className="relative z-10 flex flex-col items-center gap-2" style={{ flex: 1 }}>
               <span
                 className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full border-2 text-[12px] font-[800] transition-colors",
+                  "flex h-8 w-8 items-center justify-center rounded-full border-2 text-[12px] font-normal transition-colors",
                   done
                     ? "border-[#1A7F4B] bg-[#1A7F4B] text-white"
                     : active
@@ -534,7 +534,7 @@ export function PatientStatusTimeline({ status }: { status?: string }) {
                 {done ? <Check className="h-3.5 w-3.5" /> : index + 1}
               </span>
               <span className={cn(
-                "text-center text-[11.5px] font-[600] leading-tight",
+                "text-center text-[11.5px] font-normal leading-tight",
                 active ? "text-[#0D1B2A]" : done ? "text-[#1A7F4B]" : "text-[#8A94A6]"
               )}>
                 {step}
@@ -563,9 +563,9 @@ export function IntakeUploadCard({
   const body = (
     <>
       <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-[#E5F8FC] text-[#0AAFCE]">{icon}</div>
-      <h3 className="text-[15px] font-[700] tracking-[-0.01em] text-[#0D1B2A]">{title}</h3>
+      <h3 className="text-[15px] font-normal tracking-[-0.01em] text-[#0D1B2A]">{title}</h3>
       <p className="mt-1.5 min-h-[44px] text-[13px] leading-5 text-[#4A5568]">{description}</p>
-      <span className="mt-4 block w-full rounded-lg border border-dashed border-[#DDE3ED] bg-[#F7F8FA] px-4 py-3 text-center text-[13px] font-[600] text-[#4A5568]">
+      <span className="mt-4 block w-full rounded-lg border border-dashed border-[#DDE3ED] bg-[#F7F8FA] px-4 py-3 text-center text-[13px] font-normal text-[#4A5568]">
         {t("uploadEvidence")}
       </span>
     </>

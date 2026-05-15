@@ -39,7 +39,7 @@ export default function PrivacyPage() {
       
       {/* Hero Section */}
       <div className="bg-slate-900 text-white py-24 lg:py-32 px-6 lg:px-8 text-center shadow-inner">
-        <h1 className="text-4xl lg:text-6xl font-bold mb-6">{t("heroTitle")}</h1>
+        <h1 className="text-4xl lg:text-6xl font-normal mb-6">{t("heroTitle")}</h1>
         <p className="text-lg lg:text-xl text-cyan-200 max-w-3xl mx-auto leading-relaxed">
           {t("heroSubtitle")}
         </p>
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
               <div className="h-12 w-12 bg-[#E5F8FC] rounded-lg flex items-center justify-center mb-6">
                 {policy.icon}
               </div>
-              <h3 className="text-xl font-bold mb-3">{policy.title}</h3>
+              <h3 className="text-xl font-normal mb-3">{policy.title}</h3>
               <p className="text-slate-600 leading-relaxed">{policy.desc}</p>
             </div>
           ))}
@@ -63,25 +63,25 @@ export default function PrivacyPage() {
 
         {/* Detailed Policy Section */}
         <div className="bg-white rounded-xl border border-slate-200 p-8 md:p-12 shadow-sm max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">{t("collectionTitle")}</h2>
+          <h2 className="text-3xl font-normal mb-8">{t("collectionTitle")}</h2>
           
           <div className="space-y-8">
             <div>
-              <h3 className="text-xl font-bold mb-3">{t("s1Title")}</h3>
+              <h3 className="text-xl font-normal mb-3">{t("s1Title")}</h3>
               <p className="text-slate-600 leading-relaxed">
                 {t("s1Desc", { brandName })}
               </p>
             </div>
 
             <div>
-              <h3 className="text-xl font-bold mb-3">{t("s2Title")}</h3>
+              <h3 className="text-xl font-normal mb-3">{t("s2Title")}</h3>
               <p className="text-slate-600 leading-relaxed">
                 {t("s2Desc")}
               </p>
             </div>
 
             <div>
-              <h3 className="text-xl font-bold mb-3">{t("s3Title")}</h3>
+              <h3 className="text-xl font-normal mb-3">{t("s3Title")}</h3>
               <p className="text-slate-600 leading-relaxed">
                 {t("s3Desc", { brandName })}
               </p>
