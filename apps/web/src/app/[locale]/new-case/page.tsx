@@ -604,24 +604,24 @@ export default function IntakePage() {
 
         <section className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_340px]">
           <div className="self-start rounded-sm border border-[#e6eaf2] bg-white shadow-[0_10px_30px_rgba(34,45,74,0.05)]">
-            <div className="flex flex-col gap-3 border-b border-[#edf0f5] p-5 xl:flex-row xl:items-center xl:justify-between">
-              <div className="flex shrink-0 items-center">
+            <div className="flex flex-col gap-3 border-b border-[#edf0f5] p-5">
+              <div className="flex min-w-0 items-center">
                 <h2 className="text-[20px] font-bold tracking-[-0.03em]">{t("inputEvidence")}</h2>
               </div>
-              <div className="flex min-w-0 gap-1.5 overflow-x-auto pb-1 xl:justify-end xl:pb-0">
+              <div className="grid min-w-0 grid-cols-2 gap-1.5 sm:grid-cols-4">
                 {TABS.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => setTab(item.id)}
-                    className={`inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-none border px-2.5 text-[12px] font-semibold ${
+                    className={`inline-flex h-8 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-none border px-2 text-[11px] font-normal sm:text-[12px] ${
                       tab === item.id
                         ? "border-[#0D1B2A] bg-[#0D1B2A] text-white"
                         : "border-[#d9dfeb] bg-white text-[#50576a] hover:border-[#0AAFCE]"
                     }`}
                   >
-                    {TAB_ICONS[item.id]}
-                    {item.label}
+                    <span className="shrink-0">{TAB_ICONS[item.id]}</span>
+                    <span className="min-w-0">{item.label}</span>
                   </button>
                 ))}
               </div>

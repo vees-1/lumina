@@ -3,6 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { readStoredUserRole } from "@/lib/user-role";
 
 export function RoleGuard({ allowed, redirectTo, children }: { allowed: string[], redirectTo: string, children: React.ReactNode }) {
   const { user, isLoaded } = useUser();
@@ -12,8 +13,7 @@ export function RoleGuard({ allowed, redirectTo, children }: { allowed: string[]
     if (isLoaded) {
       let role = user?.publicMetadata?.role as string;
       if (!role && typeof window !== "undefined") {
-        const saved = window.localStorage.getItem("lumina_user_role");
-        role = saved === "patient" ? "patient" : "doctor";
+        role = readStoredUserRole();
       }
       
       if (!role || !allowed.includes(role)) {
@@ -28,8 +28,7 @@ export function RoleGuard({ allowed, redirectTo, children }: { allowed: string[]
 
   let role = user?.publicMetadata?.role as string;
   if (!role && typeof window !== "undefined") {
-    const saved = window.localStorage.getItem("lumina_user_role");
-    role = saved === "patient" ? "patient" : "doctor";
+    role = readStoredUserRole();
   }
 
   if (!role || !allowed.includes(role)) {

@@ -7,6 +7,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { Check, FileText, FlaskConical, Image as ImageIcon, PencilLine, ShieldCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
+import { readStoredUserRole } from "@/lib/user-role";
 
 /* -- Logo -------------------------------------------------------------------- */
 export function LuminaLogo({ className, footer = false }: { className?: string; footer?: boolean }) {
@@ -45,11 +46,7 @@ export function MarketingFooter() {
   const { user } = useUser();
   const locale = useLocale();
   const brandName = tc("brandName");
-  const [storedRole] = useState<"doctor" | "patient">(() => {
-    if (typeof window === "undefined") return "doctor";
-    const saved = window.localStorage.getItem("lumina_user_role");
-    return saved === "patient" ? "patient" : "doctor";
-  });
+  const [storedRole] = useState<"doctor" | "patient">(() => readStoredUserRole());
 
   const role = user?.publicMetadata?.role === "patient" ? "patient" : user?.publicMetadata?.role === "doctor" ? "doctor" : storedRole;
 

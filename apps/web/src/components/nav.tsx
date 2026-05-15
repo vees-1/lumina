@@ -7,6 +7,7 @@ import { ChevronDown, Check, Menu, X, Globe } from "lucide-react";
 import { useAuth, useUser, UserButton } from "@clerk/nextjs";
 import { getApiHealth } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { readStoredUserRole } from "@/lib/user-role";
 
 import { useTranslations, useLocale } from "next-intl";
 
@@ -223,11 +224,7 @@ export function Nav({ transparent = false }: { transparent?: boolean } = {}) {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const toLocalePath = useLocalePath();
-  const [storedRole] = useState<"doctor" | "patient">(() => {
-    if (typeof window === "undefined") return "doctor";
-    const saved = window.localStorage.getItem("lumina_user_role");
-    return saved === "patient" ? "patient" : "doctor";
-  });
+  const [storedRole] = useState<"doctor" | "patient">(() => readStoredUserRole());
   const role = typeof user?.publicMetadata?.role === "string" ? user.publicMetadata.role : storedRole;
   const workspaceHref = role === "patient" ? "/patient" : "/dashboard";
   const activeLocale = useLocale();
