@@ -38,10 +38,15 @@ def _ensure_patient_submission_columns(engine) -> None:
         "visit_recommendation": "VARCHAR",
     }
     with engine.begin() as conn:
-        existing = {row[1] for row in conn.exec_driver_sql("PRAGMA table_info(app_patient_submission)").all()}
+        existing = {
+            row[1]
+            for row in conn.exec_driver_sql("PRAGMA table_info(app_patient_submission)").all()
+        }
         for column, sql_type in missing_columns.items():
             if column not in existing:
-                conn.exec_driver_sql(f"ALTER TABLE app_patient_submission ADD COLUMN {column} {sql_type}")
+                conn.exec_driver_sql(
+                    f"ALTER TABLE app_patient_submission ADD COLUMN {column} {sql_type}"
+                )
 
 
 def init_app_db():

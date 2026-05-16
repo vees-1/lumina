@@ -423,11 +423,27 @@ def _case_text(case_data: dict) -> str:
 
 def _guess_specialist(case_data: dict) -> str:
     text = _case_text(case_data)
-    if any(word in text for word in ["seizure", "epilep", "regression", "developmental delay", "ataxia", "hypotonia"]):
+    if any(
+        word in text
+        for word in [
+            "seizure",
+            "epilep",
+            "regression",
+            "developmental delay",
+            "ataxia",
+            "hypotonia",
+        ]
+    ):
         return "Neurology"
-    if any(word in text for word in ["cardiac", "heart", "aortic", "cardiomyopathy", "arrhythmia", "qt "]):
+    if any(
+        word in text
+        for word in ["cardiac", "heart", "aortic", "cardiomyopathy", "arrhythmia", "qt "]
+    ):
         return "Cardiology"
-    if any(word in text for word in ["metabolic", "lactic", "hypogly", "hyperammon", "acidosis", "amino acid"]):
+    if any(
+        word in text
+        for word in ["metabolic", "lactic", "hypogly", "hyperammon", "acidosis", "amino acid"]
+    ):
         return "Metabolic genetics"
     if any(word in text for word in ["eye", "retina", "optic", "lens", "vision", "ophthalm"]):
         return "Ophthalmology"
@@ -463,22 +479,34 @@ def _safe_join(values: list[str], fallback: str) -> str:
 
 
 def _fallback_letter(body: LetterRequest, patient_context: dict) -> str:
-    doctor_profile = patient_context.get("doctorProfile") if isinstance(patient_context.get("doctorProfile"), dict) else {}
+    doctor_profile = (
+        patient_context.get("doctorProfile")
+        if isinstance(patient_context.get("doctorProfile"), dict)
+        else {}
+    )
     today = __import__("datetime").date.today().strftime("%d %b %Y")
     patient_name = _first_present(patient_context, "patientName", "patient_name") or "the patient"
     age = _first_present(patient_context, "age")
     sex = _first_present(patient_context, "sex")
     dob = _first_present(patient_context, "dateOfBirth", "patientDob", "patient_dob", "dob")
-    clinician = _first_present(patient_context, "referringPhysicianName", "referring_physician_name") or str(doctor_profile.get("name") or "Referring clinician")
-    clinic = _first_present(patient_context, "referringClinic", "referring_clinic") or str(doctor_profile.get("clinic") or "")
-    specialist = _first_present(patient_context, "recipientSpecialist", "recipient_specialist") or _guess_specialist(
+    clinician = _first_present(
+        patient_context, "referringPhysicianName", "referring_physician_name"
+    ) or str(doctor_profile.get("name") or "Referring clinician")
+    clinic = _first_present(patient_context, "referringClinic", "referring_clinic") or str(
+        doctor_profile.get("clinic") or ""
+    )
+    specialist = _first_present(
+        patient_context, "recipientSpecialist", "recipient_specialist"
+    ) or _guess_specialist(
         {
             "rankings": [item.dict() for item in body.top5],
             "hpoTerms": body.evidence.get("hpo_terms", []),
         }
     )
     urgency = _first_present(patient_context, "urgency") or "routine"
-    visit_recommendation = _first_present(patient_context, "visitRecommendation", "visit_recommendation")
+    visit_recommendation = _first_present(
+        patient_context, "visitRecommendation", "visit_recommendation"
+    )
     top = body.top5[0] if body.top5 else None
     top_name = top.name if top else "a rare disease differential"
     differential_text = "\n".join(
@@ -547,7 +575,9 @@ def _letter_flowables(body: LetterPdfRequest, styles: dict[str, ParagraphStyle])
             continue
         if line == "---":
             flowables.append(Spacer(1, 4))
-            flowables.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#D7DEE9")))
+            flowables.append(
+                HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#D7DEE9"))
+            )
             flowables.append(Spacer(1, 6))
             continue
         if line.startswith("# "):
@@ -561,7 +591,9 @@ def _letter_flowables(body: LetterPdfRequest, styles: dict[str, ParagraphStyle])
             continue
         if re.match(r"^[-*]\s+", line):
             text = re.sub(r"^[-*]\s+", "", line).strip()
-            flowables.append(Paragraph(f"&bull;&nbsp; {_markdown_to_pdf_text(text)}", styles["bullet"]))
+            flowables.append(
+                Paragraph(f"&bull;&nbsp; {_markdown_to_pdf_text(text)}", styles["bullet"])
+            )
             continue
         flowables.append(Paragraph(_markdown_to_pdf_text(line), styles["body"]))
     return flowables
@@ -570,7 +602,12 @@ def _letter_flowables(body: LetterPdfRequest, styles: dict[str, ParagraphStyle])
 def _render_letter_pdf(body: LetterPdfRequest) -> bytes:
     doctor_profile = body.doctor_profile or {}
     patient_context = body.case_data.get("patientContext") or {}
-    patient_id = body.submission_id or body.case_data.get("sourceSubmissionId") or body.case_data.get("id") or "patient"
+    patient_id = (
+        body.submission_id
+        or body.case_data.get("sourceSubmissionId")
+        or body.case_data.get("id")
+        or "patient"
+    )
     patient_name = patient_context.get("patientName") or "Patient"
     age = patient_context.get("age") or ""
     sex = patient_context.get("sex") or ""
@@ -671,46 +708,65 @@ def _render_letter_pdf(body: LetterPdfRequest) -> bytes:
     story: list = []
     story.append(
         Table(
-            [[
+            [
                 [
-                    Paragraph("LUMINA CLINICAL REFERRAL", styles["brand"]),
-                    Paragraph(f"Patient ID: {escape(str(patient_id))}", styles["meta"]),
-                ],
-                [
-                    Paragraph("<br/>".join(escape(str(value)) for value in [
-                        doctor_name,
-                        doctor_profile.get("specialty") or doctor_profile.get("specialization") or "",
-                        doctor_profile.get("clinic") or patient_context.get("referringClinic") or "",
-                        doctor_profile.get("contact") or "",
-                        doctor_profile.get("license") or "",
-                    ] if value), styles["doctor"]),
-                ],
-            ]],
+                    [
+                        Paragraph("LUMINA CLINICAL REFERRAL", styles["brand"]),
+                        Paragraph(f"Patient ID: {escape(str(patient_id))}", styles["meta"]),
+                    ],
+                    [
+                        Paragraph(
+                            "<br/>".join(
+                                escape(str(value))
+                                for value in [
+                                    doctor_name,
+                                    doctor_profile.get("specialty")
+                                    or doctor_profile.get("specialization")
+                                    or "",
+                                    doctor_profile.get("clinic")
+                                    or patient_context.get("referringClinic")
+                                    or "",
+                                    doctor_profile.get("contact") or "",
+                                    doctor_profile.get("license") or "",
+                                ]
+                                if value
+                            ),
+                            styles["doctor"],
+                        ),
+                    ],
+                ]
+            ],
             colWidths=[108 * mm, 72 * mm],
-            style=TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-                ("LINEBELOW", (0, 0), (-1, 0), 0.8, colors.HexColor("#111827")),
-            ]),
+            style=TableStyle(
+                [
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+                    ("LINEBELOW", (0, 0), (-1, 0), 0.8, colors.HexColor("#111827")),
+                ]
+            ),
         )
     )
     story.append(Spacer(1, 8))
     demo_text = " · ".join(part for part in [str(age).strip(), str(sex).strip()] if part)
     story.append(
         Table(
-            [[
-                Paragraph(f"Patient: {escape(str(patient_name))}", styles["meta"]),
-                Paragraph(escape(demo_text), styles["doctor"]),
-            ]],
+            [
+                [
+                    Paragraph(f"Patient: {escape(str(patient_name))}", styles["meta"]),
+                    Paragraph(escape(demo_text), styles["doctor"]),
+                ]
+            ],
             colWidths=[108 * mm, 72 * mm],
-            style=TableStyle([
-                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F8FAFC")),
-                ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#D7DEE9")),
-                ("LEFTPADDING", (0, 0), (-1, -1), 6),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-                ("TOPPADDING", (0, 0), (-1, -1), 4),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-            ]),
+            style=TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#F8FAFC")),
+                    ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#D7DEE9")),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                    ("TOPPADDING", (0, 0), (-1, -1), 4),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                ]
+            ),
         )
     )
     story.append(Spacer(1, 10))
@@ -731,10 +787,14 @@ def _render_letter_pdf(body: LetterPdfRequest) -> bytes:
             pass
     signature_text = str(doctor_profile.get("signature") or "").strip()
     if signature_text:
-        signature_items.append(Paragraph(escape(signature_text).replace("\n", "<br/>"), styles["signature"]))
+        signature_items.append(
+            Paragraph(escape(signature_text).replace("\n", "<br/>"), styles["signature"])
+        )
     signature_items.append(Paragraph(escape(doctor_name), styles["signature_name"]))
     if doctor_profile.get("clinic"):
-        signature_items.append(Paragraph(escape(str(doctor_profile.get("clinic"))), styles["signature"]))
+        signature_items.append(
+            Paragraph(escape(str(doctor_profile.get("clinic"))), styles["signature"])
+        )
     story.append(
         Table(
             [[signature_items]],
@@ -901,7 +961,9 @@ async def generate_patient_summary(body: PatientSummaryRequest) -> PatientSummar
                             "suggested_specialist": specialist,
                             "visit_recommendation": body.visit_recommendation,
                             "visit_recommendation_text": _visit_text(body.visit_recommendation),
-                            "top_clinical_impression": (body.case_data.get("rankings") or [{}])[0].get("name"),
+                            "top_clinical_impression": (body.case_data.get("rankings") or [{}])[
+                                0
+                            ].get("name"),
                             "accepted_findings": [
                                 term.get("label") or term.get("hpo_id")
                                 for term in (body.case_data.get("hpoTerms") or [])
@@ -923,7 +985,9 @@ async def generate_patient_summary(body: PatientSummaryRequest) -> PatientSummar
             headline=str(data.get("headline") or fallback.headline),
             body=str(data.get("body") or fallback.body),
             clinical_area=str(data.get("clinical_area") or fallback.clinical_area),
-            recommended_next_step=str(data.get("recommended_next_step") or fallback.recommended_next_step),
+            recommended_next_step=str(
+                data.get("recommended_next_step") or fallback.recommended_next_step
+            ),
             specialist=str(data.get("specialist") or fallback.specialist),
             safety_note=str(data.get("safety_note") or fallback.safety_note),
         )

@@ -27,7 +27,9 @@ def _actor(request: Request) -> tuple[str, str]:
     return user_id, role
 
 
-def _submission_payload(row: PatientSubmission, *, include_messages: bool = False, session: Session | None = None) -> dict:
+def _submission_payload(
+    row: PatientSubmission, *, include_messages: bool = False, session: Session | None = None
+) -> dict:
     messages = []
     if include_messages and session is not None:
         rows = session.exec(
@@ -36,7 +38,12 @@ def _submission_payload(row: PatientSubmission, *, include_messages: bool = Fals
             .order_by(DoctorRequestMessage.timestamp.desc())
         ).all()
         messages = [
-            {"id": item.id, "doctorId": item.doctor_id, "message": item.message, "timestamp": item.timestamp}
+            {
+                "id": item.id,
+                "doctorId": item.doctor_id,
+                "message": item.message,
+                "timestamp": item.timestamp,
+            }
             for item in rows
         ]
     return {
@@ -51,11 +58,15 @@ def _submission_payload(row: PatientSubmission, *, include_messages: bool = Fals
         "notes": row.notes,
         "photoFileName": row.photo_file_name,
         "labFileName": row.lab_file_name,
-        "geneticEvidence": json.loads(row.genetic_evidence_json) if row.genetic_evidence_json else None,
+        "geneticEvidence": json.loads(row.genetic_evidence_json)
+        if row.genetic_evidence_json
+        else None,
         "status": row.status,
         "linkedCaseId": row.linked_case_id,
         "doctorMessage": row.latest_doctor_message,
-        "patientSummary": json.loads(row.patient_summary_json) if row.patient_summary_json else None,
+        "patientSummary": json.loads(row.patient_summary_json)
+        if row.patient_summary_json
+        else None,
         "releasedLetterMarkdown": row.released_letter_markdown,
         "releasedCaseId": row.released_case_id,
         "releaseTimestamp": row.release_timestamp,
@@ -72,7 +83,9 @@ def _case_payload(row: ClinicalCase) -> dict:
     return payload
 
 
-def _save_upload(submission_id: str, kind: str, upload: UploadFile | None) -> tuple[str | None, str | None, str | None]:
+def _save_upload(
+    submission_id: str, kind: str, upload: UploadFile | None
+) -> tuple[str | None, str | None, str | None]:
     if upload is None or not upload.filename:
         return None, None, None
     target_dir = UPLOAD_DIR / submission_id
@@ -98,7 +111,12 @@ async def create_submission(
     user_id, role = _actor(request)
     if role != "patient":
         raise HTTPException(status_code=403, detail="Only patients can create submissions")
-    if not (notes and notes.strip()) and photo is None and lab is None and not (genetic_evidence and genetic_evidence.strip()):
+    if (
+        not (notes and notes.strip())
+        and photo is None
+        and lab is None
+        and not (genetic_evidence and genetic_evidence.strip())
+    ):
         raise HTTPException(status_code=400, detail="Submission requires evidence")
     if genetic_evidence:
         try:
@@ -219,7 +237,15 @@ async def request_more_data(submission_id: str, body: RequestMoreDataBody, reque
         row.latest_doctor_message = message
         row.updated_at = now
         session.add(row)
-        session.add(DoctorRequestMessage(id=str(uuid4()), submission_id=submission_id, doctor_id=user_id, message=message, timestamp=now))
+        session.add(
+            DoctorRequestMessage(
+                id=str(uuid4()),
+                submission_id=submission_id,
+                doctor_id=user_id,
+                message=message,
+                timestamp=now,
+            )
+        )
         session.commit()
         session.refresh(row)
         return _submission_payload(row, include_messages=True, session=session)
@@ -229,7 +255,9 @@ class LinkCaseBody(BaseModel):
     case_id: str
 
 
-def _complete_review(session: Session, submission_id: str, case_id: str, doctor_id: str) -> PatientSubmission:
+def _complete_review(
+    session: Session, submission_id: str, case_id: str, doctor_id: str
+) -> PatientSubmission:
     row = session.get(PatientSubmission, submission_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Submission not found")
@@ -389,5 +417,7 @@ async def get_case(case_id: str, request: Request):
         if role == "doctor" and row.doctor_owner_id != user_id:
             raise HTTPException(status_code=403, detail="Not allowed")
         if role == "patient":
-            raise HTTPException(status_code=403, detail="Patients can only access released summaries")
+            raise HTTPException(
+                status_code=403, detail="Patients can only access released summaries"
+            )
         return _case_payload(row)
