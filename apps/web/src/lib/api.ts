@@ -1,7 +1,8 @@
-import type { CaseData, CaseOutcome, CaseSummary, GeneticEvidence, HPOTerm, PatientContext, PatientSubmission, RankResult } from "@/types/lumina";
+import type { CaseData, CaseOutcome, CaseSummary, GeneticEvidence, HPOTerm, PatientContext, PatientSubmission, PatientSummary, RankResult, VisitRecommendation } from "@/types/lumina";
 
 const API = "/api";
 type StoredCaseSummary = CaseSummary & { status: CaseOutcome };
+export type ApiActor = { userId: string; role: "doctor" | "patient" };
 
 export interface ApiHealth {
   status: string;
@@ -27,6 +28,159 @@ export async function getApiHealth(signal?: AbortSignal): Promise<ApiHealth> {
   });
   if (!res.ok) throw new Error("Health check failed");
   return res.json();
+}
+
+function actorHeaders(actor: ApiActor): HeadersInit {
+  return {
+    "x-lumina-user-id": actor.userId,
+    "x-lumina-role": actor.role,
+  };
+}
+
+function caseToSummary(caseData: CaseData): StoredCaseSummary {
+  return {
+    id: caseData.id,
+    timestamp: caseData.timestamp,
+    topDiagnosis: caseData.rankings[0]?.name ?? "Unknown",
+    confidence: caseData.rankings[0]?.confidence ?? 0,
+    modalities: caseData.modalities,
+    hpoCount: caseData.hpoTerms.length,
+    patientName: caseData.patientContext?.patientName,
+    status: caseData.outcome ?? "pending",
+  };
+}
+
+async function jsonOrThrow<T>(res: Response, fallback: string): Promise<T> {
+  if (res.ok) return res.json();
+  let detail = fallback;
+  try {
+    const body = await res.json();
+    if (typeof body?.detail === "string") detail = body.detail;
+  } catch {}
+  throw new Error(detail);
+}
+
+export async function createPatientSubmissionRemote(input: {
+  patientName?: string;
+  age?: string;
+  sex?: string;
+  notes?: string;
+  photo?: File | null;
+  lab?: File | null;
+  geneticEvidence?: GeneticEvidence;
+}, actor: ApiActor): Promise<PatientSubmission> {
+  const form = new FormData();
+  if (input.patientName) form.append("patient_name", input.patientName);
+  if (input.age) form.append("age", input.age);
+  if (input.sex) form.append("sex", input.sex);
+  if (input.notes) form.append("notes", input.notes);
+  if (input.geneticEvidence) form.append("genetic_evidence", JSON.stringify(input.geneticEvidence));
+  if (input.photo) form.append("photo", input.photo);
+  if (input.lab) form.append("lab", input.lab);
+  const res = await fetch(`${API}/submissions`, { method: "POST", headers: actorHeaders(actor), body: form });
+  return jsonOrThrow<PatientSubmission>(res, "Submission failed");
+}
+
+export async function getPatientSubmissionsRemote(actor: ApiActor, status?: string): Promise<PatientSubmission[]> {
+  const params = status ? `?status=${encodeURIComponent(status)}` : "";
+  const res = await fetch(`${API}/submissions${params}`, { headers: actorHeaders(actor), cache: "no-store" });
+  return jsonOrThrow<PatientSubmission[]>(res, "Could not load submissions");
+}
+
+export async function getPatientSubmissionRemote(id: string, actor: ApiActor): Promise<PatientSubmission> {
+  const res = await fetch(`${API}/submissions/${id}`, { headers: actorHeaders(actor), cache: "no-store" });
+  return jsonOrThrow<PatientSubmission>(res, "Could not load submission");
+}
+
+export async function startSubmissionReview(id: string, actor: ApiActor): Promise<PatientSubmission> {
+  const res = await fetch(`${API}/submissions/${id}/start-review`, { method: "POST", headers: actorHeaders(actor) });
+  return jsonOrThrow<PatientSubmission>(res, "Could not start review");
+}
+
+export async function requestMoreSubmissionData(id: string, message: string, actor: ApiActor): Promise<PatientSubmission> {
+  const res = await fetch(`${API}/submissions/${id}/request-more-data`, {
+    method: "POST",
+    headers: { ...actorHeaders(actor), "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
+  return jsonOrThrow<PatientSubmission>(res, "Could not request more data");
+}
+
+export async function linkSubmissionCase(id: string, caseId: string, actor: ApiActor): Promise<PatientSubmission> {
+  const res = await fetch(`${API}/submissions/${id}/link-case`, {
+    method: "POST",
+    headers: { ...actorHeaders(actor), "Content-Type": "application/json" },
+    body: JSON.stringify({ case_id: caseId }),
+  });
+  return jsonOrThrow<PatientSubmission>(res, "Could not link case");
+}
+
+export async function completeSubmissionReview(id: string, caseId: string, actor: ApiActor): Promise<PatientSubmission> {
+  const res = await fetch(`${API}/submissions/${id}/complete-review`, {
+    method: "POST",
+    headers: { ...actorHeaders(actor), "Content-Type": "application/json" },
+    body: JSON.stringify({ case_id: caseId }),
+  });
+  return jsonOrThrow<PatientSubmission>(res, "Could not complete review");
+}
+
+export async function releaseSubmissionToPatient(input: {
+  submissionId: string;
+  caseId: string;
+  patientSummary: PatientSummary;
+  letterMarkdown: string;
+  visitRecommendation: VisitRecommendation;
+}, actor: ApiActor): Promise<PatientSubmission> {
+  const res = await fetch(`${API}/submissions/${input.submissionId}/release`, {
+    method: "POST",
+    headers: { ...actorHeaders(actor), "Content-Type": "application/json" },
+    body: JSON.stringify({
+      case_id: input.caseId,
+      patient_summary: input.patientSummary,
+      letter_markdown: input.letterMarkdown,
+      visit_recommendation: input.visitRecommendation,
+    }),
+  });
+  return jsonOrThrow<PatientSubmission>(res, "Could not release patient report");
+}
+
+export async function downloadSubmissionFile(id: string, kind: "photo" | "lab", fileName: string, actor: ApiActor): Promise<File> {
+  const res = await fetch(`${API}/submissions/${id}/files/${kind}`, { headers: actorHeaders(actor), cache: "no-store" });
+  if (!res.ok) throw new Error("Could not load evidence file");
+  const blob = await res.blob();
+  return new File([blob], fileName, { type: blob.type || "application/octet-stream" });
+}
+
+export async function saveCaseRemote(caseData: CaseData, actor: ApiActor, submissionId?: string): Promise<CaseData> {
+  const res = await fetch(`${API}/cases`, {
+    method: "POST",
+    headers: { ...actorHeaders(actor), "Content-Type": "application/json" },
+    body: JSON.stringify({ case_data: caseData, submission_id: submissionId }),
+  });
+  return jsonOrThrow<CaseData>(res, "Could not save case");
+}
+
+export async function updateCaseRemote(caseData: CaseData, actor: ApiActor, submissionId?: string): Promise<CaseData> {
+  const res = await fetch(`${API}/cases/${caseData.id}`, {
+    method: "PATCH",
+    headers: { ...actorHeaders(actor), "Content-Type": "application/json" },
+    body: JSON.stringify({ case_data: caseData, submission_id: submissionId }),
+  });
+  return jsonOrThrow<CaseData>(res, "Could not update case");
+}
+
+export async function getCasesRemote(actor: ApiActor): Promise<CaseData[]> {
+  const res = await fetch(`${API}/cases`, { headers: actorHeaders(actor), cache: "no-store" });
+  return jsonOrThrow<CaseData[]>(res, "Could not load cases");
+}
+
+export async function getCaseRemote(id: string, actor: ApiActor): Promise<CaseData> {
+  const res = await fetch(`${API}/cases/${id}`, { headers: actorHeaders(actor), cache: "no-store" });
+  return jsonOrThrow<CaseData>(res, "Could not load case");
+}
+
+export function summarizeCases(cases: CaseData[]): StoredCaseSummary[] {
+  return cases.map(caseToSummary);
 }
 
 export async function submitNotes(notes: string): Promise<HPOTerm[]> {
@@ -125,13 +279,19 @@ export async function* streamLetter(
   lang = "en",
   options?: Partial<PatientContext> & { to?: string; from?: string }
 ): AsyncGenerator<string> {
+  let doctorProfile = {};
+  if (typeof window !== "undefined") {
+    try {
+      doctorProfile = JSON.parse(localStorage.getItem("lumina_doc_info") ?? localStorage.getItem("lumina_doctor_profile") ?? "{}");
+    } catch {}
+  }
   const res = await fetch(`${API}/agent/letter`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      top5: caseData.rankings.slice(0, 5),
+      top5: caseData.rankings.slice(0, 10),
       evidence: { hpo_terms: caseData.hpoTerms, modalities: caseData.modalities },
-      patient_context: { ...(caseData.patientContext ?? {}), ...options },
+      patient_context: { ...(caseData.patientContext ?? {}), doctorProfile, ...options },
       lang,
     }),
   });
@@ -154,6 +314,19 @@ export async function* streamLetter(
       } catch {}
     }
   }
+}
+
+export async function generatePatientSummary(
+  caseData: CaseData,
+  visitRecommendation: VisitRecommendation,
+  lang = "en"
+): Promise<PatientSummary> {
+  const res = await fetch(`${API}/agent/patient-summary`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ case_data: caseData, visit_recommendation: visitRecommendation, lang }),
+  });
+  return jsonOrThrow<PatientSummary>(res, "Could not generate patient summary");
 }
 
 export function saveCaseToStorage(caseData: CaseData): void {

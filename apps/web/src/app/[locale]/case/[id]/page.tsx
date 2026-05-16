@@ -6,12 +6,31 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { useTranslations, useLocale, useMessages } from "next-intl";
 import { DashboardNav } from "@/components/nav";
+import {
+  ReferralLetterSheet,
+  downloadLetterPdf,
+  printWithTitle,
+  renderLetterSheetHtml,
+  useDoctorLetterProfile,
+  type DoctorLetterProfile,
+} from "@/components/lumina/referral-letter-sheet";
 import { Button } from "@/components/ui/button";
 import { localizeHpoLabel, type HpoLabelMessages } from "@/lib/hpo";
-import { formatConfidence, formatDateTime, formatNumber } from "@/lib/formatters";
-import { getCaseById, getAgentSuggestion, streamLetter, updateCaseInStorage } from "@/lib/api";
+import { formatConfidence, formatNumber } from "@/lib/formatters";
+import {
+  generatePatientSummary,
+  getCaseById,
+  getAgentSuggestion,
+  getCaseRemote,
+  getPatientSubmissionRemote,
+  releaseSubmissionToPatient,
+  requestMoreSubmissionData,
+  streamLetter,
+  updateCaseInStorage,
+} from "@/lib/api";
 import type { AgentSuggestion } from "@/lib/api";
-import type { CaseData, HPOTerm, InputSnapshot, RankResult, RankTermContext } from "@/types/lumina";
+import { useApiActor } from "@/lib/use-api-actor";
+import type { CaseData, HPOTerm, InputSnapshot, PatientSubmission, RankResult, RankTermContext, VisitRecommendation } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -592,41 +611,38 @@ function LetterView({
   letter,
   streaming,
   onChangeLetter,
+  caseData,
 }: {
   letter: string;
   streaming: boolean;
   onChangeLetter: (value: string) => void;
+  caseData: CaseData;
 }) {
   const t = useTranslations("case");
-  const tc = useTranslations("common");
   const letterT = useTranslations("letter");
-  const locale = useLocale();
   const endRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
   const isEditing = editing && !streaming && Boolean(letter);
+  const wordCount = letter.trim() ? letter.trim().split(/\s+/).length : 0;
 
-  const [doctorProfile] = useState<{ name: string; specialization: string; degree: string; clinic: string } | null>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("lumina_doctor_profile");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          console.error("Failed to parse doctor profile", e);
-        }
-      }
-    }
-    return null;
-  });
+  const doctorProfile = useDoctorLetterProfile() as DoctorLetterProfile | null;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [letter]);
 
   return (
-    <div className="relative bg-white rounded-sm border border-black/[0.06] overflow-hidden">
+    <div className="relative bg-[#F4F6F8] rounded-sm border border-black/[0.06] overflow-hidden print:border-none print:bg-white">
       <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.06] print:hidden">
-        <h3 className="text-[14px] font-normal">{t("clinicalReferralLetter")}</h3>
+        <div>
+          <h3 className="text-[14px] font-normal">{t("clinicalReferralLetter")}</h3>
+          {letter && (
+            <p className={`mt-0.5 text-[11px] ${wordCount > 190 ? "text-[#B54708]" : "text-muted-foreground"}`}>
+              {letterT("words", { count: wordCount })}
+              {wordCount > 190 ? ` · ${letterT("shortenForOnePage")}` : ` · ${letterT("onePageTarget")}`}
+            </p>
+          )}
+        </div>
         {streaming && (
           <span className="flex items-center gap-1.5 text-[12px] text-[var(--lumina-navy)]">
             <span className="w-1.5 h-1.5 rounded-none bg-[var(--lumina-navy)] animate-pulse" />
@@ -655,7 +671,12 @@ function LetterView({
               {letterT("copy")}
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={() =>
+                printWithTitle(
+                  caseData.sourceSubmissionId ?? caseData.id,
+                  renderLetterSheetHtml({ letter, caseData, doctorProfile }),
+                )
+              }
               className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors print:hidden"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
@@ -664,36 +685,39 @@ function LetterView({
               </svg>
               {letterT("print")}
             </button>
+            <button
+              onClick={() =>
+                downloadLetterPdf(`${caseData.sourceSubmissionId ?? caseData.id}.pdf`, {
+                  letter,
+                  caseData,
+                  doctorProfile,
+                  submissionId: caseData.sourceSubmissionId ?? caseData.id,
+                }).catch(() => toast.error(letterT("downloadFailed")))
+              }
+              className="text-[12px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors print:hidden"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 16 16">
+                <path d="M8 2v7m0 0l-2.5-2.5M8 9l2.5-2.5M3 11.5V13h10v-1.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {letterT("downloadPdf")}
+            </button>
           </div>
         )}
       </div>
-      <div className="p-6 max-h-[500px] overflow-y-auto print:max-h-none print:overflow-visible print:p-0 print:m-0 print:border-none">
+      <div className="p-4 max-h-[620px] overflow-y-auto print:max-h-none print:overflow-visible print:p-0 print:m-0 print:border-none">
 
         {isEditing ? (
           <textarea
             value={letter}
             onChange={(e) => onChangeLetter(e.target.value)}
-            className="w-full min-h-[420px] rounded-sm border border-black/[0.06] bg-[#FAFBFC] px-4 py-3 text-[14px] leading-relaxed font-sans resize-none outline-none"
+            className="mx-auto block min-h-[680px] w-full max-w-[794px] rounded-sm border border-black/[0.08] bg-white px-10 py-8 text-[13px] leading-[1.55] font-serif resize-y outline-none shadow-[0_8px_28px_rgba(13,27,42,0.08)]"
           />
         ) : (
-          <div className="prose prose-sm max-w-none text-[14px] leading-relaxed text-foreground whitespace-pre-wrap font-sans print:text-[11pt] print:leading-[1.6] print:font-[Arial,sans-serif]">
-            {letter}
+          <div>
+            <ReferralLetterSheet letter={letter} caseData={caseData} doctorProfile={doctorProfile} />
             {streaming && <span className="cursor-blink" />}
           </div>
         )}
-        <div className="hidden print:block mt-12 pt-8 border-t border-black/10">
-          <p className="font-sans italic text-muted-foreground">{t("signed")},</p>
-          <div className="mt-8 border-b border-black/40 w-64" />
-          <p className="mt-2 font-normal font-sans">{doctorProfile?.name || t("drBlank")}</p>
-          <p className="text-[10pt] text-muted-foreground font-sans">{doctorProfile?.degree ? `${doctorProfile.degree} · ` : ""}{doctorProfile?.specialization || t("clinicalSpecialist")}</p>
-          {doctorProfile?.clinic && <p className="text-[10pt] text-muted-foreground font-sans">{doctorProfile.clinic}</p>}
-          <p className="text-[8pt] text-muted-foreground mt-4 font-sans italic">
-            {t("docGeneratedBy", {
-              brandName: tc("brandName"),
-              date: formatDateTime(locale, new Date(), { dateStyle: "medium" }),
-            })}
-          </p>
-        </div>
         <div ref={endRef} />
       </div>
     </div>
@@ -709,7 +733,8 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   const locale = useLocale();
   const messages = useMessages() as HpoLabelMessages;
   const { id } = use(params);
-  const [caseData] = useState<CaseData | null>(() => getCaseById(id));
+  const actor = useApiActor();
+  const [caseData, setCaseData] = useState<CaseData | null>(() => getCaseById(id));
   const [letter, setLetter] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [letterStarted, setLetterStarted] = useState(false);
@@ -722,6 +747,29 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   const [recipientHospital, setRecipientHospital] = useState(() => caseData?.patientContext?.recipientHospital ?? "");
   const [letterUrgency, setLetterUrgency] = useState(() => caseData?.patientContext?.urgency ?? "routine");
   const [showLetterForm, setShowLetterForm] = useState(false);
+  const [releaseSubmission, setReleaseSubmission] = useState<PatientSubmission | null>(null);
+  const [visitRecommendation, setVisitRecommendation] = useState<VisitRecommendation>("routine_specialist");
+  const [releaseBusy, setReleaseBusy] = useState(false);
+  const [moreDataMessage, setMoreDataMessage] = useState("");
+
+  useEffect(() => {
+    if (!actor) return;
+    getCaseRemote(id, actor).then(setCaseData).catch(() => {});
+  }, [actor, id]);
+
+  useEffect(() => {
+    if (!actor || actor.role !== "doctor" || !caseData?.sourceSubmissionId) return;
+    getPatientSubmissionRemote(caseData.sourceSubmissionId, actor)
+      .then((submission) => {
+        setReleaseSubmission(submission);
+        if (submission.visitRecommendation) setVisitRecommendation(submission.visitRecommendation);
+        if (submission.releasedLetterMarkdown) {
+          setLetter(submission.releasedLetterMarkdown);
+          setLetterStarted(true);
+        }
+      })
+      .catch(() => {});
+  }, [actor, caseData?.sourceSubmissionId]);
 
   useEffect(() => {
     if (!caseData) return;
@@ -745,9 +793,11 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       ...(recipientSpecialist.trim() ? { recipientSpecialist: recipientSpecialist.trim() } : {}),
       ...(recipientHospital.trim() ? { recipientHospital: recipientHospital.trim() } : {}),
       urgency: letterUrgency,
+      visitRecommendation,
     };
     const updatedCase = { ...caseData, patientContext };
     updateCaseInStorage(caseData.id, updatedCase);
+    setCaseData(updatedCase);
     setLetterStarted(true);
     setLetter("");
     setStreaming(true);
@@ -759,6 +809,51 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       toast.error(t("letterGenerationFailed"));
     } finally {
       setStreaming(false);
+    }
+  };
+
+  const handleReleaseToPatient = async () => {
+    if (!actor || actor.role !== "doctor" || !caseData?.sourceSubmissionId) return;
+    if (streaming) {
+      toast.error(t("releaseWaitForLetter"));
+      return;
+    }
+    if (!letter.trim()) {
+      toast.error(t("releaseGenerateFirst"));
+      return;
+    }
+    setReleaseBusy(true);
+    try {
+      const patientSummary = await generatePatientSummary(caseData, visitRecommendation, locale);
+      const released = await releaseSubmissionToPatient({
+        submissionId: caseData.sourceSubmissionId,
+        caseId: caseData.id,
+        patientSummary,
+        letterMarkdown: letter,
+        visitRecommendation,
+      }, actor);
+      setReleaseSubmission(released);
+      toast.success(t("releaseSuccess"));
+    } catch {
+      toast.error(t("releaseError"));
+    } finally {
+      setReleaseBusy(false);
+    }
+  };
+
+  const handleRequestMoreData = async () => {
+    if (!actor || actor.role !== "doctor" || !caseData?.sourceSubmissionId) return;
+    const message = moreDataMessage.trim() || t("requestMoreDataDefault");
+    setReleaseBusy(true);
+    try {
+      const updated = await requestMoreSubmissionData(caseData.sourceSubmissionId, message, actor);
+      setReleaseSubmission(updated);
+      setMoreDataMessage("");
+      toast.success(t("requestMoreDataSuccess"));
+    } catch {
+      toast.error(t("requestMoreDataError"));
+    } finally {
+      setReleaseBusy(false);
     }
   };
 
@@ -1126,7 +1221,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 </Button>
               )}
               {letterStarted && (
-                <LetterView letter={letter} streaming={streaming} onChangeLetter={setLetter} />
+                <LetterView letter={letter} streaming={streaming} onChangeLetter={setLetter} caseData={caseData} />
               )}
               {!letterStarted && (
                 <motion.div
@@ -1239,6 +1334,85 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                       <span className="text-[13px] font-normal capitalize">{caseData.patientContext.sex}</span>
                     </div>
                   )}
+                </div>
+              </motion.div>
+            )}
+
+            {actor?.role === "doctor" && caseData.sourceSubmissionId && (
+              <motion.div
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, ease, delay: 0.28 }}
+                className="bg-white rounded-sm border border-[#DDE3ED] p-4"
+              >
+                <div className="mb-3 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-[12px] font-normal text-muted-foreground uppercase tracking-wider">
+                      {t("patientRelease")}
+                    </h3>
+                    <p className="mt-1 text-[12px] leading-5 text-[#62687a]">
+                      {t("patientReleaseDesc")}
+                    </p>
+                  </div>
+                  <span className="whitespace-nowrap rounded-sm bg-[#F3F6FA] px-2 py-1 text-[10px] uppercase tracking-wider text-[#4A5568]">
+                    {releaseSubmission?.status === "released_to_patient"
+                      ? t("releaseStatusReleased")
+                      : releaseSubmission?.status === "needs_more_data"
+                        ? t("releaseStatusNeedsMoreData")
+                        : releaseSubmission?.status === "in_review"
+                          ? t("releaseStatusInReview")
+                          : t("releaseStatusDoctorCompleted")}
+                  </span>
+                </div>
+                <label className="mb-3 block">
+                  <span className="mb-1 block text-[11px] text-muted-foreground">{t("recommendedNextStep")}</span>
+                  <select
+                    value={visitRecommendation}
+                    onChange={(event) => setVisitRecommendation(event.target.value as VisitRecommendation)}
+                    className="h-9 w-full rounded-sm border border-black/10 bg-white px-3 text-[12px] outline-none"
+                  >
+                    <option value="urgent_clinic">{t("visitUrgentClinic")}</option>
+                    <option value="nearest_clinic">{t("visitNearestClinic")}</option>
+                    <option value="routine_specialist">{t("visitRoutineSpecialist")}</option>
+                    <option value="more_data_first">{t("visitMoreDataFirst")}</option>
+                    <option value="no_visit_needed">{t("visitNoVisitNeeded")}</option>
+                  </select>
+                </label>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-sm h-9 text-[13px] border-black/10"
+                    onClick={handleGenerateLetter}
+                    disabled={streaming || releaseBusy}
+                  >
+                    {t("generateRefineReferralLetter")}
+                  </Button>
+                  <Button
+                    className="w-full rounded-sm h-9 text-[13px] bg-[#0D1B2A] text-white hover:bg-[#14283D]"
+                    onClick={handleReleaseToPatient}
+                    disabled={streaming || releaseBusy}
+                  >
+                    {t("releaseSummaryLetter")}
+                  </Button>
+                </div>
+                <div className="mt-4 border-t border-black/[0.06] pt-3">
+                  <label className="block">
+                    <span className="mb-1 block text-[11px] text-muted-foreground">{t("askForMoreData")}</span>
+                    <textarea
+                      value={moreDataMessage}
+                      onChange={(event) => setMoreDataMessage(event.target.value)}
+                      placeholder={t("askForMoreDataPlaceholder")}
+                      className="min-h-20 w-full resize-none rounded-sm border border-black/10 bg-[#FBFCFE] px-3 py-2 text-[12px] leading-5 outline-none"
+                    />
+                  </label>
+                  <Button
+                    variant="outline"
+                    className="mt-2 w-full rounded-sm h-9 text-[13px] border-black/10"
+                    onClick={handleRequestMoreData}
+                    disabled={releaseBusy}
+                  >
+                    {t("sendDataRequest")}
+                  </Button>
                 </div>
               </motion.div>
             )}

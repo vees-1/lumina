@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { getCaseSummaries, getPatientSubmissions } from "@/lib/api";
+import { getCaseSummaries, getCasesRemote, getPatientSubmissions, getPatientSubmissionsRemote, summarizeCases } from "@/lib/api";
+import { useApiActor } from "@/lib/use-api-actor";
 import type { CaseSummary, PatientSubmission } from "@/types/lumina";
 import { FileText, Plus, ClipboardList, Users } from "lucide-react";
 
@@ -13,16 +14,27 @@ export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("doctorDashboard");
   const tCommon = useTranslations("common");
+  const actor = useApiActor();
   const [cases] = useState<CaseSummary[]>(() => getCaseSummaries());
   const [submissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
+  const [remoteCases, setRemoteCases] = useState<CaseSummary[] | null>(null);
+  const [remoteSubmissions, setRemoteSubmissions] = useState<PatientSubmission[] | null>(null);
+  useEffect(() => {
+    if (!actor || actor.role !== "doctor") return;
+    getCasesRemote(actor).then((items) => setRemoteCases(summarizeCases(items))).catch(() => setRemoteCases(null));
+    getPatientSubmissionsRemote(actor).then(setRemoteSubmissions).catch(() => setRemoteSubmissions(null));
+  }, [actor]);
+  const visibleCases = remoteCases ?? cases;
+  const visibleSubmissions = remoteSubmissions ?? submissions;
   const today = new Date().toDateString();
-  const activeToday = cases.filter((item) => new Date(item.timestamp).toDateString() === today).length;
-  const lettersReady = cases.filter((item) => item.status === "confirmed").length;
+  const activeToday = visibleCases.filter((item) => new Date(item.timestamp).toDateString() === today).length;
+  const lettersReady = visibleCases.filter((item) => item.status === "confirmed").length;
+  const pendingQueue = visibleSubmissions.filter((s) => s.status === "doctor_review_pending" || s.status === "needs_more_data").length;
 
   const stats = [
-    { label: t("totalCases"), value: cases.length, icon: <ClipboardList className="h-4 w-4" /> },
+    { label: t("totalCases"), value: visibleCases.length, icon: <ClipboardList className="h-4 w-4" /> },
     { label: t("activeToday"), value: activeToday, icon: <FileText className="h-4 w-4" /> },
-    { label: t("patientSubmissions"), value: submissions.length, icon: <Users className="h-4 w-4" /> },
+    { label: t("patientSubmissions"), value: visibleSubmissions.length, icon: <Users className="h-4 w-4" /> },
     { label: t("lettersReady"), value: lettersReady, icon: <FileText className="h-4 w-4" /> },
   ];
 
@@ -120,9 +132,9 @@ export default function DashboardPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-[18px] font-normal tracking-[-0.02em]">{t("patientReviewQueue")}</h2>
-                  {submissions.filter((s) => s.status === "doctor_review_pending").length > 0 && (
+                  {pendingQueue > 0 && (
                     <span className="badge badge-amber">
-                      {submissions.filter((s) => s.status === "doctor_review_pending").length} {t("pending")}
+                      {pendingQueue} {t("pending")}
                     </span>
                   )}
                 </div>
@@ -131,7 +143,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <Link
-                href={`/${locale}/patient/submissions`}
+                href={`/${locale}/patient-queue`}
                 className="shrink-0 inline-flex h-10 items-center rounded bg-[#0D1B2A] px-6 text-[13.5px] font-normal text-white transition-colors hover:bg-[#1C3352]"
               >
                 {t("openQueue")}

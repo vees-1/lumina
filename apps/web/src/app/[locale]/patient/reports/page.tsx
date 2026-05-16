@@ -1,20 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { DashboardNav } from "@/components/nav";
+import {
+  ReferralLetterSheet,
+  downloadLetterPdf,
+  printWithTitle,
+  renderLetterSheetHtml,
+  useDoctorLetterProfile,
+} from "@/components/lumina/referral-letter-sheet";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { getPatientSubmissions } from "@/lib/api";
+import { getPatientSubmissions, getPatientSubmissionsRemote } from "@/lib/api";
+import { useApiActor } from "@/lib/use-api-actor";
 import type { PatientSubmission } from "@/types/lumina";
-import { FileText, ExternalLink } from "lucide-react";
+import { Download, FileText, Printer } from "lucide-react";
 
 export default function PatientReportsPage() {
   const locale = useLocale();
   const t = useTranslations("patientReports");
-  const [reports] = useState<PatientSubmission[]>(() =>
-    getPatientSubmissions().filter((item) => item.status === "approved" || item.status === "scorecard_ready")
+  const actor = useApiActor();
+  const doctorProfile = useDoctorLetterProfile();
+  const [reports, setReports] = useState<PatientSubmission[]>(() =>
+    getPatientSubmissions().filter((item) => item.status === "released_to_patient")
   );
+  useEffect(() => {
+    if (!actor) return;
+    getPatientSubmissionsRemote(actor)
+      .then((items) => setReports(items.filter((item) => item.status === "released_to_patient")))
+      .catch(() => {});
+  }, [actor]);
 
   return (
     <RoleGuard allowed={["patient"]} redirectTo="/dashboard">
@@ -28,7 +45,7 @@ export default function PatientReportsPage() {
           </div>
 
           {reports.length ? (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4">
               {reports.map((report) => (
                 <div key={report.id} className="rounded-sm border border-[#DDE3ED] bg-white p-6 shadow-[0_2px_8px_rgba(13,27,42,0.04)]">
                   <div className="flex items-start gap-4">
@@ -43,16 +60,55 @@ export default function PatientReportsPage() {
                       <p className="mt-1 text-[13px] text-[#8A94A6]">
                         {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(report.timestamp))}
                       </p>
-                      {report.linkedCaseId ? (
-                        <Link
-                          href={`/${locale}/case/${report.linkedCaseId}`}
-                          className="mt-4 inline-flex items-center gap-1.5 rounded-none bg-[#0AAFCE] px-5 py-2 text-[13px] font-normal text-white transition-colors hover:bg-[#0997B3]"
-                        >
-                          {t("openScorecard")}
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </Link>
-                      ) : (
-                        <p className="mt-4 text-[13px] font-normal text-[#1A7F4B]">{t("approvedByDoctor")}</p>
+                      <div className="mt-4 rounded-sm border border-[#E7ECF3] bg-[#FBFCFE] p-4">
+                        <p className="text-[13px] font-normal text-[#0D1B2A]">
+                          {report.patientSummary?.headline ?? t("summaryHeadlineFallback")}
+                        </p>
+                        <p className="mt-2 text-[13px] leading-6 text-[#4A5568]">
+                          {report.patientSummary?.recommended_next_step ?? report.patientSummary?.body ?? t("recommendedNextStepFallback")}
+                        </p>
+                        {report.patientSummary?.safety_note && report.patientSummary.safety_note.trim() && (
+                          <p className="mt-2 text-[12px] leading-5 text-[#6B7280]">{report.patientSummary.safety_note}</p>
+                        )}
+                      </div>
+                      {report.releasedLetterMarkdown && (
+                        <div className="mt-5">
+                          <div className="mb-3 flex flex-wrap items-center justify-between gap-3 print:hidden">
+                            <h3 className="text-[12px] font-normal uppercase tracking-wider text-[#8A94A6]">
+                              {t("referralLetter")}
+                            </h3>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  printWithTitle(
+                                    report.id,
+                                    renderLetterSheetHtml({ letter: report.releasedLetterMarkdown ?? "", submission: report, doctorProfile }),
+                                  )
+                                }
+                                className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-[#DDE3ED] px-3 text-[12px] text-[#0D1B2A] hover:border-[#0AAFCE]"
+                              >
+                                <Printer className="h-3.5 w-3.5" />
+                                {t("print")}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  downloadLetterPdf(`${report.id}.pdf`, {
+                                    letter: report.releasedLetterMarkdown ?? "",
+                                    doctorProfile,
+                                    submissionId: report.id,
+                                  }).catch(() => toast.error(t("downloadFailed")))
+                                }
+                                className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-[#DDE3ED] px-3 text-[12px] text-[#0D1B2A] hover:border-[#0AAFCE]"
+                              >
+                                <Download className="h-3.5 w-3.5" />
+                                {t("downloadPdf")}
+                              </button>
+                            </div>
+                          </div>
+                          <ReferralLetterSheet letter={report.releasedLetterMarkdown} submission={report} doctorProfile={doctorProfile} />
+                        </div>
                       )}
                     </div>
                   </div>

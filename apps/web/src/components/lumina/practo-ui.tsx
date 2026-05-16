@@ -517,7 +517,7 @@ export function PatientStatusTimeline({ status }: { status?: string }) {
         {/* connecting line */}
         <div className="absolute left-4 right-4 top-4 h-px bg-[#DDE3ED]" />
         {steps.map((step, index) => {
-          const done = index < activeIndex;
+          const done = index <= activeIndex;
           const active = index === activeIndex;
           return (
             <div key={step} className="relative z-10 flex flex-col items-center gap-2" style={{ flex: 1 }}>

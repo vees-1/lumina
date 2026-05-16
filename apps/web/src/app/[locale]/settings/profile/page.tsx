@@ -14,6 +14,7 @@ interface DoctorProfile {
   license: string;
   contact: string;
   signature: string;
+  signatureImage?: string;
   referralTo: string;
   letterTone: string;
 }
@@ -25,6 +26,7 @@ const emptyProfile: DoctorProfile = {
   license: "",
   contact: "",
   signature: "",
+  signatureImage: "",
   referralTo: "Rare disease genetics clinic",
   letterTone: "Concise specialist referral",
 };
@@ -57,9 +59,21 @@ export default function ProfilePage() {
 
   function save() {
     localStorage.setItem("lumina_doc_info", JSON.stringify(profile));
+    localStorage.setItem("lumina_doctor_profile", JSON.stringify(profile));
     toast.success(t("saved"));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
+  }
+
+  function uploadSignature(file: File | null) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("signatureImageError"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => update("signatureImage", String(reader.result));
+    reader.readAsDataURL(file);
   }
 
   return (
@@ -108,6 +122,23 @@ export default function ProfilePage() {
                 className="w-full rounded-sm border border-[#DDE3ED] bg-white px-3.5 py-3 text-[13.5px] text-[#0D1B2A] placeholder:text-[#8A94A6] outline-none focus:border-[#0AAFCE] focus:ring-2 focus:ring-[#0AAFCE]/15 transition-colors"
               />
             </label>
+
+            <div className="mt-5 rounded-sm border border-[#DDE3ED] bg-[#FBFCFE] p-4">
+              <span className={labelClass}>{t("signatureImageLabel")}</span>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => uploadSignature(event.target.files?.[0] ?? null)}
+                  className="block w-full text-[13px] text-[#4A5568] file:mr-4 file:h-9 file:rounded-sm file:border-0 file:bg-[#0D1B2A] file:px-4 file:text-[13px] file:text-white"
+                />
+                {profile.signatureImage && (
+                  <div className="rounded-sm border border-[#DDE3ED] bg-white px-4 py-2">
+                    <img src={profile.signatureImage} alt={t("signatureImageAlt")} className="h-12 max-w-[180px] object-contain" />
+                  </div>
+                )}
+              </div>
+            </div>
 
             <label className="mt-5 block">
               <span className={labelClass}>{t("letterToneLabel")}</span>

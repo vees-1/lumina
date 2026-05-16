@@ -230,6 +230,183 @@
   animation: bar-fill 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+/* -- Referral letter sheet -------------------------------------------------- */
+.referral-sheet {
+  position: relative;
+  width: min(100%, 794px);
+  min-height: 1123px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #E1E6EF;
+  box-shadow: 0 8px 28px rgba(13, 27, 42, 0.08);
+  color: #111827;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px;
+  line-height: 1.32;
+  padding: 34px 42px;
+}
+.letter-watermark {
+  position: absolute;
+  inset: 43% auto auto 50%;
+  transform: translate(-50%, -50%) rotate(-28deg);
+  font-family: Arial, sans-serif;
+  font-size: 86px;
+  letter-spacing: 0.08em;
+  color: rgba(6, 182, 212, 0.055);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.letter-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 28px;
+  border-bottom: 1px solid #111827;
+  padding-bottom: 10px;
+  font-family: Arial, sans-serif;
+}
+.letter-brand {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.letter-meta {
+  margin: 0;
+  font-size: 10px;
+  color: #4B5563;
+}
+.letter-doctor {
+  display: grid;
+  gap: 1px;
+  max-width: 260px;
+  text-align: right;
+  font-size: 10px;
+  color: #374151;
+}
+.letter-patient-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 10px 0 12px;
+  border: 1px solid #D7DEE9;
+  background: #F8FAFC;
+  padding: 7px 9px;
+  font-family: Arial, sans-serif;
+  font-size: 10.5px;
+}
+.letter-body :where(p, h1, h2, li) {
+  position: relative;
+  margin: 0 0 6px;
+}
+.letter-title {
+  margin: 0 0 8px !important;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.letter-heading {
+  margin: 8px 0 4px !important;
+  border-bottom: 1px solid #E5E7EB;
+  padding-bottom: 2px;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.letter-body ul,
+.letter-differentials ol {
+  margin: 3px 0 6px 18px;
+  padding: 0;
+}
+.letter-rule {
+  height: 1px;
+  margin: 8px 0;
+  background: #E5E7EB;
+}
+.letter-differentials {
+  position: relative;
+  margin-top: 8px;
+  border-top: 1px solid #D7DEE9;
+  padding-top: 7px;
+}
+.letter-differentials h2 {
+  margin: 0 0 4px;
+  font-family: Arial, sans-serif;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.letter-differentials ol {
+  columns: 2;
+  column-gap: 26px;
+  font-size: 9.5px;
+  line-height: 1.25;
+}
+.letter-differentials li {
+  break-inside: avoid;
+  margin-bottom: 2px;
+}
+.letter-differentials span {
+  color: #6B7280;
+  font-size: 8.5px;
+}
+.letter-signature {
+  position: absolute;
+  right: 42px;
+  bottom: 26px;
+  left: 42px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #E5E7EB;
+  padding-top: 8px;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+}
+.letter-signature img {
+  display: block;
+  max-height: 42px;
+  max-width: 170px;
+  object-fit: contain;
+  margin-left: auto;
+}
+.letter-signature-text {
+  max-width: 240px;
+  margin: 0 0 3px;
+  white-space: pre-wrap;
+  color: #4B5563;
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+  body {
+    background: white !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .referral-sheet,
+  .referral-sheet * {
+    visibility: visible;
+  }
+  .referral-sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 194mm;
+    min-height: 281mm;
+    border: 0;
+    box-shadow: none;
+    padding: 8mm 10mm;
+    font-size: 9.6pt;
+    line-height: 1.22;
+  }
+}
+
 /* -- Subtle hover lift ------------------------------------------------------ */
 .card-hover {
   transition: box-shadow 0.18s ease, transform 0.18s ease;

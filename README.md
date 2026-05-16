@@ -48,9 +48,9 @@ Lumina was built around that workflow.
 
 ## Current Clinical Workflow
 
-1. The doctor opens the intake page.
-2. The doctor enters patient context such as name, age, and sex.
-3. The doctor adds evidence through four input sections:
+1. The doctor opens the intake page or a patient submission from the review queue.
+2. The doctor enters or reviews patient context such as name, age, and sex.
+3. The doctor adds or reviews evidence through four input sections:
    - clinical notes,
    - clinical photo,
    - lab report,
@@ -61,7 +61,8 @@ Lumina was built around that workflow.
 7. The doctor enters genetic evidence manually from a clinical/genetic report.
 8. Lumina runs the final differential only on accepted HPO findings and reviewed genetic evidence.
 9. The results page shows the top 10 differential diagnoses with supporting evidence, missing findings, and distinguishing clues.
-10. The doctor can generate and edit a referral letter.
+10. The doctor can generate and edit a one-page referral letter.
+11. For patient-submitted cases, the doctor explicitly releases a short patient-safe note and the finalized referral letter.
 
 ---
 
@@ -97,7 +98,34 @@ The results page shows:
 - absent findings that reduce confidence,
 - HPO provenance,
 - deterministic/reproducible result signal,
-- editable referral letter.
+- editable referral letter,
+- doctor-only patient release controls for linked patient submissions.
+
+### Patient Review Queue
+
+Patients can submit notes, photos, lab reports, and genetic evidence for doctor review. These submissions are stored through the FastAPI app database and appear in the doctor-facing patient queue.
+
+The queue supports these review states:
+
+- `doctor_review_pending`: submitted and waiting for doctor review,
+- `in_review`: opened by a doctor,
+- `needs_more_data`: doctor requested additional evidence,
+- `doctor_completed`: analysis exists but has not been released to the patient,
+- `released_to_patient`: patient can see the approved summary and referral letter.
+
+The full scorecard stays doctor-only by default. Patients see a short doctor guidance note and the released referral letter, not the ranked differential table or technical HPO evidence.
+
+### Referral Letter And Patient Release
+
+The referral letter is the main patient-facing clinical artifact. It is designed to fit one A4 page, include doctor profile/signature details, show the top differential list once, and download as a real PDF.
+
+Doctors can:
+
+- generate and edit the referral letter,
+- print the rendered letter layout,
+- download a vector PDF,
+- release the summary and letter to the patient dashboard,
+- request more data before or after review.
 
 ---
 
@@ -119,8 +147,10 @@ apps/web
    |  - quick symptom checklist
    |  - doctor review of AI suggestions
    |  - case dashboard
+   |  - patient review queue
    |  - result explanation
    |  - editable referral letter UI
+   |  - patient-safe release flow
    |
    v
 FastAPI backend on Hugging Face Spaces
@@ -131,6 +161,8 @@ apps/api
    |  - score API
    |  - disease detail API
    |  - referral letter API
+   |  - patient submission API
+   |  - patient-safe release API
    |  - legacy VCF parsing route
    |
    v
@@ -223,7 +255,7 @@ It contains:
 - doctor review state for pending/accepted/rejected findings,
 - API client logic for calling the FastAPI backend.
 
-Current frontend limitation: cases are still stored mainly in browser localStorage, so a production version needs server-side persistence.
+Cases can still fall back to browser localStorage, but patient submissions, review state, release metadata, and linked doctor cases are backed by the FastAPI app database.
 
 ### Backend: `apps/api`
 
@@ -235,6 +267,9 @@ It contains:
 - score endpoint for final differential diagnosis,
 - disease detail endpoint,
 - referral letter generation endpoint,
+- one-page PDF referral letter endpoint,
+- patient submission and evidence file endpoints,
+- doctor review, release, and request-more-data endpoints,
 - compatibility routes for older intake flows,
 - legacy VCF parsing route that is kept in backend but hidden from the main UI.
 
@@ -485,14 +520,14 @@ Run the API:
 ```bash
 cd apps/api
 uv sync
-uv run uvicorn main:app --reload
+uv run python -m uvicorn main:app --port 8001
 ```
 
 Useful checks:
 
 ```bash
-pnpm typecheck
-pnpm lint
+pnpm --filter web typecheck
+pnpm --filter web lint
 cd apps/api && uv run ruff check .
 ```
 
@@ -513,6 +548,8 @@ pnpm --filter web build
 - Do not deploy the whole repository to Hugging Face.
 - Do not deploy frontend code to Hugging Face.
 - Do not commit demo patient files, credentials, tokens, or private clinical data.
+- Update Hugging Face with the safe manual method only: clone the Space to a temporary directory, copy `apps/api` and `packages/`, then push a standard commit from the Space repo.
+- Do not use `git subtree` or cross-branch checkout workflows for Hugging Face deployment.
 
 ---
 

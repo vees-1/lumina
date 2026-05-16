@@ -1,21 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { PatientStatusTimeline } from "@/components/lumina/practo-ui";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { getPatientSubmissions } from "@/lib/api";
+import { getPatientSubmissions, getPatientSubmissionsRemote } from "@/lib/api";
+import { useApiActor } from "@/lib/use-api-actor";
 import type { PatientSubmission } from "@/types/lumina";
 import { Plus, FileText } from "lucide-react";
 
 export default function PatientDashboardPage() {
   const locale = useLocale();
   const t = useTranslations("patientDashboard");
+  const actor = useApiActor();
   const [submissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
-  const latest = submissions[0];
-  const ready = submissions.filter((item) => item.status === "scorecard_ready" || item.status === "approved").length;
+  const [remoteSubmissions, setRemoteSubmissions] = useState<PatientSubmission[] | null>(null);
+  useEffect(() => {
+    if (!actor) return;
+    getPatientSubmissionsRemote(actor).then(setRemoteSubmissions).catch(() => setRemoteSubmissions(null));
+  }, [actor]);
+  const visibleSubmissions = remoteSubmissions ?? submissions;
+  const latest = visibleSubmissions[0];
+  const ready = visibleSubmissions.filter((item) => item.status === "released_to_patient").length;
 
   return (
     <RoleGuard allowed={["patient"]} redirectTo="/dashboard">
@@ -51,7 +59,7 @@ export default function PatientDashboardPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: t("submittedCases"), value: submissions.length },
+                { label: t("submittedCases"), value: visibleSubmissions.length },
                 { label: t("approvedReports"), value: ready },
               ].map((s) => (
                 <div key={s.label} className="rounded border border-[#DDE3ED] bg-white p-5 shadow-[0_2px_8px_rgba(13,27,42,0.04)]">
@@ -67,7 +75,7 @@ export default function PatientDashboardPage() {
             <p className="mb-3 text-[12px] font-normal uppercase tracking-[0.08em] text-[#8A94A6]">{t("submissionStatus")}</p>
             <PatientStatusTimeline
               status={
-                latest?.status === "scorecard_ready"
+                latest?.status === "released_to_patient"
                   ? t("statusScorecardReady")
                   : latest?.status === "approved"
                   ? t("statusApproved")
@@ -90,7 +98,9 @@ export default function PatientDashboardPage() {
                   <p className="mt-1 text-[13.5px] text-[#4A5568]">
                     {latest
                       ? `${latest.patientName ?? t("unnamedPatient")} · ${
-                          latest.status === "scorecard_ready" ? t("statusScorecardReady") :
+                          latest.status === "needs_more_data" ? t("statusNeedsMoreData") :
+                          latest.status === "released_to_patient" ? t("statusScorecardReady") :
+                          latest.status === "doctor_completed" ? t("statusDoctorCompleted") :
                           latest.status === "approved" ? t("statusApproved") :
                           t("statusPending")
                         }`
@@ -106,6 +116,12 @@ export default function PatientDashboardPage() {
               </Link>
             </div>
           </section>
+          {latest?.doctorMessage && (
+            <section className="mt-4 rounded border border-[#D4860A]/30 bg-[#FEF8ED] p-5">
+              <p className="text-[12px] font-normal uppercase tracking-[0.08em] text-[#D4860A]">{t("doctorRequestedMoreData")}</p>
+              <p className="mt-2 text-[14px] leading-6 text-[#0D1B2A]">{latest.doctorMessage}</p>
+            </section>
+          )}
         </main>
       </div>
     </RoleGuard>

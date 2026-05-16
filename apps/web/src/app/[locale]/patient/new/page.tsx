@@ -7,7 +7,8 @@ import { v4 as uuid } from "uuid";
 import { toast } from "sonner";
 import { DashboardNav } from "@/components/nav";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { savePatientSubmission } from "@/lib/api";
+import { createPatientSubmissionRemote, savePatientSubmission } from "@/lib/api";
+import { useApiActor } from "@/lib/use-api-actor";
 import { AlertTriangle, Upload, Dna } from "lucide-react";
 
 const inputClass = "h-11 w-full rounded-sm border border-[#DDE3ED] bg-white px-3.5 text-[13.5px] text-[#0D1B2A] placeholder:text-[#8A94A6] outline-none focus:border-[#0AAFCE] focus:ring-2 focus:ring-[#0AAFCE]/15 transition-colors";
@@ -17,6 +18,7 @@ export default function PatientNewSubmissionPage() {
   const locale = useLocale();
   const t = useTranslations("patientNewSubmission");
   const router = useRouter();
+  const actor = useApiActor();
   const [patientName, setPatientName] = useState("");
   const [age, setAge] = useState("");
   const [sex, setSex] = useState("");
@@ -27,12 +29,12 @@ export default function PatientNewSubmissionPage() {
   const [variant, setVariant] = useState("");
   const [classification, setClassification] = useState("unknown");
 
-  function submit() {
+  async function submit() {
     if (!notes.trim() && !photo && !lab && !gene.trim()) {
       toast.error(t("errorNoEvidence"));
       return;
     }
-    savePatientSubmission({
+    const submission = {
       id: uuid(),
       timestamp: Date.now(),
       patientName: patientName || undefined,
@@ -43,7 +45,25 @@ export default function PatientNewSubmissionPage() {
       labFileName: lab?.name,
       geneticEvidence: gene.trim() ? { gene_symbol: gene.trim().toUpperCase(), variant: variant || undefined, classification } : undefined,
       status: "doctor_review_pending",
-    });
+    } as const;
+    if (actor) {
+      try {
+        await createPatientSubmissionRemote({
+          patientName: submission.patientName,
+          age: submission.age,
+          sex: submission.sex,
+          notes: submission.notes,
+          photo,
+          lab,
+          geneticEvidence: submission.geneticEvidence,
+        }, actor);
+      } catch (err) {
+        console.warn(err);
+        savePatientSubmission(submission);
+      }
+    } else {
+      savePatientSubmission(submission);
+    }
     toast.success(t("successMessage"));
     router.push(`/${locale}/patient/submissions`);
   }

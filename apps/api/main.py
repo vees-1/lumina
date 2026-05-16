@@ -18,6 +18,7 @@ from api.routes.fhir import router as fhir_router  # noqa: E402
 from api.routes.intake import router as intake_router  # noqa: E402
 from api.routes.score import router as score_router  # noqa: E402
 from api.routes.search import router as search_router  # noqa: E402
+from api.routes.submissions import router as submissions_router  # noqa: E402
 
 
 def _load_hpo_vocab(engine) -> list[tuple[str, str]]:
@@ -59,6 +60,9 @@ def _load_facial_vocab(engine) -> list[str]:
 async def lifespan(app: FastAPI):
     engine = get_engine()
     app.state.db_engine = engine
+    from api.app_db import init_app_db
+
+    app.state.app_db_engine = init_app_db()
     app.state.scoring_index = ScoringIndex.load()
     app.state.hpo_vocab = _load_hpo_vocab(engine)
     app.state.hpo_names = _load_hpo_names(engine)
@@ -91,6 +95,7 @@ app.include_router(agent_router)
 app.include_router(disease_router)
 app.include_router(fhir_router)
 app.include_router(search_router)
+app.include_router(submissions_router)
 
 
 @app.get("/health")

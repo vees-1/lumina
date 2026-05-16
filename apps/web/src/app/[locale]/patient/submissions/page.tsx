@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { getPatientSubmissions, updatePatientSubmission } from "@/lib/api";
+import { getPatientSubmissions, getPatientSubmissionsRemote } from "@/lib/api";
+import { useApiActor } from "@/lib/use-api-actor";
 import type { PatientSubmission } from "@/types/lumina";
 import { Plus, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,20 +14,23 @@ import { cn } from "@/lib/utils";
 export default function PatientSubmissionsPage() {
   const locale = useLocale();
   const t = useTranslations("patientSubmissions");
+  const actor = useApiActor();
   const [submissions, setSubmissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
+  useEffect(() => {
+    if (!actor) return;
+    getPatientSubmissionsRemote(actor).then(setSubmissions).catch(() => {});
+  }, [actor]);
 
   function statusBadge(status: string) {
-    if (status === "approved" || status === "scorecard_ready") {
-      const label = status === "approved" ? t("statusApproved") : t("statusScorecardReady");
+    if (status === "released_to_patient") {
+      const label = t("statusScorecardReady");
       return <span className="badge badge-accepted">{label}</span>;
     }
+    if (status === "needs_more_data") return <span className="badge badge-amber">{t("statusNeedsMoreData")}</span>;
+    if (status === "doctor_completed") return <span className="badge badge-cyan">{t("statusDoctorCompleted")}</span>;
+    if (status === "in_review") return <span className="badge badge-cyan">{t("statusInReview")}</span>;
     if (status === "doctor_review_pending") return <span className="badge badge-amber">{t("reviewPending")}</span>;
     return <span className="badge badge-cyan">{t("statusSubmitted")}</span>;
-  }
-
-  function markApproved(id: string) {
-    updatePatientSubmission(id, { status: "approved" });
-    setSubmissions(getPatientSubmissions());
   }
 
   return (
@@ -65,25 +69,22 @@ export default function PatientSubmissionsPage() {
                         <td className="px-5 py-4 font-normal text-[#0AAFCE]">{item.id.slice(0, 8)}</td>
                         <td className="px-5 py-4 text-[13.5px] text-[#0D1B2A]">{item.patientName ?? t("unnamedPatient")}</td>
                         <td className="px-5 py-4 text-[13px] text-[#4A5568]">
-                          {[item.notes && t("notes"), item.photoFileName && t("photo"), item.labFileName && t("lab"), item.geneticEvidence && t("genetic")].filter(Boolean).join(", ") || "—"}
+                          {[item.notes && t("notes"), item.photoFileName && t("photo"), item.labFileName && t("lab"), item.geneticEvidence && t("genetic")].filter(Boolean).join(", ") || "-"}
+                          {item.doctorMessage && <p className="mt-1 text-[12px] text-[#D4860A]">{item.doctorMessage}</p>}
                         </td>
                         <td className="px-5 py-4">{statusBadge(item.status)}</td>
                         <td className="px-5 py-4 text-[12.5px] text-[#8A94A6]">
                           {new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.timestamp))}
                         </td>
                         <td className="px-5 py-4">
-                          {item.status === "approved" || item.status === "scorecard_ready" ? (
+                          {item.status === "released_to_patient" ? (
                             <Link href={`/${locale}/patient/reports`} className="text-[13px] font-normal text-[#0AAFCE] hover:underline">
                               {t("viewReport")}
                             </Link>
+                          ) : item.status === "doctor_completed" ? (
+                            <span className="text-[12px] text-[#8A94A6]">{t("awaitingRelease")}</span>
                           ) : (
-                            <button
-                              type="button"
-                              onClick={() => markApproved(item.id)}
-                              className="rounded border border-[#DDE3ED] px-3 py-1 text-[12px] font-normal text-[#4A5568] transition-colors hover:border-[#0AAFCE] hover:text-[#0D1B2A]"
-                            >
-                              {t("doctorApprove")}
-                            </button>
+                            <span className="text-[12px] text-[#8A94A6]">{t("waiting")}</span>
                           )}
                         </td>
                       </tr>

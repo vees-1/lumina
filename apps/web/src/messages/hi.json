@@ -20,9 +20,14 @@
     "noSubmissionsDesc": "डॉक्टर की समीक्षा के लिए अपना पहला साक्ष्य सबमिशन बनाएं।",
     "createSubmission": "सबमिशन बनाएं",
     "reviewPending": "समीक्षा लंबित",
-    "statusScorecardReady": "स्कोरकार्ड तैयार",
+    "statusScorecardReady": "रेफ़रल तैयार",
     "statusApproved": "अनुमोदित",
-    "statusSubmitted": "सबमिट किया गया"
+    "statusSubmitted": "सबमिट किया गया",
+    "statusNeedsMoreData": "अधिक डेटा मांगा गया",
+    "statusDoctorCompleted": "डॉक्टर समीक्षा पूरी",
+    "statusInReview": "समीक्षा में",
+    "awaitingRelease": "रिलीज़ की प्रतीक्षा में",
+    "waiting": "प्रतीक्षा में"
   },
   "patientNewSubmission": {
     "title": "मरीज़ सबमिशन",
@@ -72,10 +77,13 @@
     "noSubmissionDesc": "अभी तक कोई मरीज़ साक्ष्य सबमिट नहीं किया गया है।",
     "viewSubmissions": "सबमिशन देखें",
     "unnamedPatient": "नामहीन मरीज़",
-    "statusScorecardReady": "स्कोरकार्ड तैयार",
+    "statusScorecardReady": "रेफ़रल तैयार",
     "statusApproved": "अनुमोदित",
     "statusPending": "डॉक्टर समीक्षा लंबित",
-    "statusSubmitted": "सबमिट किया गया"
+    "statusSubmitted": "सबमिट किया गया",
+    "statusNeedsMoreData": "अधिक डेटा मांगा गया",
+    "statusDoctorCompleted": "डॉक्टर समीक्षा पूरी",
+    "doctorRequestedMoreData": "डॉक्टर ने अधिक डेटा मांगा है"
   },
   "doctorDashboard": {
     "title": "डॉक्टर डैशबोर्ड",
@@ -615,7 +623,31 @@
     "urgencyLevel": "अग्रता स्तर",
     "urgencyPriority": "प्राथमिकता",
     "confidenceTooltip": "{confidence}% एक सापेक्ष फेनोटाइपिक ओवरलैप स्कोर है, संभावना नहीं। {modalities} इनपुट विधियों के लिए अधिकतम सीमा {cap}% है। अधिक विधियाँ जोड़ने से यह सीमा बढ़ती है।",
-    "reviewedScorecard": "डॉक्टर-समीक्षित स्कोरकार्ड"
+    "reviewedScorecard": "डॉक्टर-समीक्षित स्कोरकार्ड",
+    "patientRelease": "रोगी रिलीज़",
+    "patientReleaseDesc": "पूरा स्कोरकार्ड केवल डॉक्टर के लिए रहेगा। रिलीज़ से शांत सारांश और अंतिम रेफ़रल पत्र भेजा जाता है।",
+    "releaseStatusReleased": "रोगी को रिलीज़ किया गया",
+    "releaseStatusNeedsMoreData": "अधिक डेटा चाहिए",
+    "releaseStatusInReview": "समीक्षा में",
+    "releaseStatusDoctorCompleted": "डॉक्टर द्वारा पूरा",
+    "recommendedNextStep": "अनुशंसित अगला कदम",
+    "visitUrgentClinic": "तत्काल क्लिनिक विज़िट",
+    "visitNearestClinic": "निकटतम क्लिनिक या विशेषज्ञ",
+    "visitRoutineSpecialist": "सामान्य विशेषज्ञ रेफ़रल",
+    "visitMoreDataFirst": "पहले अधिक डेटा",
+    "visitNoVisitNeeded": "अभी विज़िट की आवश्यकता नहीं",
+    "generateRefineReferralLetter": "रेफ़रल पत्र बनाएं/सुधारें",
+    "releaseSummaryLetter": "सारांश + पत्र रिलीज़ करें",
+    "askForMoreData": "अधिक डेटा मांगें",
+    "askForMoreDataPlaceholder": "रोगी को ठीक-ठीक बताएं कि अगला क्या अपलोड करना है।",
+    "sendDataRequest": "डेटा अनुरोध भेजें",
+    "releaseWaitForLetter": "रिलीज़ से पहले पत्र पूरा होने दें",
+    "releaseGenerateFirst": "रिलीज़ से पहले रेफ़रल पत्र बनाएं और समीक्षा करें",
+    "releaseSuccess": "रोगी सारांश और पत्र रिलीज़ कर दिए गए",
+    "releaseError": "रोगी रिपोर्ट रिलीज़ नहीं की जा सकी",
+    "requestMoreDataDefault": "कृपया कोई अतिरिक्त क्लिनिकल नोट्स, लैब रिपोर्ट, इमेज या जेनेटिक रिपोर्ट अपलोड करें जो समीक्षा पूरी करने में मदद करें।",
+    "requestMoreDataSuccess": "रोगी को अनुरोध भेज दिया गया",
+    "requestMoreDataError": "अधिक डेटा का अनुरोध नहीं किया जा सका"
   },
   "letter": {
     "title": "रेफरल पत्र",
@@ -641,7 +673,11 @@
     "tryAgain": "पुनः प्रयास करें",
     "toLabel": "को:",
     "filename": "रेफरल_लेटर_{id}.txt",
-    "printTitle": "रेफरल पत्र - {name}"
+    "printTitle": "रेफरल पत्र - {name}",
+    "downloadPdf": "PDF डाउनलोड करें",
+    "downloadFailed": "PDF डाउनलोड विफल रहा",
+    "shortenForOnePage": "इसे एक पेज में रखने के लिए छोटा करें",
+    "onePageTarget": "एक-पेज लक्ष्य"
   },
   "docInfo": {
     "title": "चिकित्सक विवरण",
@@ -1103,19 +1139,32 @@
     "signatureLabel": "हस्ताक्षर / पत्र समाप्ति विवरण",
     "letterToneLabel": "डिफ़ॉल्ट रेफ़रल पत्र शैली",
     "save": "प्रोफ़ाइल सहेजें",
-    "saved": "सहेजा गया"
+    "saved": "सहेजा गया",
+    "signatureImageLabel": "डॉक्टर हस्ताक्षर छवि",
+    "signatureImageError": "JPG, PNG या अन्य इमेज फ़ाइल अपलोड करें",
+    "signatureImageAlt": "डॉक्टर हस्ताक्षर पूर्वावलोकन"
   },
   "patientReports": {
     "title": "मरीज़ की रिपोर्ट",
-    "headline": "अनुमोदित स्कोरकार्ड",
-    "subtitle": "केवल डॉक्टर द्वारा अनुमोदित परिणाम यहाँ दिखाई देते हैं।",
-    "defaultReportName": "अनुमोदित रिपोर्ट",
-    "statusApproved": "अनुमोदित",
-    "openScorecard": "स्कोरकार्ड खोलें",
-    "approvedByDoctor": "डॉक्टर द्वारा अनुमोदित",
-    "noReports": "अभी तक कोई अनुमोदित रिपोर्ट नहीं",
-    "noReportsDesc": "डॉक्टर द्वारा आपके साक्ष्य की समीक्षा करने और HPO निष्कर्षों को अनुमोदित करने के बाद आपका स्कोरकार्ड यहाँ दिखाई देगा।",
-    "submitEvidence": "साक्ष्य सबमिट करें"
+    "headline": "रिलीज़ किए गए रेफ़रल",
+    "subtitle": "यहाँ केवल डॉक्टर द्वारा रिलीज़ किए गए सारांश और रेफ़रल पत्र दिखाई देते हैं।",
+    "defaultReportName": "रिलीज़ किया गया रेफ़रल",
+    "statusApproved": "रिलीज़ किया गया",
+    "openScorecard": "रेफ़रल खोलें",
+    "approvedByDoctor": "डॉक्टर द्वारा रिलीज़ किया गया",
+    "noReports": "अभी तक कोई रिलीज़ किया गया रेफ़रल नहीं",
+    "noReportsDesc": "डॉक्टर द्वारा समीक्षा पूरी करके आपके लिए रिलीज़ करने के बाद आपका रेफ़रल पत्र यहाँ दिखाई देगा।",
+    "submitEvidence": "साक्ष्य सबमिट करें",
+    "referralLetter": "रेफ़रल पत्र",
+    "print": "प्रिंट",
+    "downloadPdf": "PDF डाउनलोड करें",
+    "downloadFailed": "PDF डाउनलोड विफल रहा",
+    "summaryHeadlineFallback": "आपके डॉक्टर ने आपकी जमा की गई जानकारी की समीक्षा की है।",
+    "summaryBodyFallback": "नीचे डॉक्टर-समीक्षित क्लिनिकल सारांश और रेफ़रल पत्र उपलब्ध हैं।",
+    "clinicalAreaLabel": "विशेषज्ञ समीक्षा के लिए क्लिनिकल क्षेत्र",
+    "clinicalAreaFallback": "विशेषज्ञ समीक्षा",
+    "recommendedNextStepLabel": "अनुशंसित अगला कदम",
+    "recommendedNextStepFallback": "कृपया अपने डॉक्टर की सलाह का पालन करें।"
   },
   "rareDiseaseScoring": {
     "title": "दुर्लभ रोग स्कोरिंग",
@@ -1369,5 +1418,14 @@
     "s3P3": "एक बार हस्ताक्षरित होने के बाद, स्वीकृत स्कोरकार्ड से प्राप्त संरचित डेटा आगे की नैदानिक कार्रवाई का इंजन बन जाता है।",
     "heroTitle": "{brandName} को क्रिया में देखें",
     "heroSubtitle": "वास्तविक दुर्लभ रोग मामलों को चरण-दर-चरण देखें। जानें कि {brandName} बहु-माध्यमिक क्लिनिकल डेटा को कैसे जोड़कर निदान तक पहुँचता है।"
+  },
+  "letterSheet": {
+    "brandTitle": "Lumina क्लिनिकल रेफ़रल",
+    "patientId": "रोगी आईडी",
+    "license": "लाइसेंस",
+    "patient": "रोगी",
+    "age": "आयु",
+    "sex": "लिंग",
+    "topDifferentials": "स्कोरकार्ड द्वारा सुझाए गए शीर्ष 10 विभेदक निदान"
   }
 }

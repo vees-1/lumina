@@ -20,9 +20,14 @@
     "noSubmissionsDesc": "创建您的第一个证据提交以供医生审阅。",
     "createSubmission": "创建提交",
     "reviewPending": "待审阅",
-    "statusScorecardReady": "计分卡已就绪",
+    "statusScorecardReady": "转诊已就绪",
     "statusApproved": "已批准",
-    "statusSubmitted": "已提交"
+    "statusSubmitted": "已提交",
+    "statusNeedsMoreData": "已请求更多数据",
+    "statusDoctorCompleted": "医生审阅已完成",
+    "statusInReview": "审阅中",
+    "awaitingRelease": "等待发布",
+    "waiting": "等待中"
   },
   "patientNewSubmission": {
     "title": "患者提交",
@@ -72,10 +77,13 @@
     "noSubmissionDesc": "尚未提交任何患者证据。",
     "viewSubmissions": "查看提交",
     "unnamedPatient": "未命名患者",
-    "statusScorecardReady": "计分卡已就绪",
+    "statusScorecardReady": "转诊已就绪",
     "statusApproved": "已批准",
     "statusPending": "医生审阅中",
-    "statusSubmitted": "已提交"
+    "statusSubmitted": "已提交",
+    "statusNeedsMoreData": "已请求更多数据",
+    "statusDoctorCompleted": "医生审阅已完成",
+    "doctorRequestedMoreData": "医生请求了更多数据"
   },
   "doctorDashboard": {
     "title": "医生控制面板",
@@ -615,7 +623,31 @@
     "urgencyLevel": "紧急程度",
     "urgencyPriority": "优先级",
     "confidenceTooltip": "{confidence}% 表示相对表型重叠得分，而不是概率。{modalities} 个输入模态的上限为 {cap}%。增加更多模态会提高该上限。",
-    "reviewedScorecard": "医生审阅的计分卡"
+    "reviewedScorecard": "医生审阅的计分卡",
+    "patientRelease": "发布给患者",
+    "patientReleaseDesc": "完整评分卡仍仅供医生查看。发布会发送平静的摘要和最终转诊信。",
+    "releaseStatusReleased": "已发布给患者",
+    "releaseStatusNeedsMoreData": "需要更多数据",
+    "releaseStatusInReview": "审阅中",
+    "releaseStatusDoctorCompleted": "医生已完成",
+    "recommendedNextStep": "建议的下一步",
+    "visitUrgentClinic": "紧急门诊就诊",
+    "visitNearestClinic": "最近的诊所或专科医生",
+    "visitRoutineSpecialist": "常规专科转诊",
+    "visitMoreDataFirst": "先补充更多数据",
+    "visitNoVisitNeeded": "目前无需就诊",
+    "generateRefineReferralLetter": "生成/优化转诊信",
+    "releaseSummaryLetter": "发布摘要 + 转诊信",
+    "askForMoreData": "请求更多数据",
+    "askForMoreDataPlaceholder": "请明确告诉患者下一步需要上传什么。",
+    "sendDataRequest": "发送数据请求",
+    "releaseWaitForLetter": "请等待转诊信生成完成后再发布",
+    "releaseGenerateFirst": "请先生成并审阅转诊信，再执行发布",
+    "releaseSuccess": "已发布患者摘要和转诊信",
+    "releaseError": "无法发布患者报告",
+    "requestMoreDataDefault": "请上传任何有助于完成审阅的补充临床记录、实验室报告、图像或遗传报告。",
+    "requestMoreDataSuccess": "已向患者发送请求",
+    "requestMoreDataError": "无法请求更多数据"
   },
   "letter": {
     "title": "转诊信",
@@ -641,7 +673,11 @@
     "tryAgain": "重试",
     "toLabel": "致：",
     "filename": "Referral_letter_{id}.txt",
-    "printTitle": "转诊信 - {name}"
+    "printTitle": "转诊信 - {name}",
+    "downloadPdf": "下载 PDF",
+    "downloadFailed": "PDF 下载失败",
+    "shortenForOnePage": "请缩短内容以确保打印在一页内",
+    "onePageTarget": "单页目标"
   },
   "docInfo": {
     "title": "医生信息",
@@ -1103,19 +1139,32 @@
     "tonePatient": "患者友好型摘要",
     "saved": "资料已保存",
     "clinicPlaceholder": "诊所/医院",
-    "signaturePlaceholder": "谨上，[姓名]"
+    "signaturePlaceholder": "谨上，[姓名]",
+    "signatureImageLabel": "医生签名图片",
+    "signatureImageError": "请上传 JPG、PNG 或其他图片文件",
+    "signatureImageAlt": "医生签名预览"
   },
   "patientReports": {
     "title": "患者报告",
-    "headline": "已批准的计分卡",
-    "subtitle": "此处仅显示医生批准的输出。",
-    "defaultReportName": "已批准的报告",
-    "statusApproved": "已批准",
-    "openScorecard": "打开计分卡",
-    "approvedByDoctor": "医生已批准",
-    "noReports": "尚无已批准的报告",
-    "noReportsDesc": "您的计分卡将在医生审阅您的证据并批准 HPO 结果后显示在此处。",
-    "submitEvidence": "提交证据"
+    "headline": "已发布转诊",
+    "subtitle": "这里仅显示医生发布的摘要和转诊信。",
+    "defaultReportName": "已发布转诊",
+    "statusApproved": "已发布",
+    "openScorecard": "打开转诊",
+    "approvedByDoctor": "由医生发布",
+    "noReports": "还没有已发布的转诊",
+    "noReportsDesc": "医生完成审阅并向您发布后，您的转诊信会显示在这里。",
+    "submitEvidence": "提交证据",
+    "referralLetter": "转诊信",
+    "print": "打印",
+    "downloadPdf": "下载 PDF",
+    "downloadFailed": "PDF 下载失败",
+    "summaryHeadlineFallback": "您的医生已审阅您提交的信息。",
+    "summaryBodyFallback": "下方提供医生审阅过的临床摘要和转诊信。",
+    "clinicalAreaLabel": "供专科审阅的临床领域",
+    "clinicalAreaFallback": "专科审阅",
+    "recommendedNextStepLabel": "建议的下一步",
+    "recommendedNextStepFallback": "请遵循医生的建议。"
   },
   "rareDiseaseScoring": {
     "title": "罕见病评分",
@@ -1362,5 +1411,14 @@
     "s3P3": "一旦签字，来自已批准计分卡的结构化数据将成为后续临床行动的引擎...",
     "hero": "诊断调查的高潮。{brandName}记分卡提供了全面的、经过数学加权的鉴别诊断，在开始任何临床行动之前需要得到医生的明确批准。",
     "s3P1": "记分卡审查是在{brandName}平台内启动任何临床行动之前的最终、不可协商的门户......"
+  },
+  "letterSheet": {
+    "brandTitle": "Lumina 临床转诊",
+    "patientId": "患者 ID",
+    "license": "执照",
+    "patient": "患者",
+    "age": "年龄",
+    "sex": "性别",
+    "topDifferentials": "评分卡建议的前 10 个鉴别诊断"
   }
 }

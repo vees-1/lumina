@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -11,8 +11,22 @@ import { RoleGuard } from "@/components/lumina/role-guard";
 import { Button } from "@/components/ui/button";
 import { localizeHpoLabel, type HpoLabelMessages } from "@/lib/hpo";
 import { formatFileSize, formatNumber } from "@/lib/formatters";
-import { getCaseById, saveCaseToStorage, scoreCase, suggestLab, suggestNotes, suggestPhoto, updateCaseInStorage } from "@/lib/api";
-import type { GeneticEvidence, HPOTerm } from "@/types/lumina";
+import {
+  downloadSubmissionFile,
+  completeSubmissionReview,
+  getCaseById,
+  getPatientSubmissionRemote,
+  saveCaseRemote,
+  saveCaseToStorage,
+  scoreCase,
+  startSubmissionReview,
+  suggestLab,
+  suggestNotes,
+  suggestPhoto,
+  updateCaseInStorage,
+} from "@/lib/api";
+import { useApiActor } from "@/lib/use-api-actor";
+import type { GeneticEvidence, HPOTerm, PatientSubmission } from "@/types/lumina";
 
 const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
@@ -243,7 +257,9 @@ export default function IntakePage() {
   const messages = useMessages() as HpoLabelMessages;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const actor = useApiActor();
   const addToId = searchParams.get("addTo");
+  const submissionId = searchParams.get("submission");
   const existingCase = addToId ? getCaseById(addToId) : null;
   const requestedTab = searchParams.get("tab");
 
@@ -270,6 +286,7 @@ export default function IntakePage() {
   const [activeStep, setActiveStep] = useState("");
   const [suggestions, setSuggestions] = useState<HPOTerm[]>([]);
   const [isListening, setIsListening] = useState(false);
+  const [submission, setSubmission] = useState<PatientSubmission | null>(null);
 
   const TABS: { id: Tab; label: string; hint: string }[] = [
     { id: "notes", label: t("tabNotesLabel"), hint: t("tabNotesHint") },
@@ -286,6 +303,48 @@ export default function IntakePage() {
   const acceptedTerms = suggestions.filter((term) => term.review_status === "accepted");
   const pendingTerms = suggestions.filter((term) => term.review_status === "pending");
   const rejectedTerms = suggestions.filter((term) => term.review_status === "rejected");
+
+  useEffect(() => {
+    if (!submissionId || !actor || actor.role !== "doctor") return;
+    const reviewSubmissionId = submissionId;
+    const reviewActor = actor;
+    let cancelled = false;
+    async function loadSubmission() {
+      try {
+        const item = await startSubmissionReview(reviewSubmissionId, reviewActor);
+        const full = await getPatientSubmissionRemote(item.id, reviewActor);
+        if (cancelled) return;
+        setSubmission(full);
+        setPatientName(full.patientName ?? "");
+        setAge(full.age ?? "");
+        setSex(full.sex ?? "");
+        setNotes(full.notes ?? "");
+        if (full.geneticEvidence) {
+          setGeneSymbol(full.geneticEvidence.gene_symbol ?? "");
+          setVariant(full.geneticEvidence.variant ?? "");
+          setClassification(full.geneticEvidence.classification ?? "unknown");
+          setZygosity(full.geneticEvidence.zygosity ?? "");
+        }
+        if (full.photoFileName) {
+          downloadSubmissionFile(full.id, "photo", full.photoFileName, reviewActor)
+            .then((file) => { if (!cancelled) setPhoto(file); })
+            .catch(() => {});
+        }
+        if (full.labFileName) {
+          downloadSubmissionFile(full.id, "lab", full.labFileName, reviewActor)
+            .then((file) => { if (!cancelled) setLab(file); })
+            .catch(() => {});
+        }
+      } catch (err) {
+        console.warn(err);
+        toast.error("Could not load patient submission");
+      }
+    }
+    void loadSubmission();
+    return () => {
+      cancelled = true;
+    };
+  }, [actor, submissionId]);
 
   const addProgress = (msg: string) => {
     setActiveStep(msg);
@@ -401,7 +460,7 @@ export default function IntakePage() {
 
       if (addToId && existingCase) {
         const mergedNotes = [existingCase.notes?.trim(), trimmedNotes].filter(Boolean).join("\n\n");
-        updateCaseInStorage(addToId, {
+        const updatedCase = {
           ...existingCase,
           timestamp: analysisTimestamp,
           notes: mergedNotes || existingCase.notes,
@@ -411,13 +470,15 @@ export default function IntakePage() {
           inputHistory: [...(existingCase.inputHistory ?? []), intakeSnapshot],
           geneticEvidence: mergedGeneticEvidence,
           patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
-        });
+        };
+        updateCaseInStorage(addToId, updatedCase);
         router.push(`/${locale}/case/${addToId}`);
       } else {
         const caseId = uuid();
-        saveCaseToStorage({
+        const caseData = {
           id: caseId,
           timestamp: analysisTimestamp,
+          sourceSubmissionId: submission?.id ?? submissionId ?? undefined,
           notes: trimmedNotes || undefined,
           inputHistory: [intakeSnapshot],
           modalities,
@@ -425,7 +486,19 @@ export default function IntakePage() {
           rankings,
           geneticEvidence: mergedGeneticEvidence,
           patientContext: { patientName: patientName || undefined, age: age || undefined, sex: sex || undefined },
-        });
+        };
+        if (actor?.role === "doctor") {
+          try {
+            await saveCaseRemote(caseData, actor, submission?.id ?? submissionId ?? undefined);
+            if (submission?.id ?? submissionId) {
+              await completeSubmissionReview(submission?.id ?? submissionId!, caseId, actor);
+            }
+          } catch (err) {
+            console.warn(err);
+            toast.error("Saved locally, but could not sync patient submission");
+          }
+        }
+        saveCaseToStorage(caseData);
         router.push(`/${locale}/case/${caseId}`);
       }
     } catch (err) {
@@ -599,6 +672,12 @@ export default function IntakePage() {
         {addToId && existingCase && (
           <div className="mt-5 rounded border border-[#cfe6f5] bg-[#f2fbff] px-4 py-3 text-[13px] text-[#31566d]">
             {t("addingToCase")} {existingCase.patientContext?.patientName ? `for ${existingCase.patientContext.patientName}` : ""}
+          </div>
+        )}
+        {submission && (
+          <div className="mt-5 rounded border border-[#DDE3ED] bg-white px-4 py-3 text-[13px] text-[#31566d]">
+            Reviewing patient submission {submission.id.slice(0, 8)}
+            {submission.doctorMessage ? ` · last request: ${submission.doctorMessage}` : ""}
           </div>
         )}
 

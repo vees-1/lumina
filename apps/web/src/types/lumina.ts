@@ -57,6 +57,7 @@ export interface RankResult {
 export interface CaseData {
   id: string;
   timestamp: number;
+  sourceSubmissionId?: string;
   notes?: string;
   inputHistory?: InputSnapshot[];
   modalities: string[];
@@ -96,11 +97,38 @@ export interface CaseSummary {
   status?: CaseOutcome;
 }
 
-export type PatientSubmissionStatus = "submitted" | "doctor_review_pending" | "approved" | "scorecard_ready";
+export type VisitRecommendation =
+  | "urgent_clinic"
+  | "nearest_clinic"
+  | "routine_specialist"
+  | "more_data_first"
+  | "no_visit_needed";
+
+export interface PatientSummary {
+  headline: string;
+  body: string;
+  clinical_area: string;
+  recommended_next_step: string;
+  specialist: string;
+  safety_note: string;
+}
+
+export type PatientSubmissionStatus =
+  | "submitted"
+  | "doctor_review_pending"
+  | "in_review"
+  | "needs_more_data"
+  | "approved"
+  | "scorecard_ready"
+  | "doctor_completed"
+  | "released_to_patient";
 
 export interface PatientSubmission {
   id: string;
   timestamp: number;
+  updatedAt?: number;
+  patientOwnerId?: string;
+  doctorReviewerId?: string | null;
   patientName?: string;
   age?: string;
   sex?: string;
@@ -110,4 +138,11 @@ export interface PatientSubmission {
   geneticEvidence?: GeneticEvidence;
   status: PatientSubmissionStatus;
   linkedCaseId?: string;
+  doctorMessage?: string | null;
+  patientSummary?: PatientSummary | null;
+  releasedLetterMarkdown?: string | null;
+  releasedCaseId?: string | null;
+  releaseTimestamp?: number | null;
+  visitRecommendation?: VisitRecommendation | null;
+  messages?: Array<{ id: string; doctorId: string; message: string; timestamp: number }>;
 }

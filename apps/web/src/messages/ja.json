@@ -20,9 +20,14 @@
     "noSubmissionsDesc": "医師の確認用に最初のエビデンスを作成してください。",
     "createSubmission": "提出物を作成",
     "reviewPending": "確認待ち",
-    "statusScorecardReady": "スコアカード準備完了",
+    "statusScorecardReady": "紹介状の準備完了",
     "statusApproved": "承認済み",
-    "statusSubmitted": "提出済み"
+    "statusSubmitted": "提出済み",
+    "statusNeedsMoreData": "追加データを依頼済み",
+    "statusDoctorCompleted": "医師レビュー完了",
+    "statusInReview": "レビュー中",
+    "awaitingRelease": "公開待ち",
+    "waiting": "待機中"
   },
   "patientNewSubmission": {
     "title": "患者の提出物",
@@ -72,10 +77,13 @@
     "noSubmissionDesc": "提出された患者エビデンスはまだありません。",
     "viewSubmissions": "提出物を表示",
     "unnamedPatient": "未名の患者",
-    "statusScorecardReady": "スコアカード準備完了",
+    "statusScorecardReady": "紹介状の準備完了",
     "statusApproved": "承認済み",
     "statusPending": "医師の確認待ち",
-    "statusSubmitted": "提出済み"
+    "statusSubmitted": "提出済み",
+    "statusNeedsMoreData": "追加データを依頼済み",
+    "statusDoctorCompleted": "医師レビュー完了",
+    "doctorRequestedMoreData": "医師が追加データを依頼しました"
   },
   "doctorDashboard": {
     "title": "医師ダッシュボード",
@@ -615,7 +623,31 @@
     "urgencyLevel": "緊急度",
     "urgencyPriority": "優先度",
     "confidenceTooltip": "{confidence}% は確率ではなく、相対的な表現型重複スコアです。{modalities} 個の入力モダリティでの上限は {cap}% です。モダリティを増やすと上限も上がります。",
-    "reviewedScorecard": "医師が確認したスコアカード"
+    "reviewedScorecard": "医師が確認したスコアカード",
+    "patientRelease": "患者への公開",
+    "patientReleaseDesc": "完全なスコアカードは医師専用のままです。公開では落ち着いた要約と最終版の紹介状を送信します。",
+    "releaseStatusReleased": "患者に公開済み",
+    "releaseStatusNeedsMoreData": "追加データが必要",
+    "releaseStatusInReview": "レビュー中",
+    "releaseStatusDoctorCompleted": "医師レビュー完了",
+    "recommendedNextStep": "推奨される次のステップ",
+    "visitUrgentClinic": "緊急の受診",
+    "visitNearestClinic": "最寄りのクリニックまたは専門医",
+    "visitRoutineSpecialist": "通常の専門医紹介",
+    "visitMoreDataFirst": "先に追加データ",
+    "visitNoVisitNeeded": "現時点で受診不要",
+    "generateRefineReferralLetter": "紹介状を生成/調整",
+    "releaseSummaryLetter": "要約 + 紹介状を公開",
+    "askForMoreData": "追加データを依頼",
+    "askForMoreDataPlaceholder": "次に何をアップロードすべきかを患者に具体的に伝えてください。",
+    "sendDataRequest": "データ依頼を送信",
+    "releaseWaitForLetter": "公開前に紹介状の生成完了を待ってください",
+    "releaseGenerateFirst": "公開前に紹介状を生成して確認してください",
+    "releaseSuccess": "患者向け要約と紹介状を公開しました",
+    "releaseError": "患者レポートを公開できませんでした",
+    "requestMoreDataDefault": "レビュー完了に役立つ追加の臨床ノート、検査レポート、画像、遺伝学レポートをアップロードしてください。",
+    "requestMoreDataSuccess": "患者に依頼を送信しました",
+    "requestMoreDataError": "追加データを依頼できませんでした"
   },
   "letter": {
     "title": "紹介状",
@@ -641,7 +673,11 @@
     "tryAgain": "再試行",
     "toLabel": "宛先:",
     "filename": "紹介レター_{id}.txt",
-    "printTitle": "紹介状 - {name}"
+    "printTitle": "紹介状 - {name}",
+    "downloadPdf": "PDFをダウンロード",
+    "downloadFailed": "PDFのダウンロードに失敗しました",
+    "shortenForOnePage": "1ページに収まるよう短くしてください",
+    "onePageTarget": "1ページ目標"
   },
   "docInfo": {
     "title": "医師情報",
@@ -1099,7 +1135,10 @@
     "tonePatient": "患者向けの要約",
     "saved": "プロファイルが保存されました",
     "clinicPlaceholder": "クリニック / 病院",
-    "signaturePlaceholder": "敬具、[名前]"
+    "signaturePlaceholder": "敬具、[名前]",
+    "signatureImageLabel": "医師署名画像",
+    "signatureImageError": "JPG、PNG、またはその他の画像ファイルをアップロードしてください",
+    "signatureImageAlt": "医師署名プレビュー"
   },
   "hpoWorkflow": {
     "heroTitle": "HPO所見の確認",
@@ -1134,15 +1173,25 @@
   },
   "patientReports": {
     "title": "患者レポート",
-    "headline": "承認済みスコアカード",
-    "subtitle": "医師によって承認された出力のみがここに表示されます。",
-    "defaultReportName": "承認済みレポート",
-    "statusApproved": "承認済み",
-    "openScorecard": "スコアカードを開く",
-    "approvedByDoctor": "医師による承認済み",
-    "noReports": "承認されたレポートはまだありません",
-    "noReportsDesc": "医師がエビデンスを確認し HPO 所見を承認した後に、スコアカードがここに表示されます。",
-    "submitEvidence": "エビデンスを提出"
+    "headline": "公開済み紹介状",
+    "subtitle": "ここには医師が公開した要約と紹介状のみが表示されます。",
+    "defaultReportName": "公開済み紹介状",
+    "statusApproved": "公開済み",
+    "openScorecard": "紹介状を開く",
+    "approvedByDoctor": "医師が公開",
+    "noReports": "公開済み紹介状はまだありません",
+    "noReportsDesc": "医師がレビューを完了し、あなた向けに公開すると、紹介状がここに表示されます。",
+    "submitEvidence": "エビデンスを提出",
+    "referralLetter": "紹介状",
+    "print": "印刷",
+    "downloadPdf": "PDFをダウンロード",
+    "downloadFailed": "PDFのダウンロードに失敗しました",
+    "summaryHeadlineFallback": "医師が提出された情報を確認しました。",
+    "summaryBodyFallback": "医師が確認した臨床要約と紹介状を以下に表示します。",
+    "clinicalAreaLabel": "専門医レビューの臨床領域",
+    "clinicalAreaFallback": "専門医レビュー",
+    "recommendedNextStepLabel": "推奨される次のステップ",
+    "recommendedNextStepFallback": "医師の指示に従ってください。"
   },
   "rareDiseaseScoring": {
     "title": "希少疾患スコアリング",
@@ -1362,5 +1411,14 @@
     },
     "heroTitle": "{brandName}の動作を確認する",
     "heroSubtitle": "実際の希少疾患の症例を段階的に説明します。{brandName}がマルチモーダルな臨床データをどのように組み合わせて診断に到達するかを調べてください。"
+  },
+  "letterSheet": {
+    "brandTitle": "Lumina 臨床紹介状",
+    "patientId": "患者ID",
+    "license": "ライセンス",
+    "patient": "患者",
+    "age": "年齢",
+    "sex": "性別",
+    "topDifferentials": "スコアカードが示した上位10件の鑑別診断"
   }
 }

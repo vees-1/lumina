@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { exportAllCases, getCaseSummaries } from "@/lib/api";
+import { exportAllCases, getCaseSummaries, getCasesRemote, summarizeCases } from "@/lib/api";
+import { useApiActor } from "@/lib/use-api-actor";
 import { formatDateTime, formatNumber } from "@/lib/formatters";
 import type { CaseSummary } from "@/types/lumina";
 import { Download, Plus, ClipboardList } from "lucide-react";
@@ -19,7 +20,12 @@ function confidenceColor(pct: number) {
 export default function CasesPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
-  const [cases] = useState<CaseSummary[]>(() => getCaseSummaries());
+  const actor = useApiActor();
+  const [cases, setCases] = useState<CaseSummary[]>(() => getCaseSummaries());
+  useEffect(() => {
+    if (!actor || actor.role !== "doctor") return;
+    getCasesRemote(actor).then((items) => setCases(summarizeCases(items))).catch(() => {});
+  }, [actor]);
   const pending = cases.filter((item) => item.status === "pending").length;
   const confirmed = cases.filter((item) => item.status === "confirmed").length;
 
