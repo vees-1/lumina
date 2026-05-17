@@ -612,13 +612,11 @@ function LetterView({
   letter,
   streaming,
   onChangeLetter,
-  onRegenerate,
   caseData,
 }: {
   letter: string;
   streaming: boolean;
   onChangeLetter: (value: string) => void;
-  onRegenerate: (preference: "shorter" | "fuller") => void;
   caseData: CaseData;
 }) {
   const t = useTranslations("case");
@@ -649,18 +647,6 @@ function LetterView({
         )}
         {!streaming && letter && (
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => onRegenerate("shorter")}
-              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {t("regenerateShorterLetter")}
-            </button>
-            <button
-              onClick={() => onRegenerate("fuller")}
-              className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {t("regenerateFullerLetter")}
-            </button>
             <button
               onClick={() => setEditing((current) => !current)}
               className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
@@ -1271,7 +1257,6 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   letter={letter}
                   streaming={streaming}
                   onChangeLetter={handleChangeLetter}
-                  onRegenerate={handleGenerateLetter}
                   caseData={caseData}
                 />
               )}
@@ -1439,24 +1424,6 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                   >
                     {t("generateRefineReferralLetter")}
                   </Button>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      className="rounded-sm h-9 text-[12px] border-black/10"
-                      onClick={() => handleGenerateLetter("shorter")}
-                      disabled={streaming || releaseBusy}
-                    >
-                      {t("regenerateShorterLetter")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="rounded-sm h-9 text-[12px] border-black/10"
-                      onClick={() => handleGenerateLetter("fuller")}
-                      disabled={streaming || releaseBusy}
-                    >
-                      {t("regenerateFullerLetter")}
-                    </Button>
-                  </div>
                   <Button
                     className="w-full rounded-sm h-9 text-[13px] bg-[#0D1B2A] text-white hover:bg-[#14283D]"
                     onClick={handleReleaseToPatient}
