@@ -3,6 +3,7 @@ import os
 import re
 from base64 import b64decode
 from io import BytesIO
+from typing import Literal
 from xml.sax.saxutils import escape
 
 from fastapi import APIRouter
@@ -336,6 +337,7 @@ class LetterRequest(BaseModel):
     evidence: dict
     patient_context: dict
     lang: str = "en"
+    length_preference: Literal["shorter", "fuller"] | None = None
 
 
 class PatientSummaryRequest(BaseModel):
@@ -406,6 +408,40 @@ def _letter_system(lang: str) -> str:
     lang_name = _LANG_NAMES.get(lang, "English")
     template = _LETTER_TEMPLATES.get(lang, _LETTER_TEMPLATES["en"])
     return _LETTER_SYSTEM.format(lang_name=lang_name, **template)
+
+
+def _letter_generation_guidance(body: LetterRequest) -> str:
+    doctor_profile = (
+        body.patient_context.get("doctorProfile")
+        if isinstance(body.patient_context.get("doctorProfile"), dict)
+        else {}
+    )
+    tone = str(doctor_profile.get("letterTone") or "").strip().lower()
+    instructions: list[str] = []
+
+    if body.length_preference == "shorter":
+        instructions.append(
+            "Length preference: regenerate a shorter version. Target 120-150 words, tighten the history, and keep the differential list extremely compact while still fitting on one A4 page."
+        )
+    elif body.length_preference == "fuller":
+        instructions.append(
+            "Length preference: regenerate a fuller version. Target 170-210 words, add a little more clinical context, but still keep the full letter within one A4 page."
+        )
+
+    if "detailed" in tone:
+        instructions.append(
+            "Tone preference: provide a slightly fuller evidence-backed specialist referral tone while staying concise and professional."
+        )
+    elif "patient-friendly" in tone:
+        instructions.append(
+            "Tone preference: keep the wording calm, plain, and reassuring while preserving clinical accuracy."
+        )
+    elif "concise" in tone:
+        instructions.append(
+            "Tone preference: keep the letter crisp and tightly written for rapid specialist review."
+        )
+
+    return "\n".join(instructions)
 
 
 def _case_text(case_data: dict) -> str:
@@ -891,12 +927,15 @@ async def generate_letter(body: LetterRequest) -> StreamingResponse:
         for r in body.top5
     )
     metadata_text = _format_referral_metadata(patient_context, body.lang)
+    preference_text = _letter_generation_guidance(body)
     user_msg = (
         f"{labels['metadata_header']}:\n{metadata_text}\n\n"
         f"{labels['context_header']}:\n{json.dumps(patient_context, ensure_ascii=False, indent=2)}\n\n"
         f"{labels['diagnoses_header']}:\n{top5_text}\n\n"
         f"{labels['evidence_header']}:\n{json.dumps(body.evidence, ensure_ascii=False, indent=2)}"
     )
+    if preference_text:
+        user_msg += f"\n\nGeneration preferences:\n{preference_text}"
 
     async def stream_letter():
         try:

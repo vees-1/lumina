@@ -646,6 +646,8 @@
     "visitMoreDataFirst": "先に追加データ",
     "visitNoVisitNeeded": "現時点で受診不要",
     "generateRefineReferralLetter": "紹介状を生成/調整",
+    "regenerateShorterLetter": "短めに再生成",
+    "regenerateFullerLetter": "少し詳しく再生成",
     "releaseSummaryLetter": "要約 + 紹介状を公開",
     "askForMoreData": "追加データを依頼",
     "askForMoreDataPlaceholder": "次に何をアップロードすべきかを患者に具体的に伝えてください。",

@@ -646,6 +646,8 @@
     "visitMoreDataFirst": "Primero más datos",
     "visitNoVisitNeeded": "No se necesita visita por ahora",
     "generateRefineReferralLetter": "Generar/refinar carta de remisión",
+    "regenerateShorterLetter": "Regenerar más corta",
+    "regenerateFullerLetter": "Regenerar más completa",
     "releaseSummaryLetter": "Liberar resumen + carta",
     "askForMoreData": "Solicitar más datos",
     "askForMoreDataPlaceholder": "Indique al paciente exactamente qué debe cargar a continuación.",

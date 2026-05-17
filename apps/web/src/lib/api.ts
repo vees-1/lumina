@@ -293,7 +293,11 @@ export async function getAgentSuggestion(
 export async function* streamLetter(
   caseData: CaseData,
   lang = "en",
-  options?: Partial<PatientContext> & { to?: string; from?: string }
+  options?: Partial<PatientContext> & {
+    to?: string;
+    from?: string;
+    letterLengthPreference?: "shorter" | "fuller";
+  }
 ): AsyncGenerator<string> {
   let doctorProfile = {};
   if (typeof window !== "undefined") {
@@ -308,6 +312,7 @@ export async function* streamLetter(
       top5: caseData.rankings.slice(0, 10),
       evidence: { hpo_terms: caseData.hpoTerms, modalities: caseData.modalities },
       patient_context: { ...(caseData.patientContext ?? {}), doctorProfile, ...options },
+      length_preference: options?.letterLengthPreference,
       lang,
     }),
   });

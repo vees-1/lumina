@@ -646,6 +646,8 @@
     "visitMoreDataFirst": "Zuerst weitere Daten",
     "visitNoVisitNeeded": "Derzeit kein Besuch erforderlich",
     "generateRefineReferralLetter": "Überweisungsschreiben erstellen/verfeinern",
+    "regenerateShorterLetter": "Kürzer neu erstellen",
+    "regenerateFullerLetter": "Ausführlicher neu erstellen",
     "releaseSummaryLetter": "Zusammenfassung + Schreiben freigeben",
     "askForMoreData": "Weitere Daten anfordern",
     "askForMoreDataPlaceholder": "Dem Patienten genau mitteilen, was als Nächstes hochgeladen werden soll.",

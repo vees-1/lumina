@@ -646,6 +646,8 @@
     "visitMoreDataFirst": "Plus de données d’abord",
     "visitNoVisitNeeded": "Aucune visite nécessaire pour le moment",
     "generateRefineReferralLetter": "Générer/affiner la lettre d’orientation",
+    "regenerateShorterLetter": "Régénérer plus courte",
+    "regenerateFullerLetter": "Régénérer plus détaillée",
     "releaseSummaryLetter": "Diffuser le résumé + la lettre",
     "askForMoreData": "Demander plus de données",
     "askForMoreDataPlaceholder": "Indiquez précisément au patient ce qu’il doit téléverser ensuite.",

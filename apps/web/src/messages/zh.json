@@ -646,6 +646,8 @@
     "visitMoreDataFirst": "先补充更多数据",
     "visitNoVisitNeeded": "目前无需就诊",
     "generateRefineReferralLetter": "生成/优化转诊信",
+    "regenerateShorterLetter": "生成更短版本",
+    "regenerateFullerLetter": "生成更详细版本",
     "releaseSummaryLetter": "发布摘要 + 转诊信",
     "askForMoreData": "请求更多数据",
     "askForMoreDataPlaceholder": "请明确告诉患者下一步需要上传什么。",

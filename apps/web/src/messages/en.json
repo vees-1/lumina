@@ -688,6 +688,8 @@
     "visitMoreDataFirst": "More data first",
     "visitNoVisitNeeded": "No visit needed now",
     "generateRefineReferralLetter": "Generate/refine referral letter",
+    "regenerateShorterLetter": "Regenerate shorter",
+    "regenerateFullerLetter": "Regenerate fuller",
     "releaseSummaryLetter": "Release summary + letter",
     "askForMoreData": "Ask for more data",
     "askForMoreDataPlaceholder": "Tell the patient exactly what to upload next.",

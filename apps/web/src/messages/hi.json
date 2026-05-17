@@ -646,6 +646,8 @@
     "visitMoreDataFirst": "पहले अधिक डेटा",
     "visitNoVisitNeeded": "अभी विज़िट की आवश्यकता नहीं",
     "generateRefineReferralLetter": "रेफ़रल पत्र बनाएं/सुधारें",
+    "regenerateShorterLetter": "छोटा संस्करण फिर बनाएं",
+    "regenerateFullerLetter": "थोड़ा विस्तृत फिर बनाएं",
     "releaseSummaryLetter": "सारांश + पत्र रिलीज़ करें",
     "askForMoreData": "अधिक डेटा मांगें",
     "askForMoreDataPlaceholder": "रोगी को ठीक-ठीक बताएं कि अगला क्या अपलोड करना है।",
