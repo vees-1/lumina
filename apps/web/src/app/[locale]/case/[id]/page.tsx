@@ -27,6 +27,7 @@ import {
   requestMoreSubmissionData,
   streamLetter,
   updateCaseInStorage,
+  updateCaseRemote,
 } from "@/lib/api";
 import type { AgentSuggestion } from "@/lib/api";
 import { useApiActor } from "@/lib/use-api-actor";
@@ -735,9 +736,9 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
   const { id } = use(params);
   const actor = useApiActor();
   const [caseData, setCaseData] = useState<CaseData | null>(() => getCaseById(id));
-  const [letter, setLetter] = useState("");
+  const [letter, setLetter] = useState(() => getCaseById(id)?.referralLetterDraft ?? "");
   const [streaming, setStreaming] = useState(false);
-  const [letterStarted, setLetterStarted] = useState(false);
+  const [letterStarted, setLetterStarted] = useState(() => Boolean(getCaseById(id)?.referralLetterDraft?.trim()));
   const [agentSuggestion, setAgentSuggestion] = useState<AgentSuggestion | null>(null);
   const [agentDismissed, setAgentDismissed] = useState(false);
   const [letterDob, setLetterDob] = useState(() => caseData?.patientContext?.dateOfBirth ?? "");
@@ -754,7 +755,15 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
 
   useEffect(() => {
     if (!actor) return;
-    getCaseRemote(id, actor).then(setCaseData).catch(() => {});
+    getCaseRemote(id, actor)
+      .then((remoteCase) => {
+        setCaseData(remoteCase);
+        if (remoteCase.referralLetterDraft?.trim()) {
+          setLetter(remoteCase.referralLetterDraft);
+          setLetterStarted(true);
+        }
+      })
+      .catch(() => {});
   }, [actor, id]);
 
   useEffect(() => {
@@ -783,6 +792,16 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
     }
   }, [caseData, locale]);
 
+  const persistCase = async (nextCase: CaseData) => {
+    updateCaseInStorage(nextCase.id, nextCase);
+    setCaseData(nextCase);
+    if (actor?.role === "doctor") {
+      try {
+        await updateCaseRemote(nextCase, actor, nextCase.sourceSubmissionId);
+      } catch {}
+    }
+  };
+
   const handleGenerateLetter = async () => {
     if (!caseData) return;
     const patientContext = {
@@ -796,14 +815,18 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       visitRecommendation,
     };
     const updatedCase = { ...caseData, patientContext };
-    updateCaseInStorage(caseData.id, updatedCase);
-    setCaseData(updatedCase);
+    await persistCase(updatedCase);
     setLetterStarted(true);
     setLetter("");
     setStreaming(true);
+    let finalLetter = "";
     try {
       for await (const chunk of streamLetter(updatedCase, locale)) {
+        finalLetter += chunk;
         setLetter((prev) => prev + chunk);
+      }
+      if (finalLetter.trim()) {
+        await persistCase({ ...updatedCase, referralLetterDraft: finalLetter });
       }
     } catch {
       toast.error(t("letterGenerationFailed"));
@@ -892,6 +915,19 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
       toast.error(t("fhirExportFailed"));
     }
   };
+
+  const handleChangeLetter = (value: string) => {
+    setLetter(value);
+  };
+
+  useEffect(() => {
+    if (!caseData || !letterStarted || streaming) return;
+    if ((caseData.referralLetterDraft ?? "") === letter) return;
+    const timeout = window.setTimeout(() => {
+      void persistCase({ ...caseData, referralLetterDraft: letter });
+    }, 400);
+    return () => window.clearTimeout(timeout);
+  }, [caseData, letter, letterStarted, streaming]);
 
   if (!caseData) {
     return (
@@ -1221,7 +1257,7 @@ export default function CasePage({ params }: { params: Promise<{ id: string }> }
                 </Button>
               )}
               {letterStarted && (
-                <LetterView letter={letter} streaming={streaming} onChangeLetter={setLetter} caseData={caseData} />
+                <LetterView letter={letter} streaming={streaming} onChangeLetter={handleChangeLetter} caseData={caseData} />
               )}
               {!letterStarted && (
                 <motion.div

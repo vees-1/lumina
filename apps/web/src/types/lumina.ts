@@ -59,6 +59,7 @@ export interface CaseData {
   timestamp: number;
   sourceSubmissionId?: string;
   notes?: string;
+  referralLetterDraft?: string;
   inputHistory?: InputSnapshot[];
   modalities: string[];
   hpoTerms: HPOTerm[];

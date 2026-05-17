@@ -286,11 +286,19 @@ export default function DiseaseDetailPage({ params }: { params: Promise<{ orpha:
 
                 {/* Action buttons */}
                 <div className="flex items-center gap-3 mb-8">
-                  <Link href={`/${locale}/new-case`}>
+                  <a
+                    href={
+                      disease.omim[0]
+                        ? `https://omim.org/entry/${disease.omim[0]}`
+                        : `https://www.google.com/search?q=${encodeURIComponent(`${disease.name} rare disease`)}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button className="rounded-full bg-foreground text-background h-9 px-5 text-[13px]">
                       {t("analyzeThis")}
                     </Button>
-                  </Link>
+                  </a>
                 </div>
 
                 {/* Tabs */}
