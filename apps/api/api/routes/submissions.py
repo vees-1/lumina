@@ -476,9 +476,7 @@ async def delete_submission(submission_id: str, request: Request):
         else:
             _delete_submission_related_case(session, submission_id)
         for message in session.exec(
-            select(DoctorRequestMessage).where(
-                DoctorRequestMessage.submission_id == submission_id
-            )
+            select(DoctorRequestMessage).where(DoctorRequestMessage.submission_id == submission_id)
         ).all():
             session.delete(message)
         session.delete(row)
