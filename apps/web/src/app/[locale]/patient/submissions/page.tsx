@@ -3,22 +3,36 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { DashboardNav } from "@/components/nav";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { getPatientSubmissions, getPatientSubmissionsRemote } from "@/lib/api";
+import {
+  deletePatientSubmissionFromStorage,
+  deletePatientSubmissionRemote,
+  getPatientSubmissions,
+  getPatientSubmissionsRemote,
+} from "@/lib/api";
 import { useApiActor } from "@/lib/use-api-actor";
 import type { PatientSubmission } from "@/types/lumina";
-import { Plus, Inbox } from "lucide-react";
+import { Plus, Inbox, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function PatientSubmissionsPage() {
   const locale = useLocale();
   const t = useTranslations("patientSubmissions");
   const actor = useApiActor();
-  const [submissions, setSubmissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
+  const [fallbackSubmissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
+  const [submissions, setSubmissions] = useState<PatientSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!actor) return;
-    getPatientSubmissionsRemote(actor).then(setSubmissions).catch(() => {});
+    getPatientSubmissionsRemote(actor)
+      .then(setSubmissions)
+      .catch(() => {
+        setSubmissions(fallbackSubmissions);
+        toast.error(t("loadFailed"));
+      })
+      .finally(() => setLoading(false));
   }, [actor]);
 
   function statusBadge(status: string) {
@@ -31,6 +45,19 @@ export default function PatientSubmissionsPage() {
     if (status === "in_review") return <span className="badge badge-cyan">{t("statusInReview")}</span>;
     if (status === "doctor_review_pending") return <span className="badge badge-amber">{t("reviewPending")}</span>;
     return <span className="badge badge-cyan">{t("statusSubmitted")}</span>;
+  }
+
+  async function handleDelete(submissionId: string) {
+    if (!actor) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
+    try {
+      await deletePatientSubmissionRemote(submissionId, actor);
+      deletePatientSubmissionFromStorage(submissionId);
+      setSubmissions((current) => current.filter((item) => item.id !== submissionId));
+      toast.success(t("deleteSuccess"));
+    } catch {
+      toast.error(t("deleteFailed"));
+    }
   }
 
   return (
@@ -53,7 +80,9 @@ export default function PatientSubmissionsPage() {
           </div>
 
           <div className="overflow-hidden rounded border border-[#DDE3ED] bg-white">
-            {submissions.length ? (
+            {loading ? (
+              <div className="p-10 text-center text-[14px] text-[#4A5568]">{t("loading")}</div>
+            ) : submissions.length ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[720px] text-left">
                   <thead className="border-b border-[#DDE3ED] bg-[#F7F8FA]">
@@ -77,15 +106,25 @@ export default function PatientSubmissionsPage() {
                           {new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(item.timestamp))}
                         </td>
                         <td className="px-5 py-4">
-                          {item.status === "released_to_patient" ? (
-                            <Link href={`/${locale}/patient/reports`} className="text-[13px] font-normal text-[#0AAFCE] hover:underline">
-                              {t("viewReport")}
-                            </Link>
-                          ) : item.status === "doctor_completed" ? (
-                            <span className="text-[12px] text-[#8A94A6]">{t("awaitingRelease")}</span>
-                          ) : (
-                            <span className="text-[12px] text-[#8A94A6]">{t("waiting")}</span>
-                          )}
+                          <div className="flex flex-wrap items-center gap-3">
+                            {item.status === "released_to_patient" ? (
+                              <Link href={`/${locale}/patient/reports`} className="text-[13px] font-normal text-[#0AAFCE] hover:underline">
+                                {t("viewReport")}
+                              </Link>
+                            ) : item.status === "doctor_completed" ? (
+                              <span className="text-[12px] text-[#8A94A6]">{t("awaitingRelease")}</span>
+                            ) : (
+                              <span className="text-[12px] text-[#8A94A6]">{t("waiting")}</span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id)}
+                              className="inline-flex items-center gap-1 text-[12px] text-[#B42318] hover:underline"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              {t("delete")}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

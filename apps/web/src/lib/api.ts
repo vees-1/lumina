@@ -92,6 +92,14 @@ export async function getPatientSubmissionRemote(id: string, actor: ApiActor): P
   return jsonOrThrow<PatientSubmission>(res, "Could not load submission");
 }
 
+export async function deletePatientSubmissionRemote(id: string, actor: ApiActor): Promise<void> {
+  const res = await fetch(`${API}/submissions/${id}`, {
+    method: "DELETE",
+    headers: actorHeaders(actor),
+  });
+  await jsonOrThrow<{ ok: boolean }>(res, "Could not delete submission");
+}
+
 export async function startSubmissionReview(id: string, actor: ApiActor): Promise<PatientSubmission> {
   const res = await fetch(`${API}/submissions/${id}/start-review`, { method: "POST", headers: actorHeaders(actor) });
   return jsonOrThrow<PatientSubmission>(res, "Could not start review");
@@ -177,6 +185,14 @@ export async function getCasesRemote(actor: ApiActor): Promise<CaseData[]> {
 export async function getCaseRemote(id: string, actor: ApiActor): Promise<CaseData> {
   const res = await fetch(`${API}/cases/${id}`, { headers: actorHeaders(actor), cache: "no-store" });
   return jsonOrThrow<CaseData>(res, "Could not load case");
+}
+
+export async function deleteCaseRemote(id: string, actor: ApiActor): Promise<void> {
+  const res = await fetch(`${API}/cases/${id}`, {
+    method: "DELETE",
+    headers: actorHeaders(actor),
+  });
+  await jsonOrThrow<{ ok: boolean }>(res, "Could not delete case");
 }
 
 export function summarizeCases(cases: CaseData[]): StoredCaseSummary[] {
@@ -398,6 +414,13 @@ export function updateCaseInStorage(caseId: string, updated: CaseData): void {
   localStorage.setItem("lumina_cases", JSON.stringify(summaries.slice(0, 50)));
 }
 
+export function deleteCaseFromStorage(caseId: string): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(`lumina_case_${caseId}`);
+  const summaries = getCaseSummaries().filter((summary) => summary.id !== caseId);
+  localStorage.setItem("lumina_cases", JSON.stringify(summaries));
+}
+
 export function exportAllCases(): void {
   if (typeof window === "undefined") return;
   const summaries = getCaseSummaries();
@@ -453,4 +476,10 @@ export function updatePatientSubmission(id: string, patch: Partial<PatientSubmis
     "lumina_patient_submissions",
     JSON.stringify(submissions.map((submission) => submission.id === id ? { ...submission, ...patch } : submission))
   );
+}
+
+export function deletePatientSubmissionFromStorage(id: string): void {
+  if (typeof window === "undefined") return;
+  const submissions = getPatientSubmissions().filter((submission) => submission.id !== id);
+  localStorage.setItem("lumina_patient_submissions", JSON.stringify(submissions));
 }

@@ -3,13 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { DashboardNav } from "@/components/nav";
 import { RoleGuard } from "@/components/lumina/role-guard";
-import { exportAllCases, getCaseSummaries, getCasesRemote, summarizeCases } from "@/lib/api";
+import {
+  deleteCaseFromStorage,
+  deleteCaseRemote,
+  exportAllCases,
+  getCaseSummaries,
+  getCasesRemote,
+  summarizeCases,
+} from "@/lib/api";
 import { useApiActor } from "@/lib/use-api-actor";
 import { formatDateTime, formatNumber } from "@/lib/formatters";
 import type { CaseSummary } from "@/types/lumina";
-import { Download, Plus, ClipboardList } from "lucide-react";
+import { Download, Plus, ClipboardList, Search, Trash2 } from "lucide-react";
 
 function confidenceColor(pct: number) {
   if (pct >= 70) return "bg-[#1A7F4B]";
@@ -19,15 +27,57 @@ function confidenceColor(pct: number) {
 
 export default function CasesPage() {
   const locale = useLocale();
-  const t = useTranslations("dashboard");
+  const t = useTranslations("casesPage");
   const actor = useApiActor();
-  const [cases, setCases] = useState<CaseSummary[]>(() => getCaseSummaries());
+  const [fallbackCases] = useState<CaseSummary[]>(() => getCaseSummaries());
+  const [cases, setCases] = useState<CaseSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+
   useEffect(() => {
     if (!actor || actor.role !== "doctor") return;
-    getCasesRemote(actor).then((items) => setCases(summarizeCases(items))).catch(() => {});
+    getCasesRemote(actor)
+      .then((items) => setCases(summarizeCases(items)))
+      .catch(() => {
+        setCases(fallbackCases);
+        toast.error(t("loadFailed"));
+      })
+      .finally(() => setLoading(false));
   }, [actor]);
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredCases = cases.filter((item) => {
+    if (!normalizedQuery) return true;
+    const dateText = new Date(item.timestamp).toLocaleDateString(locale, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    return [
+      item.id,
+      item.patientName,
+      item.topDiagnosis,
+      dateText,
+    ]
+      .filter(Boolean)
+      .some((value) => value!.toLowerCase().includes(normalizedQuery));
+  });
+
   const pending = cases.filter((item) => item.status === "pending").length;
   const confirmed = cases.filter((item) => item.status === "confirmed").length;
+
+  async function handleDelete(caseId: string) {
+    if (!actor) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
+    try {
+      await deleteCaseRemote(caseId, actor);
+      deleteCaseFromStorage(caseId);
+      setCases((current) => current.filter((item) => item.id !== caseId));
+      toast.success(t("deleteSuccess"));
+    } catch {
+      toast.error(t("deleteFailed"));
+    }
+  }
 
   return (
     <RoleGuard allowed={["doctor"]} redirectTo="/patient">
@@ -38,9 +88,9 @@ export default function CasesPage() {
           {/* Header */}
           <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="section-label mb-2">{t("title")}</p>
-              <h1 className="text-[36px] font-normal tracking-[-0.03em]">{t("title")}</h1>
-              <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("subtitle")}</p>
+              <p className="section-label mb-2">{t("cases")}</p>
+              <h1 className="text-[36px] font-normal tracking-[-0.03em]">{t("myCases")}</h1>
+              <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("desc")}</p>
             </div>
             <div className="flex flex-wrap gap-2.5">
               <button
@@ -75,20 +125,32 @@ export default function CasesPage() {
             ))}
           </div>
 
+          <div className="mb-4 relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8A94A6]" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={t("searchPlaceholder")}
+              className="h-11 w-full rounded-sm border border-[#DDE3ED] bg-white pl-10 pr-3 text-[13.5px] text-[#0D1B2A] outline-none transition-colors focus:border-[#0AAFCE]"
+            />
+          </div>
+
           {/* Cases table */}
           <div className="overflow-hidden rounded-sm border border-[#DDE3ED] bg-white">
-            {cases.length ? (
+            {loading ? (
+              <div className="p-10 text-center text-[14px] text-[#4A5568]">{t("loading")}</div>
+            ) : filteredCases.length ? (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[780px] text-left">
                   <thead className="border-b border-[#DDE3ED] bg-[#F7F8FA]">
                     <tr>
-                      {[t("thCaseId"), t("thPatient"), t("thTopResult"), t("thConfidence"), t("thHpoCount"), t("thUpdated")].map((h) => (
+                      {[t("caseId"), t("patient"), t("topResult"), t("confidence"), t("hpoCount"), t("updated"), t("actions")].map((h) => (
                         <th key={h} className="px-5 py-3 text-[11px] font-normal uppercase tracking-[0.08em] text-[#8A94A6]">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F2F5]">
-                    {cases.map((item) => {
+                    {filteredCases.map((item) => {
                       const pct = Math.round(item.confidence);
                       return (
                         <tr key={item.id} className="transition-colors hover:bg-[#F7F8FA]">
@@ -114,6 +176,16 @@ export default function CasesPage() {
                           <td className="px-5 py-4 text-[12.5px] text-[#8A94A6]">
                             {formatDateTime(locale, item.timestamp, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                           </td>
+                          <td className="px-5 py-4">
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id)}
+                              className="inline-flex items-center gap-1.5 rounded-sm border border-[#E7C5C5] px-3 py-1.5 text-[12px] text-[#B42318] transition-colors hover:border-[#B42318]"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              {t("delete")}
+                            </button>
+                          </td>
                         </tr>
                       );
                     })}
@@ -125,8 +197,8 @@ export default function CasesPage() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-[#F0F2F5]">
                   <ClipboardList className="h-6 w-6 text-[#8A94A6]" />
                 </div>
-                <h2 className="mt-4 text-[20px] font-normal">{t("noCases")}</h2>
-                <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("emptyStateDesc")}</p>
+                <h2 className="mt-4 text-[20px] font-normal">{cases.length ? t("noSearchResults") : t("noCases")}</h2>
+                <p className="mt-1.5 text-[14px] text-[#4A5568]">{cases.length ? t("clearSearch") : t("emptyStateDesc")}</p>
                 <Link
                   href={`/${locale}/new-case`}
                   className="mt-6 inline-flex h-10 items-center rounded-none bg-[#0AAFCE] px-6 text-[13.5px] font-normal text-white transition-colors hover:bg-[#0997B3]"

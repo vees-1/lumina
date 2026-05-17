@@ -83,12 +83,16 @@ def _case_payload(row: ClinicalCase) -> dict:
     return payload
 
 
+def _submission_upload_dir(submission_id: str) -> Path:
+    return UPLOAD_DIR / submission_id
+
+
 def _save_upload(
     submission_id: str, kind: str, upload: UploadFile | None
 ) -> tuple[str | None, str | None, str | None]:
     if upload is None or not upload.filename:
         return None, None, None
-    target_dir = UPLOAD_DIR / submission_id
+    target_dir = _submission_upload_dir(submission_id)
     target_dir.mkdir(parents=True, exist_ok=True)
     suffix = Path(upload.filename).suffix
     target = target_dir / f"{kind}{suffix}"
@@ -342,6 +346,39 @@ class CaseBody(BaseModel):
     submission_id: str | None = None
 
 
+def _clear_submission_case_state(submission: PatientSubmission, case_id: str) -> None:
+    touched = False
+    if submission.linked_case_id == case_id:
+        submission.linked_case_id = None
+        touched = True
+    if submission.released_case_id == case_id:
+        submission.released_case_id = None
+        submission.patient_summary_json = None
+        submission.released_letter_markdown = None
+        submission.release_timestamp = None
+        submission.visit_recommendation = None
+        touched = True
+    if touched:
+        submission.status = (
+            "in_review" if submission.doctor_reviewer_id else "doctor_review_pending"
+        )
+        submission.updated_at = _now_ms()
+
+
+def _delete_submission_related_case(
+    session: Session, submission_id: str, doctor_id: str | None = None
+) -> ClinicalCase | None:
+    row = session.exec(
+        select(ClinicalCase).where(ClinicalCase.submission_id == submission_id)
+    ).first()
+    if row is None:
+        return None
+    if doctor_id is not None and row.doctor_owner_id != doctor_id:
+        raise HTTPException(status_code=403, detail="Linked case is not available")
+    session.delete(row)
+    return row
+
+
 @router.post("/cases")
 async def create_case(body: CaseBody, request: Request):
     user_id, role = _actor(request)
@@ -421,3 +458,51 @@ async def get_case(case_id: str, request: Request):
                 status_code=403, detail="Patients can only access released summaries"
             )
         return _case_payload(row)
+
+
+@router.delete("/submissions/{submission_id}")
+async def delete_submission(submission_id: str, request: Request):
+    user_id, role = _actor(request)
+    with Session(request.app.state.app_db_engine) as session:
+        row = session.get(PatientSubmission, submission_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail="Submission not found")
+        if role == "patient" and row.patient_owner_id != user_id:
+            raise HTTPException(status_code=403, detail="Not allowed")
+        if role == "doctor":
+            if row.doctor_reviewer_id and row.doctor_reviewer_id != user_id:
+                raise HTTPException(status_code=403, detail="Not allowed")
+            _delete_submission_related_case(session, submission_id, user_id)
+        else:
+            _delete_submission_related_case(session, submission_id)
+        for message in session.exec(
+            select(DoctorRequestMessage).where(
+                DoctorRequestMessage.submission_id == submission_id
+            )
+        ).all():
+            session.delete(message)
+        session.delete(row)
+        session.commit()
+    shutil.rmtree(_submission_upload_dir(submission_id), ignore_errors=True)
+    return {"ok": True, "id": submission_id}
+
+
+@router.delete("/cases/{case_id}")
+async def delete_case(case_id: str, request: Request):
+    user_id, role = _actor(request)
+    if role != "doctor":
+        raise HTTPException(status_code=403, detail="Only doctors can delete cases")
+    with Session(request.app.state.app_db_engine) as session:
+        row = session.get(ClinicalCase, case_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail="Case not found")
+        if row.doctor_owner_id != user_id:
+            raise HTTPException(status_code=403, detail="Not allowed")
+        if row.submission_id:
+            submission = session.get(PatientSubmission, row.submission_id)
+            if submission is not None:
+                _clear_submission_case_state(submission, case_id)
+                session.add(submission)
+        session.delete(row)
+        session.commit()
+    return {"ok": True, "id": case_id}

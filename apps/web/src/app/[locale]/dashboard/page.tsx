@@ -15,26 +15,24 @@ export default function DashboardPage() {
   const t = useTranslations("doctorDashboard");
   const tCommon = useTranslations("common");
   const actor = useApiActor();
-  const [cases] = useState<CaseSummary[]>(() => getCaseSummaries());
-  const [submissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
-  const [remoteCases, setRemoteCases] = useState<CaseSummary[] | null>(null);
-  const [remoteSubmissions, setRemoteSubmissions] = useState<PatientSubmission[] | null>(null);
+  const [fallbackCases] = useState<CaseSummary[]>(() => getCaseSummaries());
+  const [fallbackSubmissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
+  const [cases, setCases] = useState<CaseSummary[]>([]);
+  const [submissions, setSubmissions] = useState<PatientSubmission[]>([]);
   useEffect(() => {
     if (!actor || actor.role !== "doctor") return;
-    getCasesRemote(actor).then((items) => setRemoteCases(summarizeCases(items))).catch(() => setRemoteCases(null));
-    getPatientSubmissionsRemote(actor).then(setRemoteSubmissions).catch(() => setRemoteSubmissions(null));
+    getCasesRemote(actor).then((items) => setCases(summarizeCases(items))).catch(() => setCases(fallbackCases));
+    getPatientSubmissionsRemote(actor).then(setSubmissions).catch(() => setSubmissions(fallbackSubmissions));
   }, [actor]);
-  const visibleCases = remoteCases ?? cases;
-  const visibleSubmissions = remoteSubmissions ?? submissions;
   const today = new Date().toDateString();
-  const activeToday = visibleCases.filter((item) => new Date(item.timestamp).toDateString() === today).length;
-  const lettersReady = visibleCases.filter((item) => item.status === "confirmed").length;
-  const pendingQueue = visibleSubmissions.filter((s) => s.status === "doctor_review_pending" || s.status === "needs_more_data").length;
+  const activeToday = cases.filter((item) => new Date(item.timestamp).toDateString() === today).length;
+  const lettersReady = cases.filter((item) => item.status === "confirmed").length;
+  const pendingQueue = submissions.filter((s) => s.status === "doctor_review_pending" || s.status === "needs_more_data").length;
 
   const stats = [
-    { label: t("totalCases"), value: visibleCases.length, icon: <ClipboardList className="h-4 w-4" /> },
+    { label: t("totalCases"), value: cases.length, icon: <ClipboardList className="h-4 w-4" /> },
     { label: t("activeToday"), value: activeToday, icon: <FileText className="h-4 w-4" /> },
-    { label: t("patientSubmissions"), value: visibleSubmissions.length, icon: <Users className="h-4 w-4" /> },
+    { label: t("patientSubmissions"), value: submissions.length, icon: <Users className="h-4 w-4" /> },
     { label: t("lettersReady"), value: lettersReady, icon: <FileText className="h-4 w-4" /> },
   ];
 

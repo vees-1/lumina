@@ -27,7 +27,13 @@
     "statusDoctorCompleted": "Revue médicale terminée",
     "statusInReview": "En cours de revue",
     "awaitingRelease": "En attente de diffusion",
-    "waiting": "En attente"
+    "waiting": "En attente",
+    "loading": "Loading submissions...",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this submission and its linked referral data?",
+    "deleteSuccess": "Submission deleted.",
+    "deleteFailed": "Could not delete submission.",
+    "loadFailed": "Could not load submissions."
   },
   "patientNewSubmission": {
     "title": "Soumission du patient",
@@ -83,7 +89,10 @@
     "statusSubmitted": "Soumis",
     "statusNeedsMoreData": "Plus de données demandées",
     "statusDoctorCompleted": "Revue médicale terminée",
-    "doctorRequestedMoreData": "Le médecin a demandé plus de données"
+    "doctorRequestedMoreData": "Le médecin a demandé plus de données",
+    "statusInReview": "In review",
+    "loading": "Loading submissions...",
+    "noSubmissionsTitle": "No submissions yet"
   },
   "doctorDashboard": {
     "title": "Tableau de bord médecin",
@@ -1102,7 +1111,26 @@
     "confidence": "Confiance",
     "hpoCount": "Nombre de HPO",
     "updated": "Mis à jour",
-    "cases": "Cas"
+    "cases": "Cas",
+    "exportAll": "Export all",
+    "newCase": "New case",
+    "totalCases": "Total cases",
+    "statusPending": "Pending",
+    "confirmed": "Confirmed",
+    "unnamedPatient": "Unnamed patient",
+    "noCases": "No cases yet",
+    "emptyStateDesc": "Completed diagnostic workflows will appear here.",
+    "startFirst": "Start first case",
+    "loading": "Loading cases...",
+    "searchPlaceholder": "Search by patient, diagnosis, date, or case ID…",
+    "actions": "Actions",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this case?",
+    "deleteSuccess": "Case deleted.",
+    "deleteFailed": "Could not delete case.",
+    "loadFailed": "Could not load cases.",
+    "noSearchResults": "No matching cases",
+    "clearSearch": "Try a different search term."
   },
   "scorecardReview": {
     "title": "Examen du tableau de bord",
@@ -1200,7 +1228,8 @@
     "clinicalAreaLabel": "Domaine clinique pour revue spécialisée",
     "clinicalAreaFallback": "Revue spécialisée",
     "recommendedNextStepLabel": "Prochaine étape recommandée",
-    "recommendedNextStepFallback": "Veuillez suivre les conseils de votre médecin."
+    "recommendedNextStepFallback": "Veuillez suivre les conseils de votre médecin.",
+    "loading": "Loading reports..."
   },
   "rareDiseaseScoring": {
     "title": "Calcul de score des maladies rares",
@@ -1420,5 +1449,47 @@
       "fabry-disease": "Les variantes de GLA réduisent l'activité de l'alpha-galactosidase A, provoquant une accumulation de globotriaosylcéramide lysosomal ; les jeunes hommes présentant une acroparesthésie inexpliquée, des angiokératomes et une atteinte rénale/cardiaque doivent être dépistés.",
       "cystic-fibrosis": "Les variantes bialléliques du CFTR provoquent un transport défectueux du chlorure ; un taux élevé de chlorure dans la sueur (> 60 mmol/L) reste le test de diagnostic de référence, et les modulateurs CFTR offrent désormais un traitement de fond pour de nombreuses variantes."
     }
+  },
+  "patientQueue": {
+    "title": "Patient review queue",
+    "headline": "Review submitted evidence",
+    "subtitle": "Open patient submissions, run the existing HPO workflow, or request more data from the patient.",
+    "refresh": "Refresh",
+    "searchPlaceholder": "Search by patient, date, status, or evidence…",
+    "loading": "Loading queue...",
+    "colSubmission": "Submission",
+    "colPatient": "Patient",
+    "colEvidence": "Evidence",
+    "colStatus": "Status",
+    "colUpdated": "Updated",
+    "colAction": "Action",
+    "statusReleased": "Released to patient",
+    "statusDoctorCompleted": "Doctor completed",
+    "statusLegacyScorecardReady": "Legacy scorecard ready",
+    "statusNeedsMoreData": "More data requested",
+    "statusInReview": "In review",
+    "statusPending": "Pending",
+    "statusSubmitted": "Submitted",
+    "loadFailed": "Could not load patient queue.",
+    "requestSuccess": "Request sent to patient.",
+    "requestFailed": "Could not send request.",
+    "review": "Review",
+    "moreData": "More data",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this submission and its linked case?",
+    "deleteSuccess": "Submission deleted.",
+    "deleteFailed": "Could not delete submission.",
+    "messagePlaceholder": "Tell the patient what else to upload...",
+    "sendRequest": "Send request",
+    "unnamedPatient": "Unnamed patient",
+    "noDemographics": "No demographics",
+    "notes": "notes",
+    "photo": "photo",
+    "lab": "lab",
+    "genetic": "genetic",
+    "noSearchResults": "No matching submissions",
+    "clearSearch": "Try a different search term.",
+    "emptyTitle": "No patient submissions yet",
+    "emptyDesc": "New patient evidence will appear here for doctor review."
   }
 }

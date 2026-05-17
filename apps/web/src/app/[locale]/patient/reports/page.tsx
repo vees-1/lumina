@@ -23,14 +23,17 @@ export default function PatientReportsPage() {
   const t = useTranslations("patientReports");
   const actor = useApiActor();
   const doctorProfile = useDoctorLetterProfile();
-  const [reports, setReports] = useState<PatientSubmission[]>(() =>
+  const [fallbackReports] = useState<PatientSubmission[]>(() =>
     getPatientSubmissions().filter((item) => item.status === "released_to_patient")
   );
+  const [reports, setReports] = useState<PatientSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!actor) return;
     getPatientSubmissionsRemote(actor)
       .then((items) => setReports(items.filter((item) => item.status === "released_to_patient")))
-      .catch(() => {});
+      .catch(() => setReports(fallbackReports))
+      .finally(() => setLoading(false));
   }, [actor]);
 
   return (
@@ -44,7 +47,11 @@ export default function PatientReportsPage() {
             <p className="mt-1.5 max-w-2xl text-[14px] leading-6 text-[#4A5568]">{t("subtitle")}</p>
           </div>
 
-          {reports.length ? (
+          {loading ? (
+            <div className="rounded-sm border border-[#DDE3ED] bg-white p-12 text-center shadow-[0_2px_8px_rgba(13,27,42,0.04)]">
+              <p className="text-[14px] text-[#4A5568]">{t("loading")}</p>
+            </div>
+          ) : reports.length ? (
             <div className="grid gap-4">
               {reports.map((report) => (
                 <div key={report.id} className="rounded-sm border border-[#DDE3ED] bg-white p-6 shadow-[0_2px_8px_rgba(13,27,42,0.04)]">

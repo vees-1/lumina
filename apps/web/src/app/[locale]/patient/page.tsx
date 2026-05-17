@@ -4,26 +4,43 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { DashboardNav } from "@/components/nav";
-import { PatientStatusTimeline } from "@/components/lumina/practo-ui";
 import { RoleGuard } from "@/components/lumina/role-guard";
 import { getPatientSubmissions, getPatientSubmissionsRemote } from "@/lib/api";
 import { useApiActor } from "@/lib/use-api-actor";
 import type { PatientSubmission } from "@/types/lumina";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Inbox } from "lucide-react";
 
 export default function PatientDashboardPage() {
   const locale = useLocale();
   const t = useTranslations("patientDashboard");
   const actor = useApiActor();
-  const [submissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
-  const [remoteSubmissions, setRemoteSubmissions] = useState<PatientSubmission[] | null>(null);
+  const [fallbackSubmissions] = useState<PatientSubmission[]>(() => getPatientSubmissions());
+  const [submissions, setSubmissions] = useState<PatientSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!actor) return;
-    getPatientSubmissionsRemote(actor).then(setRemoteSubmissions).catch(() => setRemoteSubmissions(null));
+    getPatientSubmissionsRemote(actor)
+      .then(setSubmissions)
+      .catch(() => setSubmissions(fallbackSubmissions))
+      .finally(() => setLoading(false));
   }, [actor]);
-  const visibleSubmissions = remoteSubmissions ?? submissions;
-  const latest = visibleSubmissions[0];
-  const ready = visibleSubmissions.filter((item) => item.status === "released_to_patient").length;
+
+  const ready = submissions.filter((item) => item.status === "released_to_patient").length;
+
+  function statusLabel(status: PatientSubmission["status"]) {
+    if (status === "released_to_patient") return t("statusScorecardReady");
+    if (status === "needs_more_data") return t("statusNeedsMoreData");
+    if (status === "doctor_completed") return t("statusDoctorCompleted");
+    if (status === "in_review") return t("statusInReview");
+    if (status === "doctor_review_pending") return t("statusPending");
+    return t("statusSubmitted");
+  }
+
+  function statusBadge(status: PatientSubmission["status"]) {
+    if (status === "released_to_patient") return "badge badge-accepted";
+    if (status === "needs_more_data" || status === "doctor_review_pending") return "badge badge-amber";
+    return "badge badge-cyan";
+  }
 
   return (
     <RoleGuard allowed={["patient"]} redirectTo="/dashboard">
@@ -59,7 +76,7 @@ export default function PatientDashboardPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: t("submittedCases"), value: visibleSubmissions.length },
+                { label: t("submittedCases"), value: submissions.length },
                 { label: t("approvedReports"), value: ready },
               ].map((s) => (
                 <div key={s.label} className="rounded border border-[#DDE3ED] bg-white p-5 shadow-[0_2px_8px_rgba(13,27,42,0.04)]">
@@ -70,58 +87,62 @@ export default function PatientDashboardPage() {
             </div>
           </section>
 
-          {/* Status timeline */}
+          {/* Submission list */}
           <section className="mt-12">
             <p className="mb-3 text-[12px] font-normal uppercase tracking-[0.08em] text-[#8A94A6]">{t("submissionStatus")}</p>
-            <PatientStatusTimeline
-              status={
-                latest?.status === "released_to_patient"
-                  ? t("statusScorecardReady")
-                  : latest?.status === "approved"
-                  ? t("statusApproved")
-                  : latest
-                  ? t("statusPending")
-                  : t("statusSubmitted")
-              }
-            />
-          </section>
-
-          {/* Latest submission */}
-          <section className="mt-8 rounded border border-[#DDE3ED] bg-white p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#E5F8FC]">
-                  <FileText className="h-5 w-5 text-[#0AAFCE]" />
-                </div>
-                <div>
-                  <h2 className="text-[17px] font-normal tracking-[-0.02em]">{t("latestSubmission")}</h2>
-                  <p className="mt-1 text-[13.5px] text-[#4A5568]">
-                    {latest
-                      ? `${latest.patientName ?? t("unnamedPatient")} · ${
-                          latest.status === "needs_more_data" ? t("statusNeedsMoreData") :
-                          latest.status === "released_to_patient" ? t("statusScorecardReady") :
-                          latest.status === "doctor_completed" ? t("statusDoctorCompleted") :
-                          latest.status === "approved" ? t("statusApproved") :
-                          t("statusPending")
-                        }`
-                      : t("noSubmissionDesc")}
-                  </p>
-                </div>
+            <section className="rounded border border-[#DDE3ED] bg-white p-6">
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <h2 className="text-[17px] font-normal tracking-[-0.02em]">{t("latestSubmission")}</h2>
+                <Link
+                  href={`/${locale}/patient/submissions`}
+                  className="inline-flex h-10 items-center rounded border border-[#DDE3ED] bg-white px-5 text-[13px] font-normal text-[#0D1B2A] transition-colors hover:border-[#0AAFCE] hover:text-[#0AAFCE]"
+                >
+                  {t("viewSubmissions")}
+                </Link>
               </div>
-              <Link
-                href={`/${locale}/patient/submissions`}
-                className="shrink-0 inline-flex h-10 items-center rounded border border-[#DDE3ED] bg-white px-5 text-[13px] font-normal text-[#0D1B2A] transition-colors hover:border-[#0AAFCE] hover:text-[#0AAFCE]"
-              >
-                {t("viewSubmissions")}
-              </Link>
-            </div>
-          </section>
-          {latest?.doctorMessage && (
-            <section className="mt-4 rounded border border-[#D4860A]/30 bg-[#FEF8ED] p-5">
-              <p className="text-[12px] font-normal uppercase tracking-[0.08em] text-[#D4860A]">{t("doctorRequestedMoreData")}</p>
-              <p className="mt-2 text-[14px] leading-6 text-[#0D1B2A]">{latest.doctorMessage}</p>
+              {loading ? (
+                <p className="text-[14px] text-[#4A5568]">{t("loading")}</p>
+              ) : submissions.length ? (
+                <div className="space-y-3">
+                  {submissions.map((item) => (
+                    <div key={item.id} className="flex flex-col gap-3 rounded-sm border border-[#E7ECF3] bg-[#FBFCFE] p-4 md:flex-row md:items-start md:justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-[#E5F8FC]">
+                          <FileText className="h-5 w-5 text-[#0AAFCE]" />
+                        </div>
+                        <div>
+                          <p className="text-[15px] font-normal text-[#0D1B2A]">
+                            {item.patientName ?? t("unnamedPatient")}
+                          </p>
+                          <p className="mt-1 text-[12.5px] text-[#8A94A6]">
+                            {item.id.slice(0, 8)} · {new Intl.DateTimeFormat(locale, {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }).format(new Date(item.timestamp))}
+                          </p>
+                          {item.doctorMessage && (
+                            <p className="mt-2 text-[13px] leading-6 text-[#B54708]">
+                              {t("doctorRequestedMoreData")}: {item.doctorMessage}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <span className={statusBadge(item.status)}>{statusLabel(item.status)}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center py-10 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-[#F0F2F5]">
+                    <Inbox className="h-6 w-6 text-[#8A94A6]" />
+                  </div>
+                  <h2 className="mt-4 text-[20px] font-normal">{t("noSubmissionsTitle")}</h2>
+                  <p className="mt-1.5 text-[14px] text-[#4A5568]">{t("noSubmissionDesc")}</p>
+                </div>
+              )}
             </section>
-          )}
+          </section>
         </main>
       </div>
     </RoleGuard>
