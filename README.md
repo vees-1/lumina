@@ -176,6 +176,12 @@ The referral letter is the main clinical artifact. Lumina generates a one-page, 
 
 The doctor can edit, print, download as PDF, and release the finalized letter to the patient dashboard.
 
+Example generated referral letter:
+
+[![Lumina referral letter example](docs/assets/referral-letter-example.png)](docs/assets/referral-letter-example.pdf)
+
+[Open the sample PDF](docs/assets/referral-letter-example.pdf)
+
 ---
 
 ## Technical Architecture
